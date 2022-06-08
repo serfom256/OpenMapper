@@ -1,0 +1,19 @@
+
+
+
+name.of.query.0={
+SELECT * FROM [table1] t1
+    JOIN [table2] t2
+    USING(id)
+    WHERE t1.[utcTime] > t2.[utcTime]
+}
+
+
+name.of.query.1={
+    UPDATE table1 SET salary=1000 WHERE id=5
+}
+
+
+name.of.query.2={
+    UPDATE [table] SET salary=[salary] WHERE id=[myid]
+}
