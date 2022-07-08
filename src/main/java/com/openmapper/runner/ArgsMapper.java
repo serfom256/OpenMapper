@@ -9,7 +9,6 @@ import java.util.Map;
 public class ArgsMapper {
 
     public final String map(Map<String, FsqlEntity> source, String... args) {
-
         return null;
     }
 //    public String buildFor(Objects... args) {

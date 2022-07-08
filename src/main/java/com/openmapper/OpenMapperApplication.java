@@ -1,18 +1,17 @@
 package com.openmapper;
 
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+@EnableAspectJAutoProxy
 @SpringBootApplication
-public class OpenMapperApplication implements CommandLineRunner {
+public class OpenMapperApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OpenMapperApplication.class, args);
+        ConfigurableApplicationContext c = SpringApplication.run(OpenMapperApplication.class, args);
     }
 
-    @Override
-    public void run(String... args) {
 
-    }
 }

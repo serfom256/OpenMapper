@@ -1,11 +1,10 @@
 
-
-
-name.of.query.0={
+#fixme exception should be thrown
+name.of.query.0=111{
 SELECT * FROM [table1] t1
     JOIN [table2] t2
     USING(id)
-    WHERE t1.[utcTime] > t2.[utcTime]
+    WHERE t1.[utcTime] > t2.[utcTime1]
 }
 
 
@@ -13,7 +12,17 @@ name.of.query.1={
     UPDATE table1 SET salary=1000 WHERE id=5
 }
 
-
-name.of.query.2={
-    UPDATE [table] SET salary=[salary] WHERE id=[myid]
+name.of.query.6={
+    UPDATE table1(name) SET name=[name] WHERE id=[id]
 }
+
+
+name.of.query.8={
+    UPDATE [table](salary) SET salary=[salary] WHERE id=[myid]
+}
+
+#fixme exception should be thrown
+#name.of.query.3   6=  {select * from testtable}
+
+
+# todo implement lru

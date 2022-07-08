@@ -51,6 +51,6 @@ public class FsqlParser implements AbstractParser {
     }
 
     private boolean canParse(File file) {
-        return file.isFile() && file.getName().endsWith(".fsql");
+        return file.isFile() && file.getName().endsWith(FILE_EXTENSION.getValue());
     }
 }

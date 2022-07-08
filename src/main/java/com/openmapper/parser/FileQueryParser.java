@@ -21,7 +21,8 @@ public class FileQueryParser {
 
     public Map<String, String> parseFile(File file) throws FsqlParsingException, IOException {
         Map<String, String> parsed = new HashMap<>();
-        final List<String> fileContent = readFile(file);
+        List<String> fileContent = readFile(file);
+        fileContent.removeIf(s -> s.length() == 0);
         ListIterator<String> iterator = fileContent.listIterator();
         while (iterator.hasNext()) {
             int pos = moveCursor(iterator);
@@ -35,10 +36,11 @@ public class FileQueryParser {
         List<String> result = new ArrayList<>();
         try (FileInputStream fs = new FileInputStream(file); Scanner sc = new Scanner(fs)) {
             while (sc.hasNextLine()) {
-                result.add(sc.nextLine());
+                String line = sc.nextLine();
+                if (!line.startsWith("#")) result.add(line);
             }
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     private Integer moveCursor(ListIterator<String> iterator) {
@@ -58,6 +60,7 @@ public class FileQueryParser {
         return linePosition;
     }
 
+    // fixme
     private SqlTemporaryEntity parseScope(String fileName, ListIterator<String> iterator, int position) {
         SqlTemporaryEntity entity = new SqlTemporaryEntity();
         final Deque<Character> stack = new ArrayDeque<>(5);
@@ -72,7 +75,7 @@ public class FileQueryParser {
                 } else if (brackets.contains(c)) {
                     Character previous = stack.peekFirst();
                     if (Objects.equals(previous, c)) {
-                        throw new FsqlParsingException(fileName, line, position);
+                        throw new FsqlParsingException(fileName, iterator.previousIndex(), position);
                     }
                     stack.push(c);
                 } else if (stack.size() > 1) {
@@ -81,7 +84,7 @@ public class FileQueryParser {
             }
         }
         if (stack.size() != 3 || !stack.containsAll(brackets)) {
-            throw new FsqlParsingException(fileName);
+            throw new FsqlParsingException(fileName, iterator.previousIndex());
         }
         entity.setSql(sql.toString());
         return entity;
