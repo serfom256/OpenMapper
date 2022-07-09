@@ -4,7 +4,7 @@ import com.openmapper.core.loader.ComponentLoader;
 import com.openmapper.entity.FsqlEntity;
 import com.openmapper.util.FileUtil;
 import com.openmapper.util.ParsedObjectsFormatter;
-import com.openmapper.util.SourceMapper;
+import com.openmapper.core.mapping.SourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;

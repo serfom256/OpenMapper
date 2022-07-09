@@ -4,7 +4,7 @@ import com.openmapper.core.annotations.DaoMethod;
 import com.openmapper.core.annotations.SqlName;
 import com.openmapper.core.impl.FsqlContext;
 import com.openmapper.entity.FsqlEntity;
-import com.openmapper.util.SqlBuilder;
+import com.openmapper.core.mapping.SqlBuilder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;

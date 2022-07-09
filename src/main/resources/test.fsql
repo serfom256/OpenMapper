@@ -18,11 +18,15 @@ name.of.query.6={
 
 
 name.of.query.8={
-    UPDATE [table](salary) SET salary=[salary] WHERE id=[myid]
+    SELECT * FROM TABLE [t1] WHERE salary=[salary] AND id=[id]
 }
 
 #fixme exception should be thrown
 #name.of.query.3   6=  {select * from testtable}
 
+#name.of.query.8={
+# todo fix TABLE[t1]  case
+#     SELECT * FROM TABLE[t1] WHERE salary=[salary] AND id=[id]
+# }
 
 # todo implement lru

@@ -32,9 +32,10 @@ public class TestRepo {
             generator.mapSql("tab1", "tab2", new Date(), new Date());
             generator.updateSalarySql("tab1", 1000, 11);
         }
+
         System.out.println(System.currentTimeMillis() - start);
-//        System.out.println(generator.generateSql(a, b));
-//        System.out.println(generator.mapSql("tab1", "tab2", new Date(), new Date()));
-//        System.out.println(generator.updateSalarySql("tab1", 1000, 11));
+        System.out.println(generator.generateSql(a, b));
+        System.out.println(generator.mapSql("tab1", "tab2", new Date(), new Date()));
+        System.out.println(generator.updateSalarySql("tab1", 1000, 11));
     }
 }

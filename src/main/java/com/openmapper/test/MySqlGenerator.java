@@ -19,6 +19,6 @@ public interface MySqlGenerator {
                   @SqlName(name = "utcTime") Date time1, @SqlName(name = "utcTime1") Date time2);
 
     @DaoMethod(sqlName = "name.of.query.8")
-    String updateSalarySql(@SqlName(name = "table") String table, @SqlName(name = "salary") Integer salary, @SqlName(name = "myid") Integer id);
+    String updateSalarySql(@SqlName(name = "t1") String table, @SqlName(name = "salary") Integer salary, @SqlName(name = "id") Integer id);
 
 }
