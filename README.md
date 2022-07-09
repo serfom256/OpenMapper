@@ -36,6 +36,8 @@ The annotation `@DaoMethod` annotation allows you extracting sql by the sql name
 ##
 
 ```java
+import org.springframework.beans.factory.annotation.Autowired;
+
 @SqlGenerator
 public interface MySqlGenerator {
 
@@ -49,9 +51,10 @@ public interface MySqlGenerator {
 
 @Repository
 class MyRepository {
-    
+
     final MySqlGenerator generator;
-    @Repository
+
+    @Autowired
     public Runner(MySqlGenerator generator) {
         this.generator = generator;
     }
