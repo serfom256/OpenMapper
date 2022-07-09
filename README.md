@@ -57,9 +57,9 @@ class MyRepository {
     }
 
     public void test() {
-        String sql1 = generator.generateSql(1000, "column1");
+        String sql1 = generator.generateSql(1000, "value");
         String sql2 = generator.updateSalarySql("tab1", 1000, 11);
-        asserEuals("UPDATE table1(name) SET name=abc WHERE id=1", sql1);
+        asserEuals("UPDATE table1(name) SET name=value WHERE id=1000", sql1);
         asserEuals("SELECT * FROM TABLE tab1 WHERE salary=1000 AND id=11 ", sql2);
     }
 }

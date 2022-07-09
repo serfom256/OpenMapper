@@ -17,8 +17,8 @@ public class TestRepo {
 
     @PostConstruct
     public void test() {
-        Integer a = 1;
-        String b = "abc";
+        Integer a = 1000;
+        String b = "value";
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++) {
 //            String.format("UPDATE table1(name) SET name=[%s] WHERE id=[%s]", a, b);
