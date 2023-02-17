@@ -1,0 +1,21 @@
+myQuery_1={
+SELECT
+    Department.name AS 'Department',
+    Employee.name AS 'Employee',
+    Salary
+FROM
+    Employee
+        JOIN
+    Department ON Employee.DepartmentId = Department.Id
+WHERE
+    Employee.name = [eName] AND
+    Department.name = [dname] AND
+    (Employee.DepartmentId , Salary) IN
+    (SELECT
+            DepartmentId, MAX(Salary)
+        FROM
+            Employee
+        WHERE DepartmentId = [departmentId]
+        GROUP BY DepartmentId
+    )
+}
