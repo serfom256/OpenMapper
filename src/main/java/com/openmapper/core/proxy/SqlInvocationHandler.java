@@ -4,7 +4,9 @@ import com.openmapper.core.annotations.DaoMethod;
 import com.openmapper.core.annotations.SqlName;
 import com.openmapper.core.impl.FsqlContext;
 import com.openmapper.entity.FsqlEntity;
-import com.openmapper.core.mapping.SqlBuilder;
+import com.openmapper.util.SqlMapper;
+import com.openmapper.util.SqlMapperImpl;
+import org.springframework.core.env.Environment;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -13,22 +15,30 @@ import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.SQL_TRACING;
+
 public class SqlInvocationHandler implements InvocationHandler {
 
     private final FsqlContext context;
-    private final SqlBuilder sqlLoader;
+    private final SqlMapper mapper;
 
-    public SqlInvocationHandler(FsqlContext context) {
+    public SqlInvocationHandler(FsqlContext context, Environment environment) {
         this.context = context;
-        this.sqlLoader = new SqlBuilder();
+        final String property = environment.getProperty(SQL_TRACING.getValue());
+        this.mapper = new SqlMapperImpl(Boolean.parseBoolean(property == null ? "false" : property));
     }
 
     @Override
     public String invoke(Object proxy, Method method, Object[] args) {
         DaoMethod annotatedMethodName = method.getAnnotation(DaoMethod.class);
         if (annotatedMethodName == null) {
-            throw new IllegalStateException(String.format("Method %s didn't annotated with @DaoMethod", method.getName()));
+            throw new IllegalStateException(String.format("Method %s doesn't annotated with @DaoMethod", method.getName()));
         }
+        FsqlEntity result = context.getSql(annotatedMethodName.sqlName());
+        return mapper.mapSql(result, extractMethodParams(method, args));
+    }
+
+    private Map<String, Object> extractMethodParams(Method method, Object[] args) {
         Parameter[] methodParams = method.getParameters();
         Map<String, Object> params = new HashMap<>();
         for (int i = 0; i < methodParams.length; i++) {
@@ -40,8 +50,7 @@ public class SqlInvocationHandler implements InvocationHandler {
                 }
             }
         }
-
-        FsqlEntity result = context.getSql(annotatedMethodName.sqlName());
-        return sqlLoader.buildSql(result, params);
+        return params;
     }
+
 }

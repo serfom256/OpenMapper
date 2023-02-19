@@ -30,7 +30,7 @@ public class OpenMapperEnvironmentLoader implements ComponentLoader {
         this.context = context;
         this.beanFactory = beanFactory;
         this.scanner = new PackageScanner();
-        proxy = new InvocationProxy();
+        this.proxy = new InvocationProxy();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class OpenMapperEnvironmentLoader implements ComponentLoader {
         log.info("scanning: " + environment.getProperty(PACKAGE_TO_SCAN.getValue()));
         Set<Class<?>> classes = scanner.scanPackagesFor(environment.getProperty(PACKAGE_TO_SCAN.getValue()), SqlGenerator.class);
         for (Class<?> clazz : classes) {
-            Object proxiedClass = proxy.makeProxyFor(new SqlInvocationHandler(context), clazz.getName());
+            Object proxiedClass = proxy.makeProxyFor(new SqlInvocationHandler(context, environment), clazz.getName());
             if (proxiedClass == null) {
                 throw new IllegalStateException(clazz.getName() + " not found");
             }

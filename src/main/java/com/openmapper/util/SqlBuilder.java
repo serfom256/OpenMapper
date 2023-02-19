@@ -1,4 +1,4 @@
-package com.openmapper.core.mapping;
+package com.openmapper.util;
 
 import com.openmapper.entity.FsqlEntity;
 import com.openmapper.entity.SqlToken;
