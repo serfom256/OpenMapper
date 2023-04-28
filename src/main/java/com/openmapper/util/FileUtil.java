@@ -1,7 +1,8 @@
 package com.openmapper.util;
 
-import com.openmapper.parser.AbstractParser;
-import lombok.extern.log4j.Log4j2;
+import com.openmapper.core.parser.Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,19 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Log4j2
 @Component
 public class FileUtil {
 
-    private final AbstractParser parser;
+    private final Parser parser;
+
+    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     @Autowired
-    public FileUtil(AbstractParser parser) {
+    public FileUtil(Parser parser) {
         this.parser = parser;
     }
 
     public Map<String, String> findFilesAndParse(List<String> files) {
-        files.forEach(f->log.debug("File loaded: "+f));
+        files.forEach(f -> logger.debug("File loaded: " + f));
         List<Map<String, String>> parsed = files.stream()
                 .map(fsqlFile -> parser.parseTree(new File(fsqlFile)))
                 .collect(Collectors.toList());

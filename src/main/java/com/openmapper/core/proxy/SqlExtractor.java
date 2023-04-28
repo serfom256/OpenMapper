@@ -1,11 +1,11 @@
 package com.openmapper.core.proxy;
 
 import com.openmapper.core.annotations.DaoMethod;
-import com.openmapper.core.annotations.SqlName;
+import com.openmapper.core.annotations.Param;
 import com.openmapper.core.impl.FsqlContext;
 import com.openmapper.entity.FsqlEntity;
 import com.openmapper.util.SqlMapper;
-import com.openmapper.util.SqlMapperImpl;
+import com.openmapper.core.SqlMapperImpl;
 import org.springframework.core.env.Environment;
 
 import java.lang.annotation.Annotation;
@@ -17,12 +17,12 @@ import java.util.Map;
 
 import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.SQL_TRACING;
 
-public class SqlInvocationHandler implements InvocationHandler {
+public class SqlExtractor implements InvocationHandler {
 
     private final FsqlContext context;
     private final SqlMapper mapper;
 
-    public SqlInvocationHandler(FsqlContext context, Environment environment) {
+    public SqlExtractor(FsqlContext context, Environment environment) {
         this.context = context;
         final String property = environment.getProperty(SQL_TRACING.getValue());
         this.mapper = new SqlMapperImpl(Boolean.parseBoolean(property == null ? "false" : property));
@@ -34,7 +34,7 @@ public class SqlInvocationHandler implements InvocationHandler {
         if (annotatedMethodName == null) {
             throw new IllegalStateException(String.format("Method %s doesn't annotated with @DaoMethod", method.getName()));
         }
-        FsqlEntity result = context.getSql(annotatedMethodName.sqlName());
+        FsqlEntity result = context.getSql(annotatedMethodName.procedure());
         return mapper.mapSql(result, extractMethodParams(method, args));
     }
 
@@ -45,12 +45,11 @@ public class SqlInvocationHandler implements InvocationHandler {
             Parameter parameter = methodParams[i];
             Annotation[] annotArr = parameter.getAnnotations();
             for (Annotation annot : annotArr) {
-                if (annot instanceof SqlName) {
-                    params.put(((SqlName) annot).name(), args[i]);
+                if (annot instanceof Param) {
+                    params.put(((Param) annot).name(), args[i]);
                 }
             }
         }
         return params;
     }
-
 }

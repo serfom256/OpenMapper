@@ -1,4 +1,4 @@
-package com.openmapper.parser;
+package com.openmapper.core.parser;
 
 import com.openmapper.exceptions.FsqlParsingException;
 import com.openmapper.exceptions.InvalidFileFormatException;
@@ -13,7 +13,7 @@ import java.util.*;
 import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.FILE_EXTENSION;
 
 @Component
-public class FsqlParser implements AbstractParser {
+public class FsqlParser implements Parser {
 
     private final FileQueryParser parser;
 

@@ -1,4 +1,4 @@
-package com.openmapper.core.loader;
+package com.openmapper.util;
 
 import org.reflections.Reflections;
 

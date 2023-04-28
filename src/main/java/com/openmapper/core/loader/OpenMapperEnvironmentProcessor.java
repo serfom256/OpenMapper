@@ -1,5 +1,5 @@
 package com.openmapper.core.loader;
 
-public interface ComponentLoader {
+public interface OpenMapperEnvironmentProcessor {
     void load();
 }

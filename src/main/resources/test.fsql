@@ -1,5 +1,3 @@
-
-
 name.of.query.0={
 SELECT * FROM [table1] t1
     JOIN [table2] t2

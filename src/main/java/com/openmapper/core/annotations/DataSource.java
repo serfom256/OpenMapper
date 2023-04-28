@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface SqlGenerator {
+@Target({ElementType.METHOD})
+public @interface DataSource {
+    String value() default "dataSource";
 }
