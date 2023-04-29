@@ -1,6 +1,6 @@
 package com.openmapper.util;
 
-import com.openmapper.exceptions.EntityFieldAccessException;
+import com.openmapper.exceptions.entity.EntityFieldAccessException;
 
 import java.lang.reflect.Field;
 

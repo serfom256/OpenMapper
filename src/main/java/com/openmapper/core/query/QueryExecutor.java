@@ -1,4 +1,6 @@
-package com.openmapper.core.strategy;
+package com.openmapper.core.query;
+
+import com.openmapper.core.strategy.ResultSetHandler;
 
 import java.lang.reflect.Type;
 import java.sql.SQLException;

@@ -1,6 +1,10 @@
-package com.openmapper.core.strategy;
+package com.openmapper.core.query;
 
-import java.lang.reflect.Method;
+import com.openmapper.core.strategy.ResultSetHandler;
+import com.openmapper.core.strategy.impl.EmptyResultSetHandler;
+import com.openmapper.core.strategy.impl.EntityResultSetHandler;
+import com.openmapper.core.strategy.impl.IterableResultSetHandler;
+
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -11,14 +15,30 @@ public class QueryExecutorStrategy {
     static {
         STRATEGY.put(String.class, EntityResultSetHandler::new);
         STRATEGY.put(Number.class, EntityResultSetHandler::new);
+
         STRATEGY.put(Integer.class, EntityResultSetHandler::new);
+        STRATEGY.put(int.class, EntityResultSetHandler::new);
+
         STRATEGY.put(Double.class, EntityResultSetHandler::new);
+        STRATEGY.put(double.class, EntityResultSetHandler::new);
+
         STRATEGY.put(Long.class, EntityResultSetHandler::new);
+        STRATEGY.put(long.class, EntityResultSetHandler::new);
+
         STRATEGY.put(Short.class, EntityResultSetHandler::new);
+        STRATEGY.put(short.class, EntityResultSetHandler::new);
+
         STRATEGY.put(Byte.class, EntityResultSetHandler::new);
+        STRATEGY.put(byte.class, EntityResultSetHandler::new);
+
+        STRATEGY.put(Character.class, EntityResultSetHandler::new);
+        STRATEGY.put(char.class, EntityResultSetHandler::new);
+
         STRATEGY.put(Boolean.class, EntityResultSetHandler::new);
+        STRATEGY.put(boolean.class, EntityResultSetHandler::new);
 
         STRATEGY.put(Void.class, EmptyResultSetHandler::new);
+        STRATEGY.put(void.class, EmptyResultSetHandler::new);
 
         STRATEGY.put(Iterable.class, IterableResultSetHandler::new);
         STRATEGY.put(List.class, IterableResultSetHandler::new);
@@ -28,11 +48,7 @@ public class QueryExecutorStrategy {
         STRATEGY.put(Collection.class, IterableResultSetHandler::new);
     }
 
-    public ResultSetHandler<?> getExecutorByMethodReturnType(Method method) {
-        Class<?> returnType = method.getReturnType();
-        if (returnType.isPrimitive()) {
-            return new EntityResultSetHandler();
-        }
+    public ResultSetHandler<?> getExecutorByMethodReturnType(Class<?> returnType) {
         if (returnType.getTypeName().equals("void")) {
             return new EmptyResultSetHandler();
         }

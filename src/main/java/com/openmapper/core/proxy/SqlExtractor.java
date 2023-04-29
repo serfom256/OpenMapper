@@ -5,7 +5,7 @@ import com.openmapper.core.annotations.Param;
 import com.openmapper.core.impl.FsqlContext;
 import com.openmapper.entity.FsqlEntity;
 import com.openmapper.util.SqlMapper;
-import com.openmapper.core.SqlMapperImpl;
+import com.openmapper.util.SqlMapperImpl;
 import org.springframework.core.env.Environment;
 
 import java.lang.annotation.Annotation;

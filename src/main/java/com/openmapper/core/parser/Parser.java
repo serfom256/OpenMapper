@@ -1,6 +1,6 @@
 package com.openmapper.core.parser;
 
-import com.openmapper.exceptions.FsqlParsingException;
+import com.openmapper.exceptions.fsql.FsqlParsingException;
 
 import java.io.File;
 import java.util.Map;

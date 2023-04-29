@@ -1,4 +1,4 @@
-package com.openmapper.exceptions;
+package com.openmapper.exceptions.entity;
 
 public class EntityFieldAccessException extends Exception {
 

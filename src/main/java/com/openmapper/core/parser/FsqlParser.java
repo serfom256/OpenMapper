@@ -1,7 +1,7 @@
 package com.openmapper.core.parser;
 
-import com.openmapper.exceptions.FsqlParsingException;
-import com.openmapper.exceptions.InvalidFileFormatException;
+import com.openmapper.exceptions.fsql.FsqlParsingException;
+import com.openmapper.exceptions.fsql.InvalidFileFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package com.openmapper.core.annotations;
 
-import com.openmapper.exceptions.EntityNotFoundException;
+import com.openmapper.exceptions.entity.EntityNotFoundException;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

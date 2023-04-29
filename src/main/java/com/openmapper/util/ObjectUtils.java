@@ -1,7 +1,7 @@
 package com.openmapper.util;
 
-import com.openmapper.exceptions.EntityFieldAccessException;
-import com.openmapper.exceptions.ObjectCreationException;
+import com.openmapper.exceptions.entity.EntityFieldAccessException;
+import com.openmapper.exceptions.entity.ObjectCreationException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

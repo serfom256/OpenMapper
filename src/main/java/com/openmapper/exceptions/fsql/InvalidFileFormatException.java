@@ -1,4 +1,4 @@
-package com.openmapper.exceptions;
+package com.openmapper.exceptions.fsql;
 
 public class InvalidFileFormatException extends IllegalStateException {
     public InvalidFileFormatException(String fileName) {

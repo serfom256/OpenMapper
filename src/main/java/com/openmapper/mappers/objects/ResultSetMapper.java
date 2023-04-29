@@ -1,4 +1,4 @@
-package com.openmapper.util;
+package com.openmapper.mappers.objects;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

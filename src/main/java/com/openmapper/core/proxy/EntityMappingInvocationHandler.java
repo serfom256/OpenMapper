@@ -1,12 +1,12 @@
 package com.openmapper.core.proxy;
 
-import com.openmapper.core.SqlMapperImpl;
+import com.openmapper.util.SqlMapperImpl;
 import com.openmapper.core.annotations.DaoMethod;
 import com.openmapper.core.annotations.Param;
 import com.openmapper.core.impl.FsqlContext;
 import com.openmapper.core.strategy.JdbcQueryExecutor;
-import com.openmapper.core.strategy.QueryExecutor;
-import com.openmapper.core.strategy.QueryExecutorStrategy;
+import com.openmapper.core.query.QueryExecutor;
+import com.openmapper.core.query.QueryExecutorStrategy;
 import com.openmapper.entity.FsqlEntity;
 import com.openmapper.util.SqlMapper;
 import org.springframework.core.env.Environment;
@@ -46,7 +46,7 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
         FsqlEntity result = context.getSql(annotatedMethodName.procedure());
         final String query = mapper.mapSql(result, extractMethodParams(method, args));
         try {
-            return queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(method), method.getGenericReturnType());
+            return queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(method.getReturnType()), method.getGenericReturnType());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

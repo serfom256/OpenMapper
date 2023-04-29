@@ -1,4 +1,4 @@
-package com.openmapper.exceptions;
+package com.openmapper.exceptions.common;
 
 public class FunctionNotFoundException extends RuntimeException {
 

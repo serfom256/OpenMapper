@@ -1,8 +1,8 @@
-package com.openmapper.core.view;
+package com.openmapper.core.representation;
 
 import com.openmapper.core.annotations.entity.Entity;
 import com.openmapper.core.annotations.entity.Joined;
-import com.openmapper.exceptions.EntityFieldAccessException;
+import com.openmapper.exceptions.entity.EntityFieldAccessException;
 import com.openmapper.util.ObjectUtils;
 
 import java.lang.reflect.Field;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class DependencyGraph {
 
-    public Object createDependencyGraph(Map<Class<?>, Map<Object, Object>> map, Class<?> thisType, Object joinedBy, Class<?> returnClass) throws EntityFieldAccessException {
+    public Object createDependencyGraph(Graph map, Class<?> thisType, Object joinedBy, Class<?> returnClass) throws EntityFieldAccessException {
         Map<Object, Object> returnObject = map.get(thisType);
         Field[] declaredFields = thisType.getDeclaredFields();
         List<Object> joinedObjects = new ArrayList<>();

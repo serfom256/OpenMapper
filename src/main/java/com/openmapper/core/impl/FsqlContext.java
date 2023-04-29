@@ -1,7 +1,7 @@
 package com.openmapper.core.impl;
 
 import com.openmapper.entity.FsqlEntity;
-import com.openmapper.exceptions.FunctionNotFoundException;
+import com.openmapper.exceptions.common.FunctionNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

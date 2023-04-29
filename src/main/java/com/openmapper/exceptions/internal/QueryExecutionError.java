@@ -1,4 +1,4 @@
-package com.openmapper.exceptions;
+package com.openmapper.exceptions.internal;
 
 import java.sql.SQLException;
 

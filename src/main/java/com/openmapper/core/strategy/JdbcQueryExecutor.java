@@ -1,6 +1,7 @@
 package com.openmapper.core.strategy;
 
-import com.openmapper.exceptions.QueryExecutionError;
+import com.openmapper.core.query.QueryExecutor;
+import com.openmapper.exceptions.internal.QueryExecutionError;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Type;
