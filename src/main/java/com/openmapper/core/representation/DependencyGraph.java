@@ -12,8 +12,8 @@ import java.util.Map;
 
 public class DependencyGraph {
 
-    public Object createDependencyGraph(Graph map, Class<?> thisType, Object joinedBy, Class<?> returnClass) throws EntityFieldAccessException {
-        Map<Object, Object> returnObject = map.get(thisType);
+    public Object createDependencyGraph(Graph graph, Class<?> thisType, Object joinedBy, Class<?> returnClass) throws EntityFieldAccessException {
+        Map<Object, Object> returnObject = graph.get(thisType);
         Field[] declaredFields = thisType.getDeclaredFields();
         List<Object> joinedObjects = new ArrayList<>();
         for (var entry : returnObject.entrySet()) {
@@ -24,7 +24,7 @@ public class DependencyGraph {
                     ObjectUtils.modifyFieldValue(f, field -> {
                         Field joinedField = thisType.getDeclaredField(annotation.joinBy());
                         Object joinedValue = ObjectUtils.getFieldValue(entity, joinedField);
-                        field.set(entity, createDependencyGraph(map, ObjectUtils.getInnerClassType(field.getType(), field.getGenericType()), joinedValue, field.getType()));
+                        field.set(entity, createDependencyGraph(graph, ObjectUtils.getInnerClassType(field.getType(), field.getGenericType()), joinedValue, field.getType()));
                     });
                 }
             }
