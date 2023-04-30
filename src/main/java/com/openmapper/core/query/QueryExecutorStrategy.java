@@ -1,9 +1,8 @@
 package com.openmapper.core.query;
 
-import com.openmapper.core.strategy.ResultSetHandler;
-import com.openmapper.core.strategy.impl.EmptyResultSetHandler;
-import com.openmapper.core.strategy.impl.EntityResultSetHandler;
-import com.openmapper.core.strategy.impl.IterableResultSetHandler;
+import com.openmapper.core.query.impl.EmptyResultSetHandler;
+import com.openmapper.core.query.impl.EntityResultSetHandler;
+import com.openmapper.core.query.impl.IterableResultSetHandler;
 
 import java.util.*;
 import java.util.function.Supplier;

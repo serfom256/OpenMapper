@@ -3,7 +3,7 @@ package com.openmapper.core.representation;
 import com.openmapper.core.annotations.entity.Entity;
 import com.openmapper.core.annotations.entity.Joined;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
-import com.openmapper.util.ObjectUtils;
+import com.openmapper.common.ObjectUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

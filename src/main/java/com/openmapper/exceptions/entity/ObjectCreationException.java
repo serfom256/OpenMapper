@@ -1,6 +1,6 @@
 package com.openmapper.exceptions.entity;
 
-public class ObjectCreationException extends Exception{
+public class ObjectCreationException extends RuntimeException {
 
     public ObjectCreationException() {
         super();

@@ -1,5 +1,8 @@
 # OpenMapper
 
+OpenMapper is a lightweight ORM library that provides blazingly fast object mapping operations and query execution
+because it uses JDBC
+
 ---
 
 ## Sql procedures declaration:

@@ -1,16 +1,15 @@
 package com.openmapper.core.proxy;
 
-import com.openmapper.util.SqlMapperImpl;
+import com.openmapper.core.files.mapping.InputMapper;
+import com.openmapper.core.files.mapping.InputMapperImpl;
 import com.openmapper.core.annotations.DaoMethod;
 import com.openmapper.core.annotations.Param;
-import com.openmapper.core.impl.FsqlContext;
-import com.openmapper.core.strategy.JdbcQueryExecutor;
+import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
-import com.openmapper.entity.FsqlEntity;
-import com.openmapper.util.SqlMapper;
+import com.openmapper.core.entity.FsqlEntity;
 import org.springframework.core.env.Environment;
-
+import com.openmapper.core.OpenMapperSqlContext;
 import javax.sql.DataSource;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -24,17 +23,17 @@ import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.SQL_TRACING;
 
 public class EntityMappingInvocationHandler implements InvocationHandler {
 
-    private final FsqlContext context;
-    private final SqlMapper mapper;
+    private final OpenMapperSqlContext context;
+    private final InputMapper mapper;
     private final QueryExecutorStrategy strategy = new QueryExecutorStrategy();
     private final QueryExecutor queryExecutor;
 
 
-    public EntityMappingInvocationHandler(FsqlContext context, Environment environment, DataSource dataSource) {
+    public EntityMappingInvocationHandler(OpenMapperSqlContext context, Environment environment, DataSource dataSource) {
         this.context = context;
         this.queryExecutor = new JdbcQueryExecutor(dataSource);
         final String property = environment.getProperty(SQL_TRACING.getValue());
-        this.mapper = new SqlMapperImpl(Boolean.parseBoolean(property == null ? "false" : property)); // fixme
+        this.mapper = new InputMapperImpl(Boolean.parseBoolean(property == null ? "false" : property)); // fixme
     }
 
     @Override

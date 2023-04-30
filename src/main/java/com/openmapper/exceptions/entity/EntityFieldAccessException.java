@@ -1,6 +1,6 @@
 package com.openmapper.exceptions.entity;
 
-public class EntityFieldAccessException extends Exception {
+public class EntityFieldAccessException extends RuntimeException {
 
     public EntityFieldAccessException() {
         super();
