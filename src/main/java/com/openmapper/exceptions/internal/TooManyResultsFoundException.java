@@ -1,4 +1,4 @@
-package com.openmapper.core.query.impl;
+package com.openmapper.exceptions.internal;
 
 public class TooManyResultsFoundException extends RuntimeException{
     public TooManyResultsFoundException() {

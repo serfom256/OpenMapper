@@ -5,7 +5,9 @@ public enum OPEN_MAPPER_CONSTANTS {
     FILE_EXTENSION(".fsql"),
     FSQL_FILES_PATH("openmapper.fsql.files"),
     PACKAGE_TO_SCAN("openmapper.packagesToScan"),
-    SQL_TRACING("opnemapper.sql.tracing");
+    SQL_TRACING("opnemapper.sql.tracing"),
+
+    LOGGING("opnemapper.logging");
 
     private final String value;
 

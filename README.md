@@ -213,7 +213,7 @@ Usage with Maven:
 <dependency>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -222,3 +222,18 @@ Usage with Gradle:
 ```groovy
 implementation 'com.openmapper:openmapper-spring-boot-starter:1.0.0'
 ```
+
+---
+
+## Supported annotations
+
+| Supported annotations | Type | Description |
+|-----------------------|------|-------------|
+| Entity                | ---  | ---         |
+| Field                 | ---  | ---         |
+| Joined                | ---  | ---         |
+| Nested                | ---  | ---         |
+| DaoLayer              | ---  | ---         |
+| DaoMethod             | ---  | ---         |
+| Param                 | ---  | ---         |
+| Repository            | ---  | ---         |

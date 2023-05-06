@@ -6,7 +6,7 @@ import java.util.List;
 
 @Component
 public class OpenMapperEnvironmentLoader {
-    public OpenMapperEnvironmentLoader(List<OpenMapperEnvironmentProcessor> loaders) {
-        loaders.forEach(OpenMapperEnvironmentProcessor::processEnvironment);
+    public OpenMapperEnvironmentLoader(List<EnvironmentProcessor> loaders) {
+        loaders.forEach(EnvironmentProcessor::processEnvironment);
     }
 }

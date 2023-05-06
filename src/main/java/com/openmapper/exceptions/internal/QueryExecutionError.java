@@ -1,12 +1,7 @@
 package com.openmapper.exceptions.internal;
 
-import java.sql.SQLException;
+public class QueryExecutionError extends RuntimeException {
 
-public class QueryExecutionError extends SQLException {
-
-    public QueryExecutionError(String reason, String state) {
-        super(reason, state);
-    }
 
     public QueryExecutionError(String reason) {
         super(reason);

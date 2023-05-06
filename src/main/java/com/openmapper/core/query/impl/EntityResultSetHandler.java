@@ -2,17 +2,20 @@ package com.openmapper.core.query.impl;
 
 import com.openmapper.core.annotations.entity.Entity;
 import com.openmapper.core.query.ResultSetHandler;
+import com.openmapper.exceptions.internal.TooManyResultsFoundException;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
 import com.openmapper.exceptions.entity.EntityMappingException;
 import com.openmapper.exceptions.entity.ObjectCreationException;
 import com.openmapper.mappers.ResultSetObjectMapper;
 import com.openmapper.mappers.ResultSetPrimitiveMapper;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+@Component
 public class EntityResultSetHandler implements ResultSetHandler<Object> {
 
     @Override

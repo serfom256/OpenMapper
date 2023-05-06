@@ -2,15 +2,18 @@ package com.openmapper.mappers;
 
 import com.openmapper.core.annotations.entity.Entity;
 import com.openmapper.core.annotations.entity.Joined;
+import com.openmapper.core.annotations.entity.Nested;
 import com.openmapper.core.representation.DependencyGraph;
 import com.openmapper.core.representation.Graph;
 import com.openmapper.common.ObjectUtils;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.*;
 import java.util.*;
 
+@Component
 public class ResultSetObjectMapper implements ResultSetMapper {
 
     private final DependencyGraph dependencyGraph = new DependencyGraph();
@@ -27,18 +30,28 @@ public class ResultSetObjectMapper implements ResultSetMapper {
     private void extract(Class<?> concreteType, Type actualType, ResultSet resultSet, Graph graph) throws SQLException {
         concreteType = ObjectUtils.getInnerClassType(concreteType, actualType);
         Object entityInstance = ObjectUtils.createNewInstance(concreteType);
-        Field[] declaredFields = entityInstance.getClass().getDeclaredFields();
         Map<Object, Object> entityMap = graph.getIfAbsent(concreteType);
-        for (Field f : declaredFields) {
+        for (Field f : entityInstance.getClass().getDeclaredFields()) {
             com.openmapper.core.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.core.annotations.entity.Field.class);
             if (annotation != null) {
                 ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, ResultSetUtils.extractFromResultSet(f.getType(), resultSet, annotation.name())));
             } else if (f.getAnnotation(Joined.class) != null) {
                 extract(f.getType(), f.getGenericType(), resultSet, graph);
+            } else if (f.getAnnotation(Nested.class) != null) {
+                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, extractNestedEntity(f.getType(), resultSet)));
             }
         }
         entityMap.put(resultSet.getObject(concreteType.getAnnotation(Entity.class).primaryKey()), entityInstance);
     }
 
-
+    private Object extractNestedEntity(Class<?> concreteType, ResultSet resultSet) {
+        Object entityInstance = ObjectUtils.createNewInstance(concreteType);
+        for (Field f : entityInstance.getClass().getDeclaredFields()) {
+            com.openmapper.core.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.core.annotations.entity.Field.class);
+            if (annotation != null) {
+                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, ResultSetUtils.extractFromResultSet(f.getType(), resultSet, annotation.name())));
+            }
+        }
+        return entityInstance;
+    }
 }

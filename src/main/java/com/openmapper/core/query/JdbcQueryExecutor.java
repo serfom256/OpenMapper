@@ -18,7 +18,7 @@ public class JdbcQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    public <T> T execute(final String query, final ResultSetHandler<T> handler, final Type returnType) throws SQLException {
+    public <T> T execute(final String query, final ResultSetHandler<T> handler, final Type returnType) {
         try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query); ResultSet rs = preparedStatement.executeQuery()) {
             return handler.handle(rs, returnType);
         } catch (SQLException e) {

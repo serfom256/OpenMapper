@@ -1,56 +1,70 @@
 package com.openmapper.core.query;
 
+import com.openmapper.core.annotations.entity.Entity;
 import com.openmapper.core.query.impl.EmptyResultSetHandler;
 import com.openmapper.core.query.impl.EntityResultSetHandler;
 import com.openmapper.core.query.impl.IterableResultSetHandler;
+import com.openmapper.exceptions.common.NotSupportedTypeException;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Supplier;
 
+@Component
 public class QueryExecutorStrategy {
 
-    private static final Map<Class<?>, Supplier<ResultSetHandler<?>>> STRATEGY = new HashMap<>(32);
 
-    static {
-        STRATEGY.put(String.class, EntityResultSetHandler::new);
-        STRATEGY.put(Number.class, EntityResultSetHandler::new);
+    private static final Map<Class<?>, Supplier<ResultSetHandler<?>>> STRATEGY = new HashMap<>(64);
 
-        STRATEGY.put(Integer.class, EntityResultSetHandler::new);
-        STRATEGY.put(int.class, EntityResultSetHandler::new);
+    private final EntityResultSetHandler entityResultSetHandler;
 
-        STRATEGY.put(Double.class, EntityResultSetHandler::new);
-        STRATEGY.put(double.class, EntityResultSetHandler::new);
+    public QueryExecutorStrategy(EntityResultSetHandler entityResultSetHandler, EmptyResultSetHandler emptyResultSetHandler, IterableResultSetHandler iterableResultSetHandler) {
+        this.entityResultSetHandler = entityResultSetHandler;
 
-        STRATEGY.put(Long.class, EntityResultSetHandler::new);
-        STRATEGY.put(long.class, EntityResultSetHandler::new);
+        STRATEGY.put(String.class, () -> entityResultSetHandler);
+        STRATEGY.put(Number.class, () -> entityResultSetHandler);
 
-        STRATEGY.put(Short.class, EntityResultSetHandler::new);
-        STRATEGY.put(short.class, EntityResultSetHandler::new);
+        STRATEGY.put(Integer.class, () -> entityResultSetHandler);
+        STRATEGY.put(int.class, () -> entityResultSetHandler);
 
-        STRATEGY.put(Byte.class, EntityResultSetHandler::new);
-        STRATEGY.put(byte.class, EntityResultSetHandler::new);
+        STRATEGY.put(Double.class, () -> entityResultSetHandler);
+        STRATEGY.put(double.class, () -> entityResultSetHandler);
 
-        STRATEGY.put(Character.class, EntityResultSetHandler::new);
-        STRATEGY.put(char.class, EntityResultSetHandler::new);
+        STRATEGY.put(Long.class, () -> entityResultSetHandler);
+        STRATEGY.put(long.class, () -> entityResultSetHandler);
 
-        STRATEGY.put(Boolean.class, EntityResultSetHandler::new);
-        STRATEGY.put(boolean.class, EntityResultSetHandler::new);
+        STRATEGY.put(Short.class, () -> entityResultSetHandler);
+        STRATEGY.put(short.class, () -> entityResultSetHandler);
 
-        STRATEGY.put(Void.class, EmptyResultSetHandler::new);
-        STRATEGY.put(void.class, EmptyResultSetHandler::new);
+        STRATEGY.put(Byte.class, () -> entityResultSetHandler);
+        STRATEGY.put(byte.class, () -> entityResultSetHandler);
 
-        STRATEGY.put(Iterable.class, IterableResultSetHandler::new);
-        STRATEGY.put(List.class, IterableResultSetHandler::new);
-        STRATEGY.put(AbstractList.class, IterableResultSetHandler::new);
-        STRATEGY.put(ArrayList.class, IterableResultSetHandler::new);
-        STRATEGY.put(LinkedList.class, IterableResultSetHandler::new);
-        STRATEGY.put(Collection.class, IterableResultSetHandler::new);
+        STRATEGY.put(Character.class, () -> entityResultSetHandler);
+        STRATEGY.put(char.class, () -> entityResultSetHandler);
+
+        STRATEGY.put(Boolean.class, () -> entityResultSetHandler);
+        STRATEGY.put(boolean.class, () -> entityResultSetHandler);
+
+        STRATEGY.put(Void.class, () -> emptyResultSetHandler);
+        STRATEGY.put(void.class, () -> emptyResultSetHandler);
+
+        STRATEGY.put(Iterable.class, () -> iterableResultSetHandler);
+        STRATEGY.put(List.class, () -> iterableResultSetHandler);
+        STRATEGY.put(AbstractList.class, () -> iterableResultSetHandler);
+        STRATEGY.put(ArrayList.class, () -> iterableResultSetHandler);
+        STRATEGY.put(LinkedList.class, () -> iterableResultSetHandler);
+        STRATEGY.put(Collection.class, () -> iterableResultSetHandler);
     }
 
+
     public ResultSetHandler<?> getExecutorByMethodReturnType(Class<?> returnType) {
-        if (returnType.getTypeName().equals("void")) {
-            return new EmptyResultSetHandler();
+        Supplier<ResultSetHandler<?>> resultSetHandlerSupplier = STRATEGY.get(returnType);
+        if (returnType.getAnnotation(Entity.class) != null) {
+            return entityResultSetHandler;
         }
-        return STRATEGY.getOrDefault(returnType, EntityResultSetHandler::new).get();
+        if (resultSetHandlerSupplier == null) {
+            throw new NotSupportedTypeException(String.format("Type: %s doesn't supported!", returnType.getTypeName()));
+        }
+        return resultSetHandlerSupplier.get();
     }
 }

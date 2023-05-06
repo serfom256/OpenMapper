@@ -1,7 +1,7 @@
 package com.openmapper.core.files.loader;
 
 import com.openmapper.core.OpenMapperSqlContext;
-import com.openmapper.core.environment.OpenMapperEnvironmentProcessor;
+import com.openmapper.core.environment.EnvironmentProcessor;
 import com.openmapper.core.entity.FsqlEntity;
 import com.openmapper.core.files.FileUtil;
 import com.openmapper.common.ParsedObjectsFormatter;
@@ -16,7 +16,7 @@ import java.util.Map;
 import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.FSQL_FILES_PATH;
 
 @Component
-public class SqlLoader implements OpenMapperEnvironmentProcessor {
+public class SqlLoader implements EnvironmentProcessor {
 
     private final FileUtil fileUtil;
     private final Environment environment;

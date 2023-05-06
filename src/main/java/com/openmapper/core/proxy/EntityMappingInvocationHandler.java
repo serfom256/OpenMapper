@@ -1,39 +1,36 @@
 package com.openmapper.core.proxy;
 
-import com.openmapper.core.files.mapping.InputMapper;
-import com.openmapper.core.files.mapping.InputMapperImpl;
+import com.openmapper.core.OpenMapperSqlContext;
 import com.openmapper.core.annotations.DaoMethod;
 import com.openmapper.core.annotations.Param;
+import com.openmapper.core.entity.FsqlEntity;
+import com.openmapper.core.files.mapping.InputMapper;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
-import com.openmapper.core.entity.FsqlEntity;
-import org.springframework.core.env.Environment;
-import com.openmapper.core.OpenMapperSqlContext;
+
 import javax.sql.DataSource;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.SQL_TRACING;
 
 public class EntityMappingInvocationHandler implements InvocationHandler {
 
     private final OpenMapperSqlContext context;
     private final InputMapper mapper;
-    private final QueryExecutorStrategy strategy = new QueryExecutorStrategy();
+    private final QueryExecutorStrategy strategy;
     private final QueryExecutor queryExecutor;
 
 
-    public EntityMappingInvocationHandler(OpenMapperSqlContext context, Environment environment, DataSource dataSource) {
+    public EntityMappingInvocationHandler(OpenMapperSqlContext context, QueryExecutorStrategy strategy, InputMapper mapper, DataSource dataSource) {
         this.context = context;
+        this.strategy = strategy;
         this.queryExecutor = new JdbcQueryExecutor(dataSource);
-        final String property = environment.getProperty(SQL_TRACING.getValue());
-        this.mapper = new InputMapperImpl(Boolean.parseBoolean(property == null ? "false" : property)); // fixme
+        this.mapper = mapper;
     }
 
     @Override
@@ -44,11 +41,7 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
         }
         FsqlEntity result = context.getSql(annotatedMethodName.procedure());
         final String query = mapper.mapSql(result, extractMethodParams(method, args));
-        try {
-            return queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(method.getReturnType()), method.getGenericReturnType());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(method.getReturnType()), method.getGenericReturnType());
     }
 
     private Map<String, Object> extractMethodParams(Method method, Object[] args) {

@@ -1,5 +1,6 @@
 package com.openmapper.core.files;
 
+import com.openmapper.config.OpenMapperGlobalContext;
 import com.openmapper.core.files.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,15 +18,17 @@ public class FileUtil {
 
     private final Parser parser;
 
+    private final OpenMapperGlobalContext globalContext;
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     @Autowired
-    public FileUtil(Parser parser) {
+    public FileUtil(Parser parser, OpenMapperGlobalContext globalContext) {
         this.parser = parser;
+        this.globalContext = globalContext;
     }
 
     public Map<String, String> findFilesAndParse(List<String> files) {
-        files.forEach(f -> logger.debug("File loaded: " + f));
+        if (globalContext.isLogging()) files.forEach(f -> logger.debug("File loaded: {}", f));
         List<Map<String, String>> parsed = files.stream()
                 .map(fsqlFile -> parser.parseTree(new File(fsqlFile)))
                 .collect(Collectors.toList());

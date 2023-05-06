@@ -1,6 +1,7 @@
 package com.openmapper.mappers;
 
 import com.openmapper.exceptions.internal.QueryExecutionError;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
@@ -8,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class ResultSetPrimitiveMapper implements ResultSetMapper {
 
     @Override

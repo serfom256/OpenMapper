@@ -3,6 +3,9 @@ package com.openmapper.core.representation;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Graph represents mapped class type <-> primary-key <-> entity instance association
+ */
 public class Graph {
 
     private final Map<Class<?>, Map<Object, Object>> entityGraph;

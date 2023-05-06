@@ -7,12 +7,14 @@ import com.openmapper.exceptions.entity.EntityMappingException;
 import com.openmapper.exceptions.entity.ObjectCreationException;
 import com.openmapper.mappers.ResultSetObjectMapper;
 import com.openmapper.mappers.ResultSetPrimitiveMapper;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@Component
 public class IterableResultSetHandler implements ResultSetHandler<Iterable<Object>> {
 
     @Override
