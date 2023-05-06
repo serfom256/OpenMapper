@@ -130,6 +130,7 @@ class User {
 
 class Course {
     // Course's fields
+    List<User> users;
 }
 
 interface Repository {
