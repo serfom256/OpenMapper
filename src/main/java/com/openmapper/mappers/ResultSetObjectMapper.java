@@ -24,7 +24,7 @@ public class ResultSetObjectMapper implements ResultSetMapper {
         while (resultSet.next()) {
             extract(actualReturnType, concreteType, resultSet, graph);
         }
-        return dependencyGraph.createDependencyGraph(graph, actualReturnType, null, returnClass);
+        return dependencyGraph.createDependencyGraph(graph, actualReturnType, returnClass, null, null);
     }
 
     private void extract(Class<?> concreteType, Type actualType, ResultSet resultSet, Graph graph) throws SQLException {
@@ -34,14 +34,15 @@ public class ResultSetObjectMapper implements ResultSetMapper {
         for (Field f : entityInstance.getClass().getDeclaredFields()) {
             com.openmapper.core.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.core.annotations.entity.Field.class);
             if (annotation != null) {
-                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, ResultSetUtils.extractFromResultSet(f.getType(), resultSet, annotation.name())));
+                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, ResultSetUtils.extractFromResultSet(f.getType(), resultSet, getFieldNameOrDefault(f, annotation.name()))));
             } else if (f.getAnnotation(Joined.class) != null) {
                 extract(f.getType(), f.getGenericType(), resultSet, graph);
             } else if (f.getAnnotation(Nested.class) != null) {
                 ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, extractNestedEntity(f.getType(), resultSet)));
             }
         }
-        entityMap.put(resultSet.getObject(concreteType.getAnnotation(Entity.class).primaryKey()), entityInstance);
+        Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance, concreteType.getAnnotation(Entity.class).primaryKey());
+        entityMap.put(primaryKeyValue, entityInstance);
     }
 
     private Object extractNestedEntity(Class<?> concreteType, ResultSet resultSet) {
@@ -49,9 +50,13 @@ public class ResultSetObjectMapper implements ResultSetMapper {
         for (Field f : entityInstance.getClass().getDeclaredFields()) {
             com.openmapper.core.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.core.annotations.entity.Field.class);
             if (annotation != null) {
-                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, ResultSetUtils.extractFromResultSet(f.getType(), resultSet, annotation.name())));
+                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, ResultSetUtils.extractFromResultSet(f.getType(), resultSet, getFieldNameOrDefault(f, annotation.name()))));
             }
         }
         return entityInstance;
+    }
+
+    public static String getFieldNameOrDefault(Field field, String defaultName) {
+        return defaultName.isEmpty() ? field.getName() : defaultName;
     }
 }

@@ -8,5 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 public @interface Joined {
-    String joinBy() default "";
+    String joinBy();
+
+    String to();
 }

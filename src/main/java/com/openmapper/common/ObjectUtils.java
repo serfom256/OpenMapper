@@ -54,6 +54,14 @@ public class ObjectUtils {
         return result;
     }
 
+    public static Object getFieldValue(Object object, String field) throws EntityFieldAccessException {
+        try {
+            return getFieldValue(object, object.getClass().getDeclaredField(field));
+        } catch (NoSuchFieldException e) {
+            throw new EntityFieldAccessException(e);
+        }
+    }
+
     public static void modifyFieldValue(Field field, FieldModifier fieldConsumer) throws EntityFieldAccessException {
         field.setAccessible(true);
         try {

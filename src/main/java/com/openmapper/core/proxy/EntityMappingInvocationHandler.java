@@ -10,7 +10,6 @@ import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
 
 import javax.sql.DataSource;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -36,10 +35,11 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
         DaoMethod annotatedMethodName = method.getAnnotation(DaoMethod.class);
-        if (annotatedMethodName == null) {
-            throw new IllegalStateException(String.format("Method %s doesn't annotated with @DaoMethod", method.getName()));
+        String procedure = method.getName();
+        if (annotatedMethodName != null) {
+            procedure = annotatedMethodName.procedure();
         }
-        FsqlEntity result = context.getSql(annotatedMethodName.procedure());
+        FsqlEntity result = context.getSql(procedure);
         final String query = mapper.mapSql(result, extractMethodParams(method, args));
         return queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(method.getReturnType()), method.getGenericReturnType());
     }
@@ -49,11 +49,11 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
         Map<String, Object> params = new HashMap<>();
         for (int i = 0; i < methodParams.length; i++) {
             Parameter parameter = methodParams[i];
-            Annotation[] annotArr = parameter.getAnnotations();
-            for (Annotation annot : annotArr) {
-                if (annot instanceof Param) {
-                    params.put(((Param) annot).name(), args[i]);
-                }
+            Param annotation = parameter.getAnnotation(Param.class);
+            if (annotation == null) {
+                params.put(parameter.getName(), args[i]);
+            } else {
+                params.put(annotation.name(), args[i]);
             }
         }
         return params;
