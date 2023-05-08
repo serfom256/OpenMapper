@@ -120,16 +120,20 @@ OpenMapper supports different types of entity objects relationship:
 
 Modeling objects relationship in code:
 
-### Many To Many:
+### Many To Many (beta):
 
 ```java
+import com.openmapper.core.annotations.entity.Joined;
+
 class User {
     // User's fields
+    @Joined(transients = true)
     List<Course> courses;
 }
 
 class Course {
     // Course's fields
+    @Joined(transients = true)
     List<User> users;
 }
 
@@ -228,13 +232,13 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.0.0'
 
 ## Supported annotations
 
-| Supported annotations | Type | Description |
-|-----------------------|------|-------------|
-| Entity                | ---  | ---         |
-| Field                 | ---  | ---         |
-| Joined                | ---  | ---         |
-| Nested                | ---  | ---         |
-| DaoLayer              | ---  | ---         |
-| DaoMethod             | ---  | ---         |
-| Param                 | ---  | ---         |
-| Repository            | ---  | ---         |
+| Supported annotations | Type                     | Description                                                                                            |
+|-----------------------|--------------------------|--------------------------------------------------------------------------------------------------------|
+| Entity                | Class level              | Every declared entity that used in mapping uses the @Entity annotation                                 |
+| Field                 | Field level              | Used for mapping fields specifying                                                                     |
+| Joined                | Field level              | Used for joining entities by the specified field                                                       |
+| Nested                | Field level              | Used for nested objects                                                                                |
+| DaoLayer              | Class level              | DAO/Repository classes that represents data access layer should be annotated with @DaoLayer annotation |
+| DaoMethod             | Method level             | Used for method that executes the query and returns mapped result                                      |
+| Param                 | Method's parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
+| Repository            | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |

@@ -11,4 +11,6 @@ public @interface Joined {
     String joinBy();
 
     String to();
+
+    boolean transients() default false;
 }
