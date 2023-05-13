@@ -17,12 +17,12 @@ public class OpenMapperGlobalContext {
     }
 
     public boolean isLogging() {
-        final String property = environment.getProperty(LOGGING.getValue());
+        final String property = environment.getProperty(LOGGING.value());
         return Boolean.parseBoolean(property == null ? "false" : property);
     }
 
     public boolean isSqlTracing() {
-        final String property = environment.getProperty(SQL_TRACING.getValue());
+        final String property = environment.getProperty(SQL_TRACING.value());
         return Boolean.parseBoolean(property == null ? "false" : property);
     }
 }

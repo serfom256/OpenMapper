@@ -13,19 +13,27 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 @Component
 public class IterableResultSetHandler implements ResultSetHandler<Iterable<Object>> {
+
+    private final ResultSetObjectMapper objectMapper = new ResultSetObjectMapper();
+
+    private final ResultSetPrimitiveMapper primitiveMapper = new ResultSetPrimitiveMapper();
 
     @Override
     @SuppressWarnings("unchecked")
     public Iterable<Object> handle(ResultSet rs, Type mappingType) throws SQLException {
         Class<?> entityMappedType = ((Class<?>) ((ParameterizedType) mappingType).getActualTypeArguments()[0]);
         try {
+            Iterable<Object> result;
             if (entityMappedType.getAnnotation(Entity.class) != null) {
-                return (Iterable<Object>) new ResultSetObjectMapper().extract(mappingType, entityMappedType, Iterable.class, rs);
+                result = (Iterable<Object>) objectMapper.extract(mappingType, entityMappedType, Iterable.class, rs);
+            } else {
+                result = (Iterable<Object>) primitiveMapper.extract(mappingType, entityMappedType, Iterable.class, rs);
             }
-            return (Iterable<Object>) new ResultSetPrimitiveMapper().extract(mappingType, entityMappedType, Iterable.class, rs);
+            return result == null ? new ArrayList<>() : result;
         } catch (EntityFieldAccessException | ObjectCreationException e) {
             throw new EntityMappingException(e);
         }

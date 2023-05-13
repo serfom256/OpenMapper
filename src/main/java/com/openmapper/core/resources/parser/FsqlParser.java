@@ -1,4 +1,4 @@
-package com.openmapper.core.files.parser;
+package com.openmapper.core.resources.parser;
 
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 import com.openmapper.exceptions.fsql.InvalidFileFormatException;
@@ -30,7 +30,7 @@ public class FsqlParser implements Parser {
     }
 
     private void parse(Map<String, String> map, File file) {
-        if (!file.getName().endsWith(FILE_EXTENSION.getValue())) {
+        if (!file.getName().endsWith(FILE_EXTENSION.value())) {
             throw new InvalidFileFormatException(file.getName());
         }
         try {
@@ -66,6 +66,6 @@ public class FsqlParser implements Parser {
     }
 
     private boolean canParse(File file) {
-        return file.isFile() && file.getName().endsWith(FILE_EXTENSION.getValue());
+        return file.isFile() && file.getName().endsWith(FILE_EXTENSION.value());
     }
 }

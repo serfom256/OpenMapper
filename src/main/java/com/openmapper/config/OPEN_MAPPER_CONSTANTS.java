@@ -15,7 +15,7 @@ public enum OPEN_MAPPER_CONSTANTS {
         this.value = value;
     }
 
-    public String getValue() {
+    public String value() {
         return value;
     }
 }

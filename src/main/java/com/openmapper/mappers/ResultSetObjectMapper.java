@@ -24,6 +24,7 @@ public class ResultSetObjectMapper implements ResultSetMapper {
         while (resultSet.next()) {
             extract(returnClass, concreteType, resultSet, graph, new HashSet<>(8));
         }
+        if (graph.isEmpty()) return null;
         return dependencyGraph.createDependencyGraph(graph, returnClass, actualReturnClass, null, null, new HashSet<>(8));
     }
 

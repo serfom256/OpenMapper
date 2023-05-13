@@ -16,7 +16,7 @@ public class InvocationProxy {
         return null;
     }
 
-    public <T extends InvocationHandler> Object makeProxyFor( T handler, String target) {
+    public <T extends InvocationHandler> Object makeProxyFor(T handler, String target) {
         try {
             return Proxy.newProxyInstance(handler.getClass().getClassLoader(), new Class[]{Class.forName(target)}, handler);
         } catch (ClassNotFoundException e) {

@@ -11,7 +11,7 @@ public class Graph {
     private final Map<Class<?>, Map<Object, Object>> entityGraph;
 
     public Graph() {
-        entityGraph = new HashMap<>(4);
+        this.entityGraph = new HashMap<>(4);
     }
 
     public Map<Object, Object> getIfAbsent(final Class<?> clazz) {
@@ -20,6 +20,10 @@ public class Graph {
 
     public Map<Object, Object> get(final Class<?> clazz) {
         return entityGraph.get(clazz);
+    }
+
+    public boolean isEmpty() {
+        return entityGraph.isEmpty();
     }
 
 }

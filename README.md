@@ -98,8 +98,6 @@ Custom objects that used in sql query must be annotated with `@Entity` annotatio
 
 primaryKey: primary key of the table
 
-joinedBy: field that used in joining
-
 #### @Field annotation:
 
 name: name in sql procedure declared in: `.fsql` file
@@ -123,16 +121,25 @@ Modeling objects relationship in code:
 ### Many To Many (beta):
 
 ```java
-import com.openmapper.core.annotations.entity.Joined;
-
+@Entity(primaryKey = "id")
 class User {
-    // User's fields
+    @Field
+    private Integer id;
+
+    @Field
+    private Integer userId;
+
+    @Field
+    private String data;
+    
     @Joined(transients = true)
     List<Course> courses;
 }
 
+@Entity(primaryKey = "id")
 class Course {
     // Course's fields
+    
     @Joined(transients = true)
     List<User> users;
 }
@@ -147,17 +154,34 @@ interface Repository {
 ### Many To One:
 
 ```java
+@Entity(primaryKey = "id")
 class User {
-    // User's fields
-    List<Course> courses;
+    
+    @Field
+    private int id;
+    
+    @Field
+    private String name;
+
+    @Joined(joinBy = "id", to = "userId")
+    private List<Course> courses;
 }
 
+@Entity(primaryKey = "id")
 class Course {
-    // Course's fields
+    
+    @Field
+    private Integer id;
+
+    @Field
+    private Integer userId;
+
+    @Field
+    private String data;
 }
 
 interface Repository {
-    @DaoMethod(procedure = "")
+    @DaoMethod(procedure = "getAll")
     User getAll();
 }
 
@@ -166,17 +190,37 @@ interface Repository {
 ### One To One:
 
 ```java
+@Entity(primaryKey = "id")
 class User {
-    // User's fields
-    Course courses;
+
+    @Field
+    private int id;
+
+    @Field
+    private String name;
+
+    @Joined(joinBy = "id", to = "userId")
+    private Course courses;
 }
 
+@Entity(primaryKey = "id")
 class Course {
+    
+    @Field
+    private Integer id;
+    
+    @Field
+    private Integer userId;
+    
+    @Field
+    private String data;
+    
     // Course's fields
 }
 
 interface Repository {
-    @DaoMethod(procedure = "")
+    
+    @DaoMethod
     User getAll();
 }
 
@@ -184,7 +228,7 @@ interface Repository {
 
 ---
 
-OpenMapper supports Java types from table below:
+OpenMapper supports Java types from the table below:
 
 | Supported Java mapping types |
 |------------------------------|
@@ -218,14 +262,14 @@ Usage with Maven:
 <dependency>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.2</version>
 </dependency>
 ```
 
 Usage with Gradle:
 
 ```groovy
-implementation 'com.openmapper:openmapper-spring-boot-starter:1.0.0'
+implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.2'
 ```
 
 ---

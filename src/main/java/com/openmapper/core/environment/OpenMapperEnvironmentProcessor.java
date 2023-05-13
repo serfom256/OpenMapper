@@ -3,8 +3,8 @@ package com.openmapper.core.environment;
 import com.openmapper.config.OpenMapperGlobalContext;
 import com.openmapper.core.annotations.DaoLayer;
 import com.openmapper.core.OpenMapperSqlContext;
-import com.openmapper.core.files.mapping.InputMapper;
-import com.openmapper.core.files.mapping.InputMapperImpl;
+import com.openmapper.core.resources.mapping.InputMapper;
+import com.openmapper.core.resources.mapping.InputMapperImpl;
 import com.openmapper.core.proxy.EntityMappingInvocationHandler;
 import com.openmapper.core.proxy.InvocationProxy;
 import com.openmapper.core.query.QueryExecutorStrategy;
@@ -31,8 +31,7 @@ public class OpenMapperEnvironmentProcessor implements EnvironmentProcessor {
 
     private final OpenMapperGlobalContext globalContext;
 
-
-    private final PackageScanner scanner = new PackageScanner();
+    private final PackageScanner scanner;
     private final InvocationProxy proxy = new InvocationProxy();
     private static final Logger logger = LoggerFactory.getLogger(OpenMapperEnvironmentProcessor.class);
 
@@ -42,20 +41,19 @@ public class OpenMapperEnvironmentProcessor implements EnvironmentProcessor {
             OpenMapperSqlContext context,
             DefaultListableBeanFactory beanFactory,
             QueryExecutorStrategy strategy,
-            OpenMapperGlobalContext globalContext) {
+            OpenMapperGlobalContext globalContext,
+            PackageScanner scanner) {
         this.environment = environment;
         this.context = context;
         this.beanFactory = beanFactory;
         this.strategy = strategy;
         this.globalContext = globalContext;
+        this.scanner = scanner;
     }
 
     @Override
     public void processEnvironment() {
-        if (globalContext.isLogging()) {
-            logger.info("Scanning: {}", environment.getRequiredProperty(PACKAGE_TO_SCAN.getValue()));
-        }
-        Set<Class<?>> classes = scanner.scanPackagesFor(environment.getProperty(PACKAGE_TO_SCAN.getValue()), DaoLayer.class);
+        Set<Class<?>> classes = scanner.scanPackagesFor(environment.getProperty(PACKAGE_TO_SCAN.value()), DaoLayer.class);
         for (Class<?> clazz : classes) {
             Object dataSource = beanFactory.getBean(clazz.getAnnotation(DaoLayer.class).dataSource());
             if (globalContext.isLogging()) logger.info("Detected datasource: {}", dataSource);

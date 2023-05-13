@@ -18,18 +18,21 @@ import java.util.List;
 @Component
 public class EntityResultSetHandler implements ResultSetHandler<Object> {
 
+    private final ResultSetObjectMapper objectMapper = new ResultSetObjectMapper();
+    private final ResultSetPrimitiveMapper primitiveMapper = new ResultSetPrimitiveMapper();
+
     @Override
     @SuppressWarnings("unchecked")
     public Object handle(ResultSet rs, Type mappingType) throws SQLException {
         try {
-            if (mappingType.getClass().getAnnotation(Entity.class) != null) {
-                return new ResultSetObjectMapper().extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
+            if (((Class<?>) mappingType).getAnnotation(Entity.class) != null){
+                return objectMapper.extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
             }
-            List<Object> rows = (List<Object>) new ResultSetPrimitiveMapper().extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
+            List<Object> rows = (List<Object>) primitiveMapper.extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
             if (rows.size() > 1) {
                 throw new TooManyResultsFoundException("Expected single result got: " + rows.size());
             }
-            return rows.get(0);
+            return rows.isEmpty() ? null : rows.get(0);
         } catch (EntityFieldAccessException | ObjectCreationException e) {
             throw new EntityMappingException(e);
         }

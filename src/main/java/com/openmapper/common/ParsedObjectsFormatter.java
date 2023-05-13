@@ -9,11 +9,11 @@ public class ParsedObjectsFormatter {
 
     public void format(Map<String, String> parsed) {
         for (Map.Entry<String, String> pair : parsed.entrySet()) {
-            pair.setValue(normalizeSql(pair.getValue()));
+            pair.setValue(formatSql(pair.getValue()));
         }
     }
 
-    private String normalizeSql(String sql) {
+    private String formatSql(String sql) {
         return sql.replaceAll("\\s+", " ").trim();
     }
 

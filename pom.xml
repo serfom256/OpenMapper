@@ -10,12 +10,12 @@
     </parent>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.2</version>
     <name>openMapper</name>
     <description>openMapper</description>
     <properties>
         <java.version>14</java.version>
-        <openMapper.version>1.1.0.RELEASE</openMapper.version>
+        <openMapper.version>1.2.2.RELEASE</openMapper.version>
     </properties>
     <dependencies>
         <dependency>

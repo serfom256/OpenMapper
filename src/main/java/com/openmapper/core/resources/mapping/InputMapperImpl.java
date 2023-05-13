@@ -1,7 +1,7 @@
-package com.openmapper.core.files.mapping;
+package com.openmapper.core.resources.mapping;
 
 import com.openmapper.core.entity.FsqlEntity;
-import com.openmapper.core.files.SqlBuilder;
+import com.openmapper.core.resources.SqlBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

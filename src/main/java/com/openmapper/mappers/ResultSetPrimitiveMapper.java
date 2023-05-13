@@ -13,7 +13,7 @@ import java.util.List;
 public class ResultSetPrimitiveMapper implements ResultSetMapper {
 
     @Override
-    public Object extract(Type concreteType, Class<?> actualReturnType, Class<?> returnClass, ResultSet resultSet) throws SQLException {
+    public Object extract(Type concreteType, Class<?> actualReturnType, Class<?> returnClass, ResultSet resultSet) {
         try {
             List<Object> result = new ArrayList<>();
             while (resultSet.next()) {

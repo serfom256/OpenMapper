@@ -4,17 +4,16 @@ import com.openmapper.core.OpenMapperSqlContext;
 import com.openmapper.core.annotations.DaoMethod;
 import com.openmapper.core.annotations.Param;
 import com.openmapper.core.entity.FsqlEntity;
-import com.openmapper.core.files.mapping.InputMapper;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
+import com.openmapper.core.resources.mapping.InputMapper;
 
 import javax.sql.DataSource;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class EntityMappingInvocationHandler implements InvocationHandler {
@@ -41,7 +40,20 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
         }
         FsqlEntity result = context.getSql(procedure);
         final String query = mapper.mapSql(result, extractMethodParams(method, args));
-        return queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(method.getReturnType()), method.getGenericReturnType());
+        return handlerOptionalReturnType(query, method);
+    }
+
+    private Object handlerOptionalReturnType(String query, Method method) {
+        Class<?> returnType; // TODO add generic entity support
+        Type genericReturnType = method.getGenericReturnType();
+        if (method.getReturnType() == Optional.class) { // FIXME handler ClassCastException if optional contains generic iterable class
+            returnType = ((Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0]);
+            genericReturnType = ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
+        } else {
+            returnType = method.getReturnType();
+        }
+        Object result = queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(returnType), genericReturnType);
+        return method.getReturnType() == Optional.class ? Optional.ofNullable(result) : result;
     }
 
     private Map<String, Object> extractMethodParams(Method method, Object[] args) {

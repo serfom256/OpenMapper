@@ -11,13 +11,16 @@ import java.util.Map;
 
 public class ResultSetUtils {
 
+    private ResultSetUtils() {
+    }
+
     @FunctionalInterface
-    private static interface ResultSetExtractorByColumn {
+    private interface ResultSetExtractorByColumn {
         Object extract(ResultSet resultSet, String name) throws SQLException;
     }
 
     @FunctionalInterface
-    private static interface ResultSetExtractorByPosition {
+    private interface ResultSetExtractorByPosition {
         Object extract(ResultSet resultSet, int position) throws SQLException;
     }
 

@@ -1,4 +1,4 @@
-package com.openmapper.core.files.parser;
+package com.openmapper.core.resources.parser;
 
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 import org.springframework.stereotype.Component;
