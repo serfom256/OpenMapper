@@ -3,11 +3,13 @@ package com.openmapper.core.proxy;
 import com.openmapper.core.OpenMapperSqlContext;
 import com.openmapper.core.annotations.DaoMethod;
 import com.openmapper.core.annotations.Param;
+import com.openmapper.core.annotations.entity.Entity;
 import com.openmapper.core.entity.FsqlEntity;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
-import com.openmapper.core.resources.mapping.InputMapper;
+import com.openmapper.core.processors.mapping.InputMapper;
+import com.openmapper.mappers.EntityPropertyExtractor;
 
 import javax.sql.DataSource;
 import java.lang.reflect.*;
@@ -24,11 +26,14 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
     private final QueryExecutor queryExecutor;
 
 
-    public EntityMappingInvocationHandler(OpenMapperSqlContext context, QueryExecutorStrategy strategy, InputMapper mapper, DataSource dataSource) {
+    public EntityMappingInvocationHandler(OpenMapperSqlContext context,
+                                          QueryExecutorStrategy strategy,
+                                          InputMapper mapper,
+                                          DataSource dataSource) {
         this.context = context;
         this.strategy = strategy;
-        this.queryExecutor = new JdbcQueryExecutor(dataSource);
         this.mapper = mapper;
+        this.queryExecutor = new JdbcQueryExecutor(dataSource);
     }
 
     @Override
@@ -44,9 +49,9 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
     }
 
     private Object handlerOptionalReturnType(String query, Method method) {
-        Class<?> returnType; // TODO add generic entity support
+        Class<?> returnType;
         Type genericReturnType = method.getGenericReturnType();
-        if (method.getReturnType() == Optional.class) { // FIXME handler ClassCastException if optional contains generic iterable class
+        if (method.getReturnType() == Optional.class) {
             returnType = ((Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0]);
             genericReturnType = ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
         } else {
@@ -61,11 +66,11 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
         Map<String, Object> params = new HashMap<>();
         for (int i = 0; i < methodParams.length; i++) {
             Parameter parameter = methodParams[i];
-            Param annotation = parameter.getAnnotation(Param.class);
-            if (annotation == null) {
-                params.put(parameter.getName(), args[i]);
+            if (parameter.getType().getAnnotation(Entity.class) != null) {
+                params.putAll(EntityPropertyExtractor.extractParams(args[i]));
             } else {
-                params.put(annotation.name(), args[i]);
+                Param annotation = parameter.getAnnotation(Param.class);
+                params.put(annotation == null ? parameter.getName() : annotation.name(), args[i]);
             }
         }
         return params;

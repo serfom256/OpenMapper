@@ -1,11 +1,11 @@
-package com.openmapper.core.resources.loader;
+package com.openmapper.core.processors.loader;
 
 import com.openmapper.common.ParsedObjectsFormatter;
 import com.openmapper.core.OpenMapperSqlContext;
 import com.openmapper.core.entity.FsqlEntity;
 import com.openmapper.core.environment.EnvironmentProcessor;
-import com.openmapper.core.resources.FileUtil;
-import com.openmapper.core.resources.mapping.SourceMapper;
+import com.openmapper.core.processors.FileUtil;
+import com.openmapper.core.processors.mapping.SourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;

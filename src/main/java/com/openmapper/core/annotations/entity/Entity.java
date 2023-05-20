@@ -10,4 +10,6 @@ import java.lang.annotation.Target;
 public @interface Entity {
     String primaryKey();
 
+    String table() default "";
+
 }

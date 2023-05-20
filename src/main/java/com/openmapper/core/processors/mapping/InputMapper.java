@@ -1,4 +1,4 @@
-package com.openmapper.core.resources.mapping;
+package com.openmapper.core.processors.mapping;
 
 import com.openmapper.core.entity.FsqlEntity;
 

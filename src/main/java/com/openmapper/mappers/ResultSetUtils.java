@@ -7,7 +7,9 @@ import com.openmapper.exceptions.internal.ResultSetExtractionException;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ResultSetUtils {
 
@@ -103,4 +105,18 @@ public class ResultSetUtils {
             throw new InvalidResultCountException("Invalid result set length. Expected 1 got: " + resultSet.getMetaData().getColumnCount());
         }
     }
+
+    public static Set<String> getAvailableColumnNames(ResultSet resultSet) {
+        final Set<String> set = new HashSet<>();
+        try {
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int x = 1; x <= metaData.getColumnCount(); x++) {
+                set.add(metaData.getColumnName(x));
+            }
+            return set;
+        } catch (SQLException e) {
+            return set;
+        }
+    }
+
 }

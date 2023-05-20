@@ -1,7 +1,7 @@
-package com.openmapper.core.resources;
+package com.openmapper.core.processors;
 
 import com.openmapper.config.OpenMapperGlobalContext;
-import com.openmapper.core.resources.parser.Parser;
+import com.openmapper.core.processors.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

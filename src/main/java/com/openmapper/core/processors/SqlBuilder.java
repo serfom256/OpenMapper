@@ -1,4 +1,4 @@
-package com.openmapper.core.resources;
+package com.openmapper.core.processors;
 
 import com.openmapper.core.entity.FsqlEntity;
 import com.openmapper.core.entity.SqlToken;
