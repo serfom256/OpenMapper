@@ -8,7 +8,7 @@ import java.util.Map;
 public class ParsedObjectsFormatter {
 
     public void format(Map<String, String> parsed) {
-        for (Map.Entry<String, String> pair : parsed.entrySet()) {
+        for (var pair : parsed.entrySet()) {
             pair.setValue(formatSql(pair.getValue()));
         }
     }

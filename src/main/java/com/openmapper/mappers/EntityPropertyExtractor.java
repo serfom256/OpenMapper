@@ -2,7 +2,7 @@ package com.openmapper.mappers;
 
 import com.openmapper.common.ObjectUtils;
 import com.openmapper.core.annotations.entity.Field;
-import org.springframework.stereotype.Component;
+import com.openmapper.core.annotations.entity.Nested;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +19,8 @@ public class EntityPropertyExtractor {
             Field annotation = field.getAnnotation(Field.class);
             if (annotation != null) {
                 values.put(annotation.name().isEmpty() ? field.getName() : annotation.name(), ObjectUtils.getFieldValue(entity, field));
+            } else if (field.getAnnotation(Nested.class) != null) {
+                values.putAll(extractParams(ObjectUtils.getFieldValue(entity, field)));
             }
         }
         return values;

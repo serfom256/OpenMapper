@@ -50,7 +50,7 @@ public class SqlLoader implements EnvironmentProcessor {
         Map<String, String> parsed = fileUtil.findFilesAndParse(sqlFilePaths);
         formatter.format(parsed);
         Map<String, FsqlEntity> res = mapper.map(parsed);
-        for (Map.Entry<String, FsqlEntity> m : res.entrySet()) {
+        for (var m : res.entrySet()) {
             context.updateContext(m.getKey(), m.getValue());
         }
     }

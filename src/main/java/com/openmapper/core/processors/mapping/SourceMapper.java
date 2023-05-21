@@ -16,7 +16,7 @@ public class SourceMapper {
 
     public Map<String, FsqlEntity> map(Map<String, String> parsed) {
         Map<String, FsqlEntity> map = new HashMap<>();
-        for (Map.Entry<String, String> e : parsed.entrySet()) {
+        for (var e : parsed.entrySet()) {
             String[] value = e.getValue().split(" ");
             map.put(e.getKey(), toEntity(value));
         }

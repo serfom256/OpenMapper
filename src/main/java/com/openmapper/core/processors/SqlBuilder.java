@@ -9,16 +9,20 @@ import java.util.Map;
 public class SqlBuilder {
 
     public String buildSql(FsqlEntity entity, Map<String, Object> toReplace) {
-        Map<String, SqlToken> tokenMap = entity.getVariables();
+        Map<String, SqlToken> tokens = entity.getVariables();
+        if (tokens.size() > toReplace.size()) {
+            throw new IllegalArgumentException(String.format("Invalid count of arguments given! Expected: %s given: %s", tokens.size(), toReplace.size()));
+        }
         Map<Integer, String> replaced = new HashMap<>();
-        for (var pair : toReplace.entrySet()) {
-            SqlToken token = tokenMap.get(pair.getKey());
-            if (token != null) {
-                replaced.put(token.getPosition(), String.format(token.getData(), pair.getValue().toString()));
+        for (var tokenPair : tokens.entrySet()) {
+            Object value = toReplace.get(tokenPair.getKey());
+            if (value != null) {
+                replaced.put(tokenPair.getValue().getPosition(), String.format(tokenPair.getValue().getData(), value));
             } else {
-                throw new IllegalArgumentException("");
+                throw new IllegalArgumentException(String.format("Argument: %s not found!", tokenPair.getKey()));
             }
         }
+
         StringBuilder result = new StringBuilder();
         for (SqlToken token : entity.getSql()) {
             String repl = replaced.get(token.getPosition());
