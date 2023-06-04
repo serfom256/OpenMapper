@@ -1,5 +1,7 @@
-package com.openmapper.core.processors.parser;
+package com.openmapper.common;
 
+import com.openmapper.common.parser.FileParser;
+import com.openmapper.common.parser.Parser;
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 import com.openmapper.exceptions.fsql.InvalidFileFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +15,12 @@ import java.util.*;
 import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.FILE_EXTENSION;
 
 @Component
-public class FsqlParser implements Parser {
+public class QueryExtractor implements Parser {
 
-    private final FileQueryParser parser;
+    private final FileParser parser;
 
     @Autowired
-    public FsqlParser(FileQueryParser parser) {
+    public QueryExtractor(FileParser parser) {
         this.parser = parser;
     }
 

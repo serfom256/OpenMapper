@@ -1,11 +1,12 @@
 package com.openmapper.core.environment;
 
 import com.openmapper.config.OpenMapperGlobalContext;
-import com.openmapper.core.annotations.DaoLayer;
+import com.openmapper.common.PackageScanner;
+import com.openmapper.annotations.DaoLayer;
 import com.openmapper.core.OpenMapperSqlContext;
-import com.openmapper.core.processors.mapping.InputMapper;
-import com.openmapper.core.processors.mapping.InputMapperImpl;
-import com.openmapper.core.proxy.EntityMappingInvocationHandler;
+import com.openmapper.common.mapping.InputMapper;
+import com.openmapper.common.mapping.InputMapperImpl;
+import com.openmapper.core.EntityMappingInvocationHandler;
 import com.openmapper.core.proxy.InvocationProxy;
 import com.openmapper.core.query.QueryExecutorStrategy;
 import org.slf4j.Logger;

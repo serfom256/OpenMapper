@@ -1,7 +1,7 @@
 package com.openmapper.common;
 
-import com.openmapper.core.annotations.Param;
-import com.openmapper.core.annotations.entity.Entity;
+import com.openmapper.annotations.Param;
+import com.openmapper.annotations.entity.Entity;
 import com.openmapper.mappers.EntityPropertyExtractor;
 
 import java.lang.reflect.Method;

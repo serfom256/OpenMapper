@@ -1,6 +1,6 @@
 package com.openmapper.core.query;
 
-import com.openmapper.core.annotations.entity.Entity;
+import com.openmapper.annotations.entity.Entity;
 import com.openmapper.core.query.impl.EmptyResultSetHandler;
 import com.openmapper.core.query.impl.EntityResultSetHandler;
 import com.openmapper.core.query.impl.IterableResultSetHandler;

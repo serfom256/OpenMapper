@@ -1,15 +1,15 @@
-package com.openmapper.core.processors;
+package com.openmapper.common;
 
-import com.openmapper.core.entity.FsqlEntity;
-import com.openmapper.core.entity.SqlToken;
+import com.openmapper.core.entity.SQLRecord;
+import com.openmapper.core.entity.SQLToken;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class SqlBuilder {
+public class SQLBuilder {
 
-    public String buildSql(FsqlEntity entity, Map<String, Object> toReplace) {
-        Map<String, SqlToken> tokens = entity.getVariables();
+    public String buildSql(SQLRecord entity, Map<String, Object> toReplace) {
+        Map<String, SQLToken> tokens = entity.getVariables();
         if (tokens.size() > toReplace.size()) {
             throw new IllegalArgumentException(String.format("Invalid count of arguments given! Expected: %s given: %s", tokens.size(), toReplace.size()));
         }
@@ -24,7 +24,7 @@ public class SqlBuilder {
         }
 
         StringBuilder result = new StringBuilder();
-        for (SqlToken token : entity.getSql()) {
+        for (SQLToken token : entity.getSql()) {
             String repl = replaced.get(token.getPosition());
             if (repl != null) {
                 result.append(repl).append(' ');

@@ -1,13 +1,13 @@
 package com.openmapper.core.entity;
 
 
-public class SqlToken {
+public class SQLToken {
 
     private final String data;
 
     private final int position;
 
-    public SqlToken(String data, int position) {
+    public SQLToken(String data, int position) {
         this.data = data;
         this.position = position;
     }

@@ -1,7 +1,7 @@
 package com.openmapper.core.representation;
 
 import com.openmapper.common.ObjectUtils;
-import com.openmapper.core.annotations.entity.Joined;
+import com.openmapper.annotations.entity.Joined;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
 
 import java.lang.reflect.Field;

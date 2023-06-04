@@ -1,8 +1,8 @@
 package com.openmapper.mappers;
 
-import com.openmapper.core.annotations.entity.Entity;
-import com.openmapper.core.annotations.entity.Joined;
-import com.openmapper.core.annotations.entity.Nested;
+import com.openmapper.annotations.entity.Entity;
+import com.openmapper.annotations.entity.Joined;
+import com.openmapper.annotations.entity.Nested;
 import com.openmapper.core.representation.DependencyGraph;
 import com.openmapper.core.representation.Graph;
 import com.openmapper.common.ObjectUtils;
@@ -36,7 +36,7 @@ public class ResultSetObjectMapper implements ResultSetMapper {
         Map<Object, Object> entityMap = graph.getIfAbsent(concreteType);
         usedTypes.add(concreteType);
         for (Field f : entityInstance.getClass().getDeclaredFields()) {
-            com.openmapper.core.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.core.annotations.entity.Field.class);
+            com.openmapper.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.annotations.entity.Field.class);
             if (annotation != null) { // handling fields entities
                 final String column = getFieldNameOrDefault(f, annotation.name());
                 if (!columns.contains(column)) continue;
@@ -55,7 +55,7 @@ public class ResultSetObjectMapper implements ResultSetMapper {
     private Object extractNestedEntity(Class<?> concreteType, ResultSet resultSet, Set<String> columns) {
         Object entityInstance = ObjectUtils.createNewInstance(concreteType);
         for (Field f : entityInstance.getClass().getDeclaredFields()) {
-            com.openmapper.core.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.core.annotations.entity.Field.class);
+            com.openmapper.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.annotations.entity.Field.class);
             if (annotation != null) {
                 String column = getFieldNameOrDefault(f, annotation.name());
                 if (!columns.contains(column)) continue;

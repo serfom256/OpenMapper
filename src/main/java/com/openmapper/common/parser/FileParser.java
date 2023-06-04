@@ -1,4 +1,4 @@
-package com.openmapper.core.processors.parser;
+package com.openmapper.common.parser;
 
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 @Component
-public class FileQueryParser {
+public class FileParser {
 
     public Map<String, String> parseFile(final List<String> fileContent, final String fileName) throws FsqlParsingException {
         Map<String, String> parsed = new HashMap<>();

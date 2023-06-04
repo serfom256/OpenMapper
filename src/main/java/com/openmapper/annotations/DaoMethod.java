@@ -1,4 +1,4 @@
-package com.openmapper.core.annotations;
+package com.openmapper.annotations;
 
 import com.openmapper.common.DmlOperation;
 import com.openmapper.exceptions.entity.EntityNotFoundException;

@@ -4,29 +4,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class FsqlEntity {
+public class SQLRecord {
 
-    private final List<SqlToken> sql;
+    private final List<SQLToken> sql;
 
-    private final Map<String, SqlToken> variables;
+    private final Map<String, SQLToken> variables;
 
-    public FsqlEntity(List<SqlToken> sql, Map<String, SqlToken> sequence) {
+    public SQLRecord(List<SQLToken> sql, Map<String, SQLToken> sequence) {
         this.sql = Collections.unmodifiableList(sql);
         this.variables = sequence;
     }
 
-    public List<SqlToken> getSql() {
+    public List<SQLToken> getSql() {
         return sql;
     }
 
 
-    public Map<String, SqlToken> getVariables() {
+    public Map<String, SQLToken> getVariables() {
         return variables;
     }
 
     @Override
     public String toString() {
-        return "FsqlEntity{" +
+        return "SqlRecord{" +
                 "sql=" + sql +
                 ", variables=" + variables +
                 '}';

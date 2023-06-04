@@ -1,4 +1,4 @@
-package com.openmapper.core.annotations.entity;
+package com.openmapper.annotations.entity;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,7 +1,7 @@
-package com.openmapper.core.processors.mapping;
+package com.openmapper.common.mapping;
 
-import com.openmapper.core.entity.FsqlEntity;
-import com.openmapper.core.entity.SqlToken;
+import com.openmapper.core.entity.SQLRecord;
+import com.openmapper.core.entity.SQLToken;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -14,8 +14,8 @@ public class SourceMapper {
 
     final Pattern pattern = Pattern.compile("\\[.+]", Pattern.MULTILINE);
 
-    public Map<String, FsqlEntity> map(Map<String, String> parsed) {
-        Map<String, FsqlEntity> map = new HashMap<>();
+    public Map<String, SQLRecord> map(Map<String, String> parsed) {
+        Map<String, SQLRecord> map = new HashMap<>();
         for (var e : parsed.entrySet()) {
             String[] value = e.getValue().split(" ");
             map.put(e.getKey(), toEntity(value));
@@ -35,25 +35,25 @@ public class SourceMapper {
         return token.replace(founded, "%s");
     }
 
-    private FsqlEntity toEntity(String[] sql) {
-        Map<String, SqlToken> variables = new HashMap<>();
-        List<SqlToken> tokens = new ArrayList<>();
+    private SQLRecord toEntity(String[] sql) {
+        Map<String, SQLToken> variables = new HashMap<>();
+        List<SQLToken> tokens = new ArrayList<>();
         for (String token : sql) {
-            SqlToken curr;
+            SQLToken curr;
             if (isVariable(token)) {
                 String key = parseVariable(token);
-                curr = new SqlToken(replaceVariable(token, key), tokens.size());
+                curr = new SQLToken(replaceVariable(token, key), tokens.size());
                 key = key.substring(1, key.length() - 1);
                 variables.put(key, curr);
             } else {
-                curr = new SqlToken(token, tokens.size());
+                curr = new SQLToken(token, tokens.size());
             }
             tokens.add(curr);
         }
-        return new FsqlEntity(tokens, variables);
+        return new SQLRecord(tokens, variables);
     }
 
     private boolean isVariable(String s) {
-        return s.length() > 2 && s.contains("[") && s.contains("]");
+        return s.length() > 2 && s.startsWith("[") && s.endsWith("]");
     }
 }

@@ -1,7 +1,7 @@
-package com.openmapper.core.processors.mapping;
+package com.openmapper.common.mapping;
 
-import com.openmapper.core.entity.FsqlEntity;
-import com.openmapper.core.processors.SqlBuilder;
+import com.openmapper.core.entity.SQLRecord;
+import com.openmapper.common.SQLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,18 +9,18 @@ import java.util.Map;
 
 public class InputMapperImpl implements InputMapper {
 
-    private final SqlBuilder sqlBuilder;
+    private final SQLBuilder sqlBuilder;
     private final boolean isLogging;
 
     private static final Logger logger = LoggerFactory.getLogger(InputMapperImpl.class);
 
     public InputMapperImpl(final boolean isLogging) {
-        this.sqlBuilder = new SqlBuilder();
+        this.sqlBuilder = new SQLBuilder();
         this.isLogging = isLogging;
     }
 
     @Override
-    public String mapSql(FsqlEntity entity, Map<String, Object> toReplace) {
+    public String mapSql(SQLRecord entity, Map<String, Object> toReplace) {
         String result = sqlBuilder.buildSql(entity, toReplace);
         if (isLogging) logger.info(result);
         return result;

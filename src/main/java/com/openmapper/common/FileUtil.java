@@ -1,7 +1,7 @@
-package com.openmapper.core.processors;
+package com.openmapper.common;
 
 import com.openmapper.config.OpenMapperGlobalContext;
-import com.openmapper.core.processors.parser.Parser;
+import com.openmapper.common.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class FileUtil {
     public Map<String, String> findFilesAndParse(List<String> files) {
         if (globalContext.isLogging()) files.forEach(f -> logger.debug("File loaded: {}", f));
         List<Map<String, String>> parsed = files.stream()
-                .map(fsqlFile -> parser.parseTree(new File(fsqlFile)))
+                .map(file -> parser.parseTree(new File(file)))
                 .collect(Collectors.toList());
 
         Map<String, String> map = new HashMap<>();

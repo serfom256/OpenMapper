@@ -1,6 +1,6 @@
 package com.openmapper.core.query.impl;
 
-import com.openmapper.core.annotations.entity.Entity;
+import com.openmapper.annotations.entity.Entity;
 import com.openmapper.core.query.ResultSetHandler;
 import com.openmapper.exceptions.internal.TooManyResultsFoundException;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;

@@ -1,8 +1,8 @@
 package com.openmapper.mappers;
 
 import com.openmapper.common.ObjectUtils;
-import com.openmapper.core.annotations.entity.Field;
-import com.openmapper.core.annotations.entity.Nested;
+import com.openmapper.annotations.entity.Field;
+import com.openmapper.annotations.entity.Nested;
 
 import java.util.HashMap;
 import java.util.Map;

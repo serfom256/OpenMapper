@@ -1,4 +1,4 @@
-package com.openmapper.core.processors.parser;
+package com.openmapper.common.parser;
 
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 

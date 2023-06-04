@@ -1,11 +1,10 @@
-package com.openmapper.core.proxy;
+package com.openmapper.core;
 
 import com.openmapper.common.DmlOperation;
 import com.openmapper.common.MethodArgumentsExtractor;
-import com.openmapper.core.OpenMapperSqlContext;
-import com.openmapper.core.annotations.DaoMethod;
-import com.openmapper.core.entity.FsqlEntity;
-import com.openmapper.core.processors.mapping.InputMapper;
+import com.openmapper.annotations.DaoMethod;
+import com.openmapper.core.entity.SQLRecord;
+import com.openmapper.common.mapping.InputMapper;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
@@ -37,7 +36,7 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        FsqlEntity result = context.getSql(getProcedureName(method));
+        SQLRecord result = context.getSql(getProcedureName(method));
         final String query = mapper.mapSql(result, MethodArgumentsExtractor.extractNamedArgs(method, args));
         return executeDaoMethod(query, method);
     }
