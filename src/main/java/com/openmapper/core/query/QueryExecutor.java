@@ -1,6 +1,6 @@
 package com.openmapper.core.query;
 
-import com.openmapper.common.DmlOperation;
+import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.exceptions.internal.QueryExecutionError;
 
 import java.lang.reflect.Type;

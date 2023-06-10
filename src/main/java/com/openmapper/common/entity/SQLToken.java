@@ -1,4 +1,4 @@
-package com.openmapper.core.entity;
+package com.openmapper.common.entity;
 
 
 public class SQLToken {

@@ -1,4 +1,4 @@
-package com.openmapper.common;
+package com.openmapper.core;
 
 import com.openmapper.config.OpenMapperGlobalContext;
 import org.reflections.Reflections;

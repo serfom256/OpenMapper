@@ -1,70 +1,39 @@
 package com.openmapper.common;
 
+import com.openmapper.common.entity.SQLProcedure;
 import com.openmapper.common.parser.FileParser;
-import com.openmapper.common.parser.Parser;
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 import com.openmapper.exceptions.fsql.InvalidFileFormatException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.FILE_EXTENSION;
 
-@Component
-public class QueryExtractor implements Parser {
+public class QueryExtractor {
 
-    private final FileParser parser;
+    private final FileParser parser = new FileParser();
 
-    @Autowired
-    public QueryExtractor(FileParser parser) {
-        this.parser = parser;
+    public List<SQLProcedure> extractContent(File file) throws FsqlParsingException {
+        return extractTree(file);
     }
 
-    @Override
-    public Map<String, String> parseTree(File file) throws FsqlParsingException {
-        Map<String, String> map = new HashMap<>();
-        parseTree(map, file);
-        return map;
-    }
-
-    private void parse(Map<String, String> map, File file) {
+    private List<SQLProcedure> parseFile(File file) {
         if (!file.getName().endsWith(FILE_EXTENSION.value())) {
             throw new InvalidFileFormatException(file.getName());
         }
-        try {
-            map.putAll(parser.parseFile(readFile(file), file.getName()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return parser.parse(file);
     }
 
-    private List<String> readFile(File file) throws IOException {
-        List<String> result = new ArrayList<>();
-        try (FileInputStream fs = new FileInputStream(file); Scanner sc = new Scanner(fs)) {
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine().trim();
-                if (line.startsWith("#")) {
-                    result.add("");
-                } else {
-                    result.add(line);
-                }
-            }
-        }
-        return result;
-    }
 
-    private void parseTree(Map<String, String> map, File file) {
+    private List<SQLProcedure> extractTree(File file) {
         if (canParse(file)) {
-            parse(map, file);
+            return parseFile(file);
         } else if (file.isDirectory()) {
-            parseTree(map, file);
-        } else {
-            throw new InvalidFileFormatException(file.getName());
+            return new ArrayList<>(extractTree(file));
         }
+        throw new InvalidFileFormatException(file.getName());
     }
 
     private boolean canParse(File file) {

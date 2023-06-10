@@ -1,26 +1,22 @@
 package com.openmapper.common.mapping;
 
-import com.openmapper.core.entity.SQLRecord;
-import com.openmapper.core.entity.SQLToken;
-import org.springframework.stereotype.Component;
+import com.openmapper.common.entity.SQLRecord;
+import com.openmapper.common.entity.SQLToken;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-@Component
 public class SourceMapper {
 
     final Pattern pattern = Pattern.compile("\\[.+]", Pattern.MULTILINE);
 
-    public Map<String, SQLRecord> map(Map<String, String> parsed) {
-        Map<String, SQLRecord> map = new HashMap<>();
-        for (var e : parsed.entrySet()) {
-            String[] value = e.getValue().split(" ");
-            map.put(e.getKey(), toEntity(value));
-        }
-        return map;
+    public SQLRecord map(final String sqlProcedure) {
+        return toEntity(sqlProcedure.split(" "));
     }
 
     private String parseVariable(String token) {

@@ -1,6 +1,6 @@
 package com.openmapper.core.query.impl;
 
-import com.openmapper.common.DmlOperation;
+import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.core.query.ResultSetHandler;
 
 import java.lang.reflect.Type;

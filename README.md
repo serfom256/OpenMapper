@@ -1,7 +1,6 @@
 # OpenMapper
 
-OpenMapper is a lightweight ORM library that provides blazingly fast object mapping operations and query execution
-because it uses JDBC
+OpenMapper is a lightweight ORM library based on JDBC that provides fast object mapping operations
 
 ---
 
@@ -13,19 +12,26 @@ OpenMapper supports files [.fsql] extension
 
 ```fslq
 name.of.query={
-    select count(*) from users where id=[id]
+    select count(*) from users where id=[QUERY_PARAMETER]
 }
 ```
 
----
-
-## Setup OpenMapper properties:
-
-There are `fsql.files` - files, which contains declared sql methods
-and `packagesToScan` - package to scan for declared repositories with `@DaoLayer` annotation
-
+Where `QUERY` - variable to replacement
 
 ---
+
+## OpenMapper properties:
+
+| Property                  | Value                                   | Type    |
+|---------------------------|-----------------------------------------|---------|
+| opnemapper.sql.tracing    | query tracing                           | boolean |
+| opnemapper.logging        | events tracing                          | boolean |
+| opnemapper.packagesToScan | packages to scan for @DaoLayer entities | list    |
+| opnemapper.fsql.path      | packages with `.fsql` files to scan     | list    |
+
+---
+
+## Code declaration:
 
 Repository declaration:
 
@@ -70,7 +76,7 @@ public class Course {
 }
 ```
 
-## Objects mapping:
+## Objects mapping example:
 
 #### Sql procedure:
 
@@ -121,6 +127,7 @@ Modeling objects relationship in code:
 ### Many To Many (beta):
 
 ```java
+
 @Entity(primaryKey = "id")
 class User {
     @Field
@@ -131,7 +138,7 @@ class User {
 
     @Field
     private String data;
-    
+
     @Joined(transients = true)
     List<Course> courses;
 }
@@ -139,7 +146,7 @@ class User {
 @Entity(primaryKey = "id")
 class Course {
     // Course's fields
-    
+
     @Joined(transients = true)
     List<User> users;
 }
@@ -154,12 +161,13 @@ interface Repository {
 ### Many To One:
 
 ```java
+
 @Entity(primaryKey = "id")
 class User {
-    
+
     @Field
     private int id;
-    
+
     @Field
     private String name;
 
@@ -169,7 +177,7 @@ class User {
 
 @Entity(primaryKey = "id")
 class Course {
-    
+
     @Field
     private Integer id;
 
@@ -190,6 +198,7 @@ interface Repository {
 ### One To One:
 
 ```java
+
 @Entity(primaryKey = "id")
 class User {
 
@@ -205,21 +214,21 @@ class User {
 
 @Entity(primaryKey = "id")
 class Course {
-    
+
     @Field
     private Integer id;
-    
+
     @Field
     private Integer userId;
-    
+
     @Field
     private String data;
-    
+
     // Course's fields
 }
 
 interface Repository {
-    
+
     @DaoMethod
     User getAll();
 }
@@ -262,14 +271,14 @@ Usage with Maven:
 <dependency>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.4</version>
 </dependency>
 ```
 
 Usage with Gradle:
 
 ```groovy
-implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.2'
+implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.4'
 ```
 
 ---

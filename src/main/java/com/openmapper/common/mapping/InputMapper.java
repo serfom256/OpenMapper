@@ -1,6 +1,6 @@
 package com.openmapper.common.mapping;
 
-import com.openmapper.core.entity.SQLRecord;
+import com.openmapper.common.entity.SQLRecord;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.openmapper.core.entity;
+package com.openmapper.common.entity;
 
 import java.util.Collections;
 import java.util.List;

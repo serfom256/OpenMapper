@@ -1,12 +1,13 @@
 package com.openmapper.common.parser;
 
+import com.openmapper.common.entity.SQLProcedure;
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 
 import java.io.File;
-import java.util.Map;
+import java.util.List;
 
 public interface Parser {
 
-    Map<String, String> parseTree(File file) throws FsqlParsingException;
+    List<SQLProcedure> parse(File file) throws FsqlParsingException;
 
 }

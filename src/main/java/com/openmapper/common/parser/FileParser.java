@@ -1,35 +1,36 @@
 package com.openmapper.common.parser;
 
+import com.openmapper.common.entity.SQLProcedure;
 import com.openmapper.exceptions.fsql.FsqlParsingException;
-import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.*;
 
-@Component
-public class FileParser {
+public class FileParser implements Parser {
 
-    public Map<String, String> parseFile(final List<String> fileContent, final String fileName) throws FsqlParsingException {
-        Map<String, String> parsed = new HashMap<>();
-        ListIterator<String> iterator = fileContent.listIterator();
+    @Override
+    public List<SQLProcedure> parse(final File file) throws FsqlParsingException {
+        final List<String> fileContent = readFile(file);
+        final Map<String, SQLProcedure> parsed = new HashMap<>();
+        final ListIterator<String> iterator = fileContent.listIterator();
         while (iterator.hasNext()) {
             tryAdvance(iterator);
             if (!iterator.hasNext()) break;
-            String functionName = extractFunctionName(iterator);
-            String functionBody = extractFunctionBlock(iterator);
-            if (functionName.length() == 0 || functionBody.length() == 0) {
-                throw new FsqlParsingException(fileName, iterator.previousIndex());
+            final String functionName = extractFunctionName(iterator);
+            final String procedureBody = extractFunctionBlock(iterator);
+            if (functionName.length() == 0 || procedureBody.length() == 0) {
+                throw new FsqlParsingException(file.getName(), iterator.previousIndex());
             }
-            parsed.put(functionName, functionBody);
+            parsed.put(functionName, new SQLProcedure(functionName, procedureBody));
         }
-        return parsed;
+        return List.copyOf(parsed.values());
     }
 
     private void tryAdvance(ListIterator<String> iterator) {
         while (iterator.hasNext()) {
-            String line = iterator.next();
+            final String line = iterator.next();
             int pos = 0;
             while (pos < line.length() && line.charAt(pos) == ' ') {
                 pos++;
@@ -80,5 +81,23 @@ public class FileParser {
         iterator.add(name.substring(idx + 1));
         iterator.previous();
         return name.substring(0, idx).strip();
+    }
+
+    private List<String> readFile(final File file) {
+        List<String> result = new ArrayList<>();
+        try (FileInputStream fs = new FileInputStream(file); Scanner sc = new Scanner(fs)) {
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine().trim();
+                if (line.startsWith("#")) {
+                    result.add("");
+                } else {
+                    result.add(line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+        return result;
     }
 }

@@ -5,7 +5,7 @@ import com.openmapper.annotations.entity.Joined;
 import com.openmapper.annotations.entity.Nested;
 import com.openmapper.core.representation.DependencyGraph;
 import com.openmapper.core.representation.Graph;
-import com.openmapper.common.ObjectUtils;
+import com.openmapper.common.reflect.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;

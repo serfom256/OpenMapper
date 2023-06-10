@@ -1,10 +1,10 @@
 package com.openmapper.core;
 
-import com.openmapper.common.DmlOperation;
-import com.openmapper.common.MethodArgumentsExtractor;
 import com.openmapper.annotations.DaoMethod;
-import com.openmapper.core.entity.SQLRecord;
+import com.openmapper.common.reflect.MethodArgumentsExtractor;
+import com.openmapper.common.entity.SQLRecord;
 import com.openmapper.common.mapping.InputMapper;
+import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
@@ -19,12 +19,12 @@ import java.util.Optional;
 
 public class EntityMappingInvocationHandler implements InvocationHandler {
 
-    private final OpenMapperSqlContext context;
+    private final OpenMapperSQLContext context;
     private final InputMapper mapper;
     private final QueryExecutorStrategy strategy;
     private final QueryExecutor queryExecutor;
 
-    public EntityMappingInvocationHandler(OpenMapperSqlContext context,
+    public EntityMappingInvocationHandler(OpenMapperSQLContext context,
                                           QueryExecutorStrategy strategy,
                                           InputMapper mapper,
                                           DataSource dataSource) {
@@ -36,7 +36,7 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        SQLRecord result = context.getSql(getProcedureName(method));
+        SQLRecord result = context.getSqlProcedure(getProcedureName(method));
         final String query = mapper.mapSql(result, MethodArgumentsExtractor.extractNamedArgs(method, args));
         return executeDaoMethod(query, method);
     }

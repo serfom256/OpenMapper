@@ -1,9 +1,9 @@
 package com.openmapper.core.environment;
 
 import com.openmapper.config.OpenMapperGlobalContext;
-import com.openmapper.common.PackageScanner;
+import com.openmapper.core.PackageScanner;
 import com.openmapper.annotations.DaoLayer;
-import com.openmapper.core.OpenMapperSqlContext;
+import com.openmapper.core.OpenMapperSQLContext;
 import com.openmapper.common.mapping.InputMapper;
 import com.openmapper.common.mapping.InputMapperImpl;
 import com.openmapper.core.EntityMappingInvocationHandler;
@@ -25,7 +25,7 @@ import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.PACKAGE_TO_SCAN;
 public class OpenMapperEnvironmentProcessor implements EnvironmentProcessor {
 
     private final ConfigurableEnvironment environment;
-    private final OpenMapperSqlContext context;
+    private final OpenMapperSQLContext context;
 
     private final DefaultListableBeanFactory beanFactory;
     private final QueryExecutorStrategy strategy;
@@ -39,7 +39,7 @@ public class OpenMapperEnvironmentProcessor implements EnvironmentProcessor {
     @Autowired
     public OpenMapperEnvironmentProcessor(
             ConfigurableEnvironment environment,
-            OpenMapperSqlContext context,
+            OpenMapperSQLContext context,
             DefaultListableBeanFactory beanFactory,
             QueryExecutorStrategy strategy,
             OpenMapperGlobalContext globalContext,
@@ -72,6 +72,6 @@ public class OpenMapperEnvironmentProcessor implements EnvironmentProcessor {
     }
 
     private InputMapper createInputMapper() {
-        return new InputMapperImpl(globalContext.isSqlTracing());
+        return new InputMapperImpl(globalContext);
     }
 }

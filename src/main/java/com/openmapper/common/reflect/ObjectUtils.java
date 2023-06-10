@@ -1,5 +1,6 @@
-package com.openmapper.common;
+package com.openmapper.common.reflect;
 
+import com.openmapper.common.reflect.FieldModifier;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
 import com.openmapper.exceptions.entity.ObjectCreationException;
 

@@ -1,6 +1,6 @@
 package com.openmapper.mappers;
 
-import com.openmapper.common.ObjectUtils;
+import com.openmapper.common.reflect.ObjectUtils;
 import com.openmapper.annotations.entity.Field;
 import com.openmapper.annotations.entity.Nested;
 

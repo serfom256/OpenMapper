@@ -3,7 +3,7 @@ package com.openmapper.config;
 public enum OPEN_MAPPER_CONSTANTS {
 
     FILE_EXTENSION(".fsql"),
-    FSQL_FILES_PATH("openmapper.fsql.files"),
+    FSQL_FILES_PATH("openmapper.fsql.path"),
     PACKAGE_TO_SCAN("openmapper.packagesToScan"),
     SQL_TRACING("opnemapper.sql.tracing"),
 

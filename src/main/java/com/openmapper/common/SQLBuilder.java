@@ -1,7 +1,7 @@
 package com.openmapper.common;
 
-import com.openmapper.core.entity.SQLRecord;
-import com.openmapper.core.entity.SQLToken;
+import com.openmapper.common.entity.SQLRecord;
+import com.openmapper.common.entity.SQLToken;
 
 import java.util.HashMap;
 import java.util.Map;

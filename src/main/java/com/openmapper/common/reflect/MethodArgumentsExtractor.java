@@ -1,4 +1,4 @@
-package com.openmapper.common;
+package com.openmapper.common.reflect;
 
 import com.openmapper.annotations.Param;
 import com.openmapper.annotations.entity.Entity;
