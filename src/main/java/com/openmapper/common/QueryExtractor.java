@@ -8,6 +8,7 @@ import com.openmapper.exceptions.fsql.InvalidFileFormatException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.FILE_EXTENSION;
 
@@ -31,7 +32,11 @@ public class QueryExtractor {
         if (canParse(file)) {
             return parseFile(file);
         } else if (file.isDirectory()) {
-            return new ArrayList<>(extractTree(file));
+            final List<SQLProcedure> procedures = new ArrayList<>();
+            for (File nested : Objects.requireNonNull(file.listFiles())) {
+                procedures.addAll(extractTree(nested));
+            }
+            return procedures;
         }
         throw new InvalidFileFormatException(file.getName());
     }
