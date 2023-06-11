@@ -18,11 +18,11 @@ public class MethodArgumentsExtractor {
         Parameter[] methodParams = method.getParameters();
         Map<String, Object> params = new HashMap<>();
         for (int i = 0; i < methodParams.length; i++) {
-            Parameter parameter = methodParams[i];
+            final Parameter parameter = methodParams[i];
             if (parameter.getType().getAnnotation(Entity.class) != null) {
                 params.putAll(EntityPropertyExtractor.extractParams(args[i]));
             } else {
-                Param annotation = parameter.getAnnotation(Param.class);
+                final Param annotation = parameter.getAnnotation(Param.class);
                 params.put(annotation == null ? parameter.getName() : annotation.name(), args[i]);
             }
         }

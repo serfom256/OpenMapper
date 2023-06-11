@@ -145,14 +145,22 @@ class User {
 
 @Entity(primaryKey = "id")
 class Course {
-    // Course's fields
 
-    @Joined(transients = true)
+    @Field
+    private Integer id;
+
+    @Field
+    private Integer userId;
+
+    @Field
+    private String type;
+
+    @Joined(joinBy = "userId", to = "id")
     List<User> users;
 }
 
 interface Repository {
-    @DaoMethod(procedure = "")
+    @DaoMethod
     List<User> getAll();
 }
 
@@ -189,7 +197,7 @@ class Course {
 }
 
 interface Repository {
-    @DaoMethod(procedure = "getAll")
+    @DaoMethod
     User getAll();
 }
 
@@ -223,8 +231,6 @@ class Course {
 
     @Field
     private String data;
-
-    // Course's fields
 }
 
 interface Repository {
