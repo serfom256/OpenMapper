@@ -106,17 +106,4 @@ public class ResultSetUtils {
         }
     }
 
-    public static Set<String> getAvailableColumnNames(ResultSet resultSet) {
-        final Set<String> set = new HashSet<>();
-        try {
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            for (int x = 1; x <= metaData.getColumnCount(); x++) {
-                set.add(metaData.getColumnName(x));
-            }
-            return set;
-        } catch (SQLException e) {
-            return set;
-        }
-    }
-
 }

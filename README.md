@@ -124,7 +124,7 @@ OpenMapper supports different types of entity objects relationship:
 
 Modeling objects relationship in code:
 
-### Many To Many (beta):
+### Many To Many:
 
 ```java
 
