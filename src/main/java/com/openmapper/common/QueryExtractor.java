@@ -6,7 +6,6 @@ import com.openmapper.exceptions.fsql.FsqlParsingException;
 import com.openmapper.exceptions.fsql.InvalidFileFormatException;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
