@@ -1,8 +1,10 @@
 package com.openmapper.exceptions.fsql;
 
-public class FsqlParsingException extends IllegalStateException {
+import com.openmapper.common.entity.SpanLocation;
 
-    public FsqlParsingException(String fileName, Integer line) {
-        super("Unable to parse file: " + fileName + " in line: " + line);
+public class FsqlParsingException extends IllegalStateException {
+    public FsqlParsingException(String fileName, SpanLocation location) {
+            super("Unable to parse file: " + fileName + " in: " + location);
+        }
     }
 }
