@@ -6,6 +6,6 @@ import java.lang.reflect.Field;
 
 @FunctionalInterface
 public interface FieldModifier {
-    void modify(Field field) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, EntityFieldAccessException;
+    void modify(final Field field) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, EntityFieldAccessException;
 }
 

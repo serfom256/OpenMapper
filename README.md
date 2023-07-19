@@ -76,7 +76,7 @@ public class Course {
 }
 ```
 
-## Objects mapping example:
+## Object mapping example:
 
 #### Sql procedure:
 
@@ -277,7 +277,7 @@ Usage with Maven:
 <dependency>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.2.4</version>
+    <version>1.2.5</version>
 </dependency>
 ```
 

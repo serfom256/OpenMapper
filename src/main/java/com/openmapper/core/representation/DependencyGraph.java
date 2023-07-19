@@ -16,18 +16,27 @@ public class DependencyGraph {
         if (prevTypes.contains(thisType)) {
             return mapRelationShip(graph, thisType, returnType, joinedBy, joinedField);
         }
-        Map<Object, Object> returnObject = graph.get(thisType);
+
+        final Map<Object, Object> returnObject = graph.get(thisType);
+
+        final Field[] declaredFields = thisType.getDeclaredFields();
+        final List<Object> joinedObjects = new ArrayList<>();
+
         prevTypes.add(thisType);
-        Field[] declaredFields = thisType.getDeclaredFields();
-        List<Object> joinedObjects = new ArrayList<>();
-        for (var entry : returnObject.entrySet()) {
-            Object entity = entry.getValue();
+
+        for (final var entry : returnObject.entrySet()) {
+
+            final Object entity = entry.getValue();
+
             for (Field f : declaredFields) {
-                Joined annotation = f.getAnnotation(Joined.class);
+
+                final Joined annotation = f.getAnnotation(Joined.class);
+
                 if (annotation != null) {
+
                     ObjectUtils.modifyFieldValue(f, field -> {
-                        Field thisJoinedField = thisType.getDeclaredField(annotation.joinBy());
-                        Object joinedValue = ObjectUtils.getFieldValue(entity, thisJoinedField);
+                        final Field thisJoinedField = thisType.getDeclaredField(annotation.joinBy());
+                        final Object joinedValue = ObjectUtils.getFieldValue(entity, thisJoinedField);
                         field.set(entity, createDependencyGraph(graph, ObjectUtils.getInnerClassType(field.getType(), field.getGenericType()), field.getType(), joinedValue, annotation.to(), prevTypes));
                     });
                 }
@@ -39,8 +48,13 @@ public class DependencyGraph {
             }
 
         }
+
         prevTypes.remove(thisType);
-        if (ObjectUtils.isIterable(returnType)) return joinedObjects;
+
+        if (ObjectUtils.isIterable(returnType)) {
+            return joinedObjects;
+        }
+
         return joinedObjects.isEmpty() ? null : joinedObjects.get(0);
     }
 

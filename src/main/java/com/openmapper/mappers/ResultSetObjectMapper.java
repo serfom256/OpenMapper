@@ -21,19 +21,25 @@ public class ResultSetObjectMapper implements ResultSetMapper {
     @Override
     public Object extract(Type concreteType, Class<?> returnClass, Class<?> actualReturnClass, ResultSet resultSet) throws SQLException {
         final Graph graph = new Graph();
+
         while (resultSet.next()) {
             extract(returnClass, concreteType, resultSet, graph, new HashSet<>(8));
         }
         if (graph.isEmpty()) return null;
+
         return dependencyGraph.createDependencyGraph(graph, returnClass, actualReturnClass, null, null, new HashSet<>(8));
     }
 
     private void extract(Class<?> concreteType, Type actualType, ResultSet resultSet, Graph graph, Set<Class<?>> usedTypes) {
         concreteType = ObjectUtils.getInnerClassType(concreteType, actualType);
+
         if (usedTypes.contains(concreteType)) return;
-        Object entityInstance = ObjectUtils.createNewInstance(concreteType);
-        Map<Object, Object> entityMap = graph.getIfAbsent(concreteType);
+
+        final Object entityInstance = ObjectUtils.createNewInstance(concreteType);
+        final Map<Object, Object> entityMap = graph.getIfAbsent(concreteType);
+
         usedTypes.add(concreteType);
+
         for (Field f : entityInstance.getClass().getDeclaredFields()) {
             com.openmapper.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.annotations.entity.Field.class);
             if (annotation != null) { // handling fields entities
@@ -45,13 +51,16 @@ public class ResultSetObjectMapper implements ResultSetMapper {
                 ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, extractNestedEntity(f.getType(), resultSet)));
             }
         }
-        Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance, concreteType.getAnnotation(Entity.class).primaryKey());
+
+        final Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance, concreteType.getAnnotation(Entity.class).primaryKey());
+
         entityMap.put(primaryKeyValue, entityInstance);
         usedTypes.remove(concreteType);
     }
 
     private Object extractNestedEntity(Class<?> concreteType, ResultSet resultSet) {
-        Object entityInstance = ObjectUtils.createNewInstance(concreteType);
+        final Object entityInstance = ObjectUtils.createNewInstance(concreteType);
+
         for (Field f : entityInstance.getClass().getDeclaredFields()) {
             com.openmapper.annotations.entity.Field annotation = f.getAnnotation(com.openmapper.annotations.entity.Field.class);
             if (annotation != null) {
@@ -59,6 +68,7 @@ public class ResultSetObjectMapper implements ResultSetMapper {
                 ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, ResultSetUtils.extractFromResultSet(f.getType(), resultSet, column)));
             }
         }
+
         return entityInstance;
     }
 

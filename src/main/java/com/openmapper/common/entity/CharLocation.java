@@ -1,9 +1,9 @@
 package com.openmapper.common.entity;
 
 public class CharLocation {
-    private int line;
-    private int column;
-    private int offset;
+    private final int line;
+    private final int column;
+    private final int offset;
 
     public CharLocation(int line, int column, int offset) {
         this.line = line;
@@ -24,5 +24,7 @@ public class CharLocation {
         return column;
     }
 
-    public int getOffset() { return offset; }
+    public int getOffset() {
+        return offset;
+    }
 }

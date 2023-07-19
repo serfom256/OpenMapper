@@ -9,13 +9,16 @@ import java.util.Map;
 public class SQLBuilder {
 
     public String buildSql(SQLRecord entity, Map<String, Object> toReplace) {
-        Map<String, SQLToken> tokens = entity.getVariables();
+
+        final Map<String, SQLToken> tokens = entity.getVariables();
+        final Map<Integer, String> replaced = new HashMap<>();
+
         if (tokens.size() > toReplace.size()) {
             throw new IllegalArgumentException(String.format("Invalid count of arguments given! Expected: %s given: %s", tokens.size(), toReplace.size()));
         }
-        Map<Integer, String> replaced = new HashMap<>();
+
         for (var tokenPair : tokens.entrySet()) {
-            Object value = toReplace.get(tokenPair.getKey());
+            final Object value = toReplace.get(tokenPair.getKey());
             if (value != null) {
                 replaced.put(tokenPair.getValue().getPosition(), String.format(tokenPair.getValue().getData(), value));
             } else {
@@ -23,9 +26,10 @@ public class SQLBuilder {
             }
         }
 
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
+
         for (SQLToken token : entity.getSql()) {
-            String repl = replaced.get(token.getPosition());
+            final String repl = replaced.get(token.getPosition());
             if (repl != null) {
                 result.append(repl).append(' ');
             } else {
