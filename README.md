@@ -284,7 +284,7 @@ Usage with Maven:
 Usage with Gradle:
 
 ```groovy
-implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.4'
+implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.5'
 ```
 
 ---
