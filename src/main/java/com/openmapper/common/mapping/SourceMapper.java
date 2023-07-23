@@ -6,50 +6,68 @@ import com.openmapper.common.entity.SQLToken;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public class SourceMapper {
 
-    final Pattern pattern = Pattern.compile("\\[.+]", Pattern.MULTILINE);
+    private static final String REGEX = "((?=\\W)|(?<=\\W))";
+
+    private static final String VARIABLE_START_IDENTIFIER = "[";
+    private static final String VARIABLE_CLOSE_IDENTIFIER = "]";
+
 
     public SQLRecord map(final String sqlProcedure) {
-        return toEntity(sqlProcedure.split(" "));
-    }
 
-    private String parseVariable(String token) {
-        final Matcher matcher = pattern.matcher(token);
-        if (matcher.find()) {
-            return matcher.group(0);
-        }
-        throw new IllegalArgumentException(String.format("Token: [%s] contains illegal symbols", token));
-    }
+        int position = 0;
 
-    private String replaceVariable(String token, String founded) {
-        return token.replace(founded, "%s");
-    }
+        boolean expectedVariable = false;
+        boolean expectedCloseIdentifier = false;
 
-    private SQLRecord toEntity(String[] sql) {
-        Map<String, SQLToken> variables = new HashMap<>();
-        List<SQLToken> tokens = new ArrayList<>();
-        for (String token : sql) {
-            SQLToken curr;
-            if (isVariable(token)) {
-                String key = parseVariable(token);
-                curr = new SQLToken(replaceVariable(token, key), tokens.size());
-                key = key.substring(1, key.length() - 1);
-                variables.put(key, curr);
+        final String[] tokens = sqlProcedure.split(REGEX);
+        final List<SQLToken> tokenList = new ArrayList<>();
+
+        final var variables = new HashMap<String, SQLToken>();
+        final StringBuilder sequence = new StringBuilder();
+
+        while (position < tokens.length) {
+
+            final String token = tokens[position];
+
+            if (token.equals(VARIABLE_START_IDENTIFIER)) { // check variable opens
+                expect(VARIABLE_START_IDENTIFIER, token, "Expected open bracket ']' before the variable");
+                expectedVariable = true;
+
+            } else if (expectedVariable) { // get variable
+                variables.put(token, new SQLToken(token, position));
+                tokenList.add(new SQLToken(sequence.toString(), position - 1));
+                tokenList.add(new SQLToken(token, position));
+
+                expectedVariable = false;
+                expectedCloseIdentifier = true;
+
+                sequence.setLength(0);
+
+            } else if (expectedCloseIdentifier) { // check variable closes
+                expect(VARIABLE_CLOSE_IDENTIFIER, token, "Expected close bracket ']' after the variable");
+                expectedCloseIdentifier = false;
             } else {
-                curr = new SQLToken(token, tokens.size());
+                sequence.append(token);
             }
-            tokens.add(curr);
+            position++;
         }
-        return new SQLRecord(tokens, variables);
+
+        if (!sqlProcedure.isEmpty()) {
+            tokenList.add(new SQLToken(sequence.toString(), position));
+        }
+
+        return new SQLRecord(tokenList, variables);
     }
 
-    private boolean isVariable(String s) {
-        return s.length() > 2 && s.startsWith("[") && s.endsWith("]");
+    private void expect(final String symbol, final String token, final String message) {
+        if (!symbol.equals(token)) {
+            throw new IllegalStateException(message);
+        }
     }
+
+
 }

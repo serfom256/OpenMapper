@@ -15,8 +15,8 @@ public class MethodArgumentsExtractor {
     }
 
     public static Map<String, Object> extractNamedArgs(Method method, Object[] args) {
-        Parameter[] methodParams = method.getParameters();
-        Map<String, Object> params = new HashMap<>();
+        final Parameter[] methodParams = method.getParameters();
+        final Map<String, Object> params = new HashMap<>();
         for (int i = 0; i < methodParams.length; i++) {
             final Parameter parameter = methodParams[i];
             if (parameter.getType().getAnnotation(Entity.class) != null) {

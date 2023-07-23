@@ -20,7 +20,7 @@ public class EntityPropertyExtractor {
         }
         final Map<String, Object> values = new HashMap<>();
         for (java.lang.reflect.Field field : entity.getClass().getDeclaredFields()) {
-            Field annotation = field.getAnnotation(Field.class);
+            final Field annotation = field.getAnnotation(Field.class);
             if (annotation != null) {
                 values.put(annotation.name().isEmpty() ? field.getName() : annotation.name(), ObjectUtils.getFieldValue(entity, field));
             } else if (field.getAnnotation(Nested.class) != null) {

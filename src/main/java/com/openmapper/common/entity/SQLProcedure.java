@@ -16,4 +16,12 @@ public class SQLProcedure {
     public String getFunctionBody() {
         return functionBody;
     }
+
+    @Override
+    public String toString() {
+        return "SQLProcedure{" +
+                "functionName='" + functionName + '\'' +
+                ", functionBody='" + functionBody + '\'' +
+                '}';
+    }
 }

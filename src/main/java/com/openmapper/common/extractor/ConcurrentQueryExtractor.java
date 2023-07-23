@@ -1,24 +1,36 @@
-package com.openmapper.common;
+package com.openmapper.common.extractor;
 
 import com.openmapper.common.entity.SQLProcedure;
-import com.openmapper.common.parser.FileParser;
+import com.openmapper.common.util.FileUtil;
+import com.openmapper.common.parser.factory.DefaultParserFactory;
 import com.openmapper.exceptions.fsql.FsqlParsingException;
 import com.openmapper.exceptions.fsql.InvalidFileFormatException;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.FILE_EXTENSION;
 
-public class QueryExtractor {
+public class ConcurrentQueryExtractor implements Extractor {
 
-    private final FileParser parser = new FileParser();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(4);
 
-    public List<SQLProcedure> extractContent(File file) throws FsqlParsingException {
+    private final DefaultParserFactory parserFactory;
+
+    public ConcurrentQueryExtractor(DefaultParserFactory parserFactory) {
+        this.parserFactory = parserFactory;
+    }
+
+    @Override
+    public List<Future<List<SQLProcedure>>> extract(File file) throws FsqlParsingException {
         return extractTree(file);
     }
 
@@ -26,13 +38,15 @@ public class QueryExtractor {
         if (!file.getName().endsWith(FILE_EXTENSION.value())) {
             throw new InvalidFileFormatException(file.getName());
         }
-        return parser.parse(file);
+        return parserFactory.getParser(file.getName(), FileUtil.readFile(file)).parse();
     }
 
 
-    private List<SQLProcedure> extractTree(File file) {
+    private List<Future<List<SQLProcedure>>> extractTree(File file) {
         if (canParse(file)) {
-            return parseFile(file);
+            return Collections.singletonList(
+                    CompletableFuture.supplyAsync(() -> parseFile(file), executorService)
+            );
         } else if (file.isDirectory()) {
             return Arrays.stream(Objects.requireNonNull(file.listFiles()))
                     .flatMap(f -> extractTree(f).stream())
