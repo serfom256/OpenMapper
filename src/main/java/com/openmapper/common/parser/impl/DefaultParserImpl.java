@@ -15,7 +15,7 @@ public class DefaultParserImpl implements Parser {
     private static final char EOF = '\0';
     private static final char NEW_LINE = '\n';
     private static final char CARRIAGE_RETURN = '\r';
-    private static final char EMPTY = ' ';
+    private static final char EMPTY_SPACE = ' ';
     private static final char TAB = '\t';
     private static final char SQL_COMMENT = '#';
 
@@ -35,7 +35,8 @@ public class DefaultParserImpl implements Parser {
     @Override
     public List<SQLProcedure> parse() throws FsqlParsingException {
         final List<SQLProcedure> procedures = new ArrayList<>();
-
+        skipWhitespaces();
+        consumeFSqlComments();
         while (!isEof()) {
             procedures.add(parseProcedure());
             skipWhitespaces();
@@ -92,8 +93,13 @@ public class DefaultParserImpl implements Parser {
                 consumeMultiLineComment();
             } else if (currentChar != NEW_LINE && currentChar != CARRIAGE_RETURN) {
                 queryBody.append(currentChar);
-            } else {
-                queryBody.replace(newlineStart, queryBody.length(), queryBody.substring(newlineStart, queryBody.length()).strip());
+            } else if (currentChar == NEW_LINE) {
+                queryBody
+                        .replace(newlineStart,
+                                queryBody.length(),
+                                queryBody.substring(newlineStart, queryBody.length()).strip()
+                        )
+                        .append(EMPTY_SPACE);
                 newlineStart = queryBody.length();
             }
             advance();
@@ -101,7 +107,7 @@ public class DefaultParserImpl implements Parser {
 
         advance();
 
-        return queryBody.toString();
+        return queryBody.toString().strip();
     }
 
     private void consumeFSqlComments() {
@@ -160,7 +166,7 @@ public class DefaultParserImpl implements Parser {
     }
 
     private void skipWhitespaces() {
-        while (currentChar == TAB || currentChar == EMPTY || currentChar == NEW_LINE || currentChar == CARRIAGE_RETURN) {
+        while (currentChar == TAB || currentChar == EMPTY_SPACE || currentChar == NEW_LINE || currentChar == CARRIAGE_RETURN) {
             advance();
         }
     }
@@ -181,7 +187,7 @@ public class DefaultParserImpl implements Parser {
     }
 
     private boolean isEof() {
-        return offset == contents.length() - 1;
+        return offset >= contents.length() - 1;
     }
 
     private CharLocation currentCharLocation() {

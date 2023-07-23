@@ -4,6 +4,7 @@ import com.openmapper.common.FileContentReader;
 import com.openmapper.common.entity.SQLProcedure;
 import com.openmapper.common.mapping.SourceMapper;
 import com.openmapper.core.environment.EnvironmentProcessor;
+import com.openmapper.exceptions.fsql.InvalidDeclarationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -42,15 +43,22 @@ public class ProcedureSourceLoader implements EnvironmentProcessor {
 
     @Override
     public void processEnvironment() {
-        final List<String> sqlFilePaths = getFsqlPaths(FSQL_FILES_PATH.value());
+        final List<String> sqlFilePaths = getPaths(FSQL_FILES_PATH.value());
         final List<SQLProcedure> parsed = fileContentReader.readFiles(sqlFilePaths);
         parsed.stream()
                 .map(sqlProcedure -> new SQLProcedure(sqlProcedure.getFunctionName(), format(sqlProcedure.getFunctionBody())))
-                .forEach(sqlProcedure -> context.updateContext(sqlProcedure.getFunctionName(), mapper.map(sqlProcedure.getFunctionBody())));
+                .forEach(sqlProcedure -> {
+                            try {
+                                context.updateContext(sqlProcedure.getFunctionName(), mapper.map(sqlProcedure.getFunctionBody()));
+                            } catch (IllegalStateException e) {
+                                throw new InvalidDeclarationException(sqlProcedure.getFunctionName(), e.getMessage());
+                            }
+                        }
+                );
     }
 
     @SuppressWarnings("unchecked")
-    private List<String> getFsqlPaths(String propertyName) {
+    private List<String> getPaths(String propertyName) {
         List<String> properties = environment.getProperty(propertyName, List.class);
         if (properties != null) return properties;
         try {

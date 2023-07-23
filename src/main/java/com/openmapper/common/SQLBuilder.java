@@ -20,7 +20,7 @@ public class SQLBuilder {
         for (var tokenPair : tokens.entrySet()) {
             final Object value = toReplace.get(tokenPair.getKey());
             if (value != null) {
-                replaced.put(tokenPair.getValue().getPosition(), String.format(tokenPair.getValue().getData(), value));
+                replaced.put(tokenPair.getValue().getPosition(), value.toString());
             } else {
                 throw new IllegalArgumentException(String.format("Argument: %s not found!", tokenPair.getKey()));
             }
@@ -31,9 +31,9 @@ public class SQLBuilder {
         for (SQLToken token : entity.getSql()) {
             final String repl = replaced.get(token.getPosition());
             if (repl != null) {
-                result.append(repl).append(' ');
+                result.append(repl);
             } else {
-                result.append(token.getData()).append(' ');
+                result.append(token.getData());
             }
         }
         return result.toString();
