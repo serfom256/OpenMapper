@@ -8,14 +8,15 @@ import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
+import com.openmapper.core.query.impl.DmlOperationsHandler;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.sql.Statement;
 import java.util.Optional;
-
 
 public class EntityMappingInvocationHandler implements InvocationHandler {
 
@@ -25,13 +26,13 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
     private final QueryExecutor queryExecutor;
 
     public EntityMappingInvocationHandler(OpenMapperSQLContext context,
-                                          QueryExecutorStrategy strategy,
-                                          InputMapper mapper,
-                                          DataSource dataSource) {
+            QueryExecutorStrategy strategy,
+            InputMapper mapper,
+            DataSource dataSource) {
         this.context = context;
         this.strategy = strategy;
         this.mapper = mapper;
-        this.queryExecutor = new JdbcQueryExecutor(dataSource);
+        this.queryExecutor = new JdbcQueryExecutor(dataSource, new DmlOperationsHandler());
     }
 
     @Override
@@ -51,8 +52,22 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
             returnType = method.getReturnType();
         }
 
-        Object result = queryExecutor.execute(query, strategy.getExecutorByMethodReturnType(returnType), genericReturnType, getOperationType(method));
+        Object result = queryExecutor.execute(
+                query,
+                strategy.getExecutorByMethodReturnType(returnType),
+                genericReturnType,
+                getOperationType(method),
+                returnGeneratedKeys(method));
+
         return method.getReturnType() == Optional.class ? Optional.ofNullable(result) : result;
+    }
+
+    private int returnGeneratedKeys(Method method) {
+        DaoMethod daoMethod = method.getAnnotation(DaoMethod.class);
+        if (daoMethod == null) {
+            return Statement.NO_GENERATED_KEYS;
+        }
+        return !daoMethod.returnKeys() ? Statement.NO_GENERATED_KEYS : Statement.RETURN_GENERATED_KEYS;
     }
 
     private DmlOperation getOperationType(Method method) {
@@ -72,5 +87,4 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
         }
         return procedure;
     }
-
 }

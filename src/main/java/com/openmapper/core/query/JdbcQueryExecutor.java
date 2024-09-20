@@ -9,19 +9,22 @@ import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class JdbcQueryExecutor implements QueryExecutor {
 
     private final DataSource dataSource;
+    private final DmlOperationsHandler dmlOperationsHandler;
 
-    public JdbcQueryExecutor(DataSource dataSource) {
+    public JdbcQueryExecutor(DataSource dataSource, DmlOperationsHandler dmlOperationsHandler) {
         this.dataSource = dataSource;
+        this.dmlOperationsHandler = dmlOperationsHandler;
     }
 
     @Override
-    public <T> Object execute(final String query, final ResultSetHandler<T> handler, final Type returnType, DmlOperation operation) {
-        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            return DmlOperationsHandler.evaluateOperation(handler, returnType, operation, preparedStatement);
+    public <T> Object execute(final String query, final ResultSetHandler<T> handler, final Type returnType, DmlOperation operation, int returnGeneratedKeys) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query, new String[]{ "ID" })) {
+            return dmlOperationsHandler.executeQuery(handler, returnType, operation, preparedStatement, returnGeneratedKeys == Statement.RETURN_GENERATED_KEYS);
         } catch (SQLException e) {
             throw new QueryExecutionError(e);
         }

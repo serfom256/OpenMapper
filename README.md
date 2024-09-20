@@ -51,7 +51,7 @@ Entity declaration:
 
 ```java
 
-@Entity(primaryKey = "id")
+@Model(primaryKey = "id")
 public class User {
     @Field(name = "id")
     private int id;
@@ -63,7 +63,7 @@ public class User {
     // Getters and setters
 }
 
-@Entity(primaryKey = "id", joinedBy = "uId")
+@Model(primaryKey = "id", joinedBy = "uId")
 public class Course {
     @Field(name = "crs.id")
     private int id;
@@ -98,9 +98,9 @@ public interface MyRepo {
 }
 ```
 
-Custom objects that used in sql query must be annotated with `@Entity` annotation
+Custom objects that used in sql query must be annotated with `@Model` annotation
 
-#### @Entity annotation:
+#### @Model annotation:
 
 primaryKey: primary key of the table
 
@@ -128,7 +128,7 @@ Modeling objects relationship in code:
 
 ```java
 
-@Entity(primaryKey = "id")
+@Model(primaryKey = "id")
 class User {
     @Field
     private Integer id;
@@ -143,7 +143,7 @@ class User {
     List<Course> courses;
 }
 
-@Entity(primaryKey = "id")
+@Model(primaryKey = "id")
 class Course {
 
     @Field
@@ -170,7 +170,7 @@ interface Repository {
 
 ```java
 
-@Entity(primaryKey = "id")
+@Model(primaryKey = "id")
 class User {
 
     @Field
@@ -183,7 +183,7 @@ class User {
     private List<Course> courses;
 }
 
-@Entity(primaryKey = "id")
+@Model(primaryKey = "id")
 class Course {
 
     @Field
@@ -207,7 +207,7 @@ interface Repository {
 
 ```java
 
-@Entity(primaryKey = "id")
+@Model(primaryKey = "id")
 class User {
 
     @Field
@@ -220,7 +220,7 @@ class User {
     private Course courses;
 }
 
-@Entity(primaryKey = "id")
+@Model(primaryKey = "id")
 class Course {
 
     @Field
@@ -293,11 +293,24 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.5'
 
 | Supported annotations | Type                     | Description                                                                                            |
 |-----------------------|--------------------------|--------------------------------------------------------------------------------------------------------|
-| Entity                | Class level              | Every declared entity that used in mapping uses the @Entity annotation                                 |
+| Entity                | Class level              | Every declared entity that used in mapping uses the @Model annotation                                 |
 | Field                 | Field level              | Used for mapping fields specifying                                                                     |
 | Joined                | Field level              | Used for joining entities by the specified field                                                       |
 | Nested                | Field level              | Used for nested objects                                                                                |
 | DaoLayer              | Class level              | DAO/Repository classes that represents data access layer should be annotated with @DaoLayer annotation |
 | DaoMethod             | Method level             | Used for method that executes the query and returns mapped result                                      |
 | Param                 | Method's parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
-| Repository            | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
+| UseRepository            | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
+
+
+---
+
+## How to install
+
+1) Check `Maven` installation in your system
+2) Clone repository
+3) Run command `mvn install` inside cloned project
+
+Or
+
+- Run command `git clone git@github.com:serfom256/OpenMapper.git && cd OpenMapper && mvn install`

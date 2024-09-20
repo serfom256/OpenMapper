@@ -7,5 +7,5 @@ import java.lang.reflect.Type;
 
 public interface QueryExecutor {
 
-    <T> Object execute(final String query, final ResultSetHandler<T> handler, final Type returnType, DmlOperation operation) throws QueryExecutionError;
+    <T> Object execute(final String query, final ResultSetHandler<T> handler, final Type returnType, DmlOperation operation, int returnGeneratedKeys) throws QueryExecutionError;
 }

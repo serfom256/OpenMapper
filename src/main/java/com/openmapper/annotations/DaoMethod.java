@@ -13,13 +13,14 @@ import static com.openmapper.common.operations.DmlOperation.SELECT;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface DaoMethod {
+
     String procedure() default "";
 
     DmlOperation operation() default SELECT;
 
-    boolean exceptionIfNotFound() default true;
-
-    Class<? extends Throwable> exceptionIfNot() default EntityNotFoundException.class;
+    Class<? extends Throwable> translateNotFoundExceptionTo() default EntityNotFoundException.class;
 
     String datasource() default "datasource";
+
+    boolean returnKeys() default false;
 }

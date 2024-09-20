@@ -1,6 +1,6 @@
 package com.openmapper.core.query.impl;
 
-import com.openmapper.annotations.entity.Entity;
+import com.openmapper.annotations.entity.Model;
 import com.openmapper.core.query.ResultSetHandler;
 import com.openmapper.exceptions.internal.TooManyResultsFoundException;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
@@ -25,7 +25,7 @@ public class EntityResultSetHandler implements ResultSetHandler<Object> {
     @SuppressWarnings("unchecked")
     public Object handle(ResultSet rs, Type mappingType) throws SQLException {
         try {
-            if (((Class<?>) mappingType).getAnnotation(Entity.class) != null){
+            if (((Class<?>) mappingType).getAnnotation(Model.class) != null){
                 return objectMapper.extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
             }
             List<Object> rows = (List<Object>) primitiveMapper.extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);

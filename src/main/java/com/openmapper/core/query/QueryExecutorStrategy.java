@@ -1,6 +1,6 @@
 package com.openmapper.core.query;
 
-import com.openmapper.annotations.entity.Entity;
+import com.openmapper.annotations.entity.Model;
 import com.openmapper.core.query.impl.EmptyResultSetHandler;
 import com.openmapper.core.query.impl.EntityResultSetHandler;
 import com.openmapper.core.query.impl.IterableResultSetHandler;
@@ -59,7 +59,7 @@ public class QueryExecutorStrategy {
 
     public ResultSetHandler<?> getExecutorByMethodReturnType(Class<?> returnType) {
         Supplier<ResultSetHandler<?>> resultSetHandlerSupplier = STRATEGY.get(returnType);
-        if (returnType.getAnnotation(Entity.class) != null) {
+        if (returnType.getAnnotation(Model.class) != null) {
             return entityResultSetHandler;
         }
         if (resultSetHandlerSupplier == null) {

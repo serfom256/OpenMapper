@@ -1,6 +1,6 @@
 package com.openmapper.core.query.impl;
 
-import com.openmapper.annotations.entity.Entity;
+import com.openmapper.annotations.entity.Model;
 import com.openmapper.core.query.ResultSetHandler;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
 import com.openmapper.exceptions.entity.EntityMappingException;
@@ -28,7 +28,7 @@ public class IterableResultSetHandler implements ResultSetHandler<Iterable<Objec
         Class<?> entityMappedType = ((Class<?>) ((ParameterizedType) mappingType).getActualTypeArguments()[0]);
         try {
             Iterable<Object> result;
-            if (entityMappedType.getAnnotation(Entity.class) != null) {
+            if (entityMappedType.getAnnotation(Model.class) != null) {
                 result = (Iterable<Object>) objectMapper.extract(mappingType, entityMappedType, Iterable.class, rs);
             } else {
                 result = (Iterable<Object>) primitiveMapper.extract(mappingType, entityMappedType, Iterable.class, rs);

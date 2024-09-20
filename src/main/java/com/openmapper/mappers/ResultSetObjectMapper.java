@@ -1,6 +1,6 @@
 package com.openmapper.mappers;
 
-import com.openmapper.annotations.entity.Entity;
+import com.openmapper.annotations.entity.Model;
 import com.openmapper.annotations.entity.Joined;
 import com.openmapper.annotations.entity.Nested;
 import com.openmapper.core.representation.DependencyGraph;
@@ -52,7 +52,7 @@ public class ResultSetObjectMapper implements ResultSetMapper {
             }
         }
 
-        final Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance, concreteType.getAnnotation(Entity.class).primaryKey());
+        final Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance, concreteType.getAnnotation(Model.class).primaryKey());
 
         entityMap.put(primaryKeyValue, entityInstance);
         usedTypes.remove(concreteType);

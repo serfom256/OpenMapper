@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Component
 @DependsOn(value = "globalEnvironmentLoader")
-public @interface Repository {
+public @interface UseRepository {
 }
