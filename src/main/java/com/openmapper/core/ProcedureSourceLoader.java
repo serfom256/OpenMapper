@@ -32,9 +32,9 @@ public class ProcedureSourceLoader implements EnvironmentProcessor {
 
     @Autowired
     public ProcedureSourceLoader(Environment environment,
-                                 FileContentReader fileContentReader,
-                                 OpenMapperSQLContext context,
-                                 ResourceLoader resourceLoader) {
+            FileContentReader fileContentReader,
+            OpenMapperSQLContext context,
+            ResourceLoader resourceLoader) {
         this.fileContentReader = fileContentReader;
         this.environment = environment;
         this.context = context;
@@ -46,26 +46,30 @@ public class ProcedureSourceLoader implements EnvironmentProcessor {
         final List<String> sqlFilePaths = getPaths(FSQL_FILES_PATH.value());
         final List<SQLProcedure> parsed = fileContentReader.readFiles(sqlFilePaths);
         parsed.stream()
-                .map(sqlProcedure -> new SQLProcedure(sqlProcedure.getFunctionName(), format(sqlProcedure.getFunctionBody())))
+                .map(sqlProcedure -> new SQLProcedure(sqlProcedure.getFunctionName(),
+                        format(sqlProcedure.getFunctionBody())))
+                        
                 .forEach(sqlProcedure -> {
-                            try {
-                                context.updateContext(sqlProcedure.getFunctionName(), mapper.map(sqlProcedure.getFunctionBody()));
-                            } catch (IllegalStateException e) {
-                                throw new InvalidDeclarationException(sqlProcedure.getFunctionName(), e.getMessage());
-                            }
-                        }
-                );
+                    try {
+                        context.updateContext(sqlProcedure.getFunctionName(),
+                                mapper.map(sqlProcedure.getFunctionBody()));
+                    } catch (IllegalStateException e) {
+                        throw new InvalidDeclarationException(sqlProcedure.getFunctionName(), e.getMessage());
+                    }
+                });
     }
 
     @SuppressWarnings("unchecked")
     private List<String> getPaths(String propertyName) {
         List<String> properties = environment.getProperty(propertyName, List.class);
-        if (properties != null) return properties;
+        if (properties != null)
+            return properties;
         try {
             File[] classPathFiles = resourceLoader.getResource("classpath:/").getFile().listFiles();
-            if (classPathFiles == null) return Collections.emptyList();
+            if (classPathFiles == null)
+                return Collections.emptyList();
             return Arrays.stream(classPathFiles).filter(f -> f.getName()
-                            .endsWith(FILE_EXTENSION.value()))
+                    .endsWith(FILE_EXTENSION.value()))
                     .map(File::getAbsolutePath)
                     .collect(Collectors.toList());
         } catch (IOException e) {

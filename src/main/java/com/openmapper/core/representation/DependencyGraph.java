@@ -12,7 +12,12 @@ import java.util.Set;
 
 public class DependencyGraph {
 
-    public Object createDependencyGraph(Graph graph, Class<?> thisType, Class<?> returnType, Object joinedBy, String joinedField, Set<Class<?>> prevTypes) throws EntityFieldAccessException {
+    public Object createDependencyGraph(Graph graph,
+            Class<?> thisType,
+            Class<?> returnType,
+            Object joinedBy,
+            String joinedField,
+            Set<Class<?>> prevTypes) throws EntityFieldAccessException {
         if (prevTypes.contains(thisType)) {
             return mapRelationShip(graph, thisType, returnType, joinedBy, joinedField);
         }
@@ -24,7 +29,7 @@ public class DependencyGraph {
 
         prevTypes.add(thisType);
 
-        for (final var entry : returnObject.entrySet()) {
+        for (final Map.Entry<Object, Object> entry : returnObject.entrySet()) {
 
             final Object entity = entry.getValue();
 
@@ -37,16 +42,20 @@ public class DependencyGraph {
                     ObjectUtils.modifyFieldValue(f, field -> {
                         final Field thisJoinedField = thisType.getDeclaredField(annotation.joinBy());
                         final Object joinedValue = ObjectUtils.getFieldValue(entity, thisJoinedField);
-                        field.set(entity, createDependencyGraph(graph, ObjectUtils.getInnerClassType(field.getType(), field.getGenericType()), field.getType(), joinedValue, annotation.to(), prevTypes));
+                        field.set(entity,
+                                createDependencyGraph(graph,
+                                        ObjectUtils.getInnerClassType(field.getType(), field.getGenericType()),
+                                        field.getType(), joinedValue, annotation.to(), prevTypes));
                     });
                 }
             }
             if (joinedField != null) {
-                if (ObjectUtils.getFieldValue(entity, joinedField).equals(joinedBy)) joinedObjects.add(entity);
+                if (ObjectUtils.getFieldValue(entity, joinedField).equals(joinedBy)){
+                    joinedObjects.add(entity);
+                }
             } else {
                 joinedObjects.add(entity);
             }
-
         }
 
         prevTypes.remove(thisType);
@@ -58,18 +67,24 @@ public class DependencyGraph {
         return joinedObjects.isEmpty() ? null : joinedObjects.get(0);
     }
 
-
-    private Object mapRelationShip(Graph graph, Class<?> thisType, Class<?> returnType, Object joinedByValue, String joinedField) {
+    private Object mapRelationShip(Graph graph,
+            Class<?> thisType,
+            Class<?> returnType,
+            Object joinedByValue,
+            String joinedField) {
         if (ObjectUtils.isIterable(returnType)) {
             return mapManyToManyRelationship(graph, thisType, joinedByValue, joinedField);
         }
         return mapManyToOneRelationship(graph, thisType, joinedByValue, joinedField);
     }
 
-    private List<Object> mapManyToManyRelationship(Graph graph, Class<?> thisType, Object joinedByValue, String joinedField) {
+    private List<Object> mapManyToManyRelationship(Graph graph,
+            Class<?> thisType,
+            Object joinedByValue,
+            String joinedField) {
         Map<Object, Object> returnObject = graph.get(thisType);
         final List<Object> result = new ArrayList<>(5);
-        for (var entry : returnObject.entrySet()) {
+        for (Map.Entry<Object, Object> entry : returnObject.entrySet()) {
             if (ObjectUtils.getFieldValue(entry.getValue(), joinedField).equals(joinedByValue)) {
                 result.add(entry.getValue());
             }
@@ -79,7 +94,7 @@ public class DependencyGraph {
 
     private Object mapManyToOneRelationship(Graph graph, Class<?> thisType, Object joinedByValue, String joinedField) {
         Map<Object, Object> returnObject = graph.get(thisType);
-        for (var entry : returnObject.entrySet()) {
+        for (Map.Entry<Object, Object> entry : returnObject.entrySet()) {
             if (ObjectUtils.getFieldValue(entry.getValue(), joinedField).equals(joinedByValue)) {
                 return entry.getValue();
             }

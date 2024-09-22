@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class GlobalEnvironmentLoader {
-    public GlobalEnvironmentLoader(List<EnvironmentProcessor> loaders) {
+public class GlobalEnvironmentProcessor {
+    public GlobalEnvironmentProcessor(List<EnvironmentProcessor> loaders) {
         loaders.forEach(EnvironmentProcessor::processEnvironment);
     }
 }

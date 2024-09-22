@@ -17,7 +17,7 @@ public class SQLBuilder {
             throw new IllegalArgumentException(String.format("Invalid count of arguments given! Expected: %s given: %s", tokens.size(), toReplace.size()));
         }
 
-        for (var tokenPair : tokens.entrySet()) {
+        for (Map.Entry<String, SQLToken> tokenPair : tokens.entrySet()) {
             final Object value = toReplace.get(tokenPair.getKey());
             if (value != null) {
                 replaced.put(tokenPair.getValue().getPosition(), value.toString());

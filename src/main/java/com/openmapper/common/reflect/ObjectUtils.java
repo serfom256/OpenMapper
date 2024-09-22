@@ -1,6 +1,5 @@
 package com.openmapper.common.reflect;
 
-import com.openmapper.common.reflect.FieldModifier;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
 import com.openmapper.exceptions.entity.ObjectCreationException;
 
@@ -21,8 +20,7 @@ public class ObjectUtils {
         ITERABLE.addAll(Arrays.asList(
                 Iterable.class, List.class, ArrayList.class, LinkedList.class,
                 Collection.class, Set.class, HashSet.class, LinkedHashSet.class,
-                NavigableSet.class, SortedSet.class, TreeSet.class)
-        );
+                NavigableSet.class, SortedSet.class, TreeSet.class));
     }
 
     /**
@@ -37,8 +35,8 @@ public class ObjectUtils {
         }
         try {
             return clazz.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                 NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+                | NoSuchMethodException e) {
             throw new ObjectCreationException(e);
         }
     }

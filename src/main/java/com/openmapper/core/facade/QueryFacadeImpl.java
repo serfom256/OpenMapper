@@ -1,31 +1,37 @@
-package com.openmapper.core;
+package com.openmapper.core.facade;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import org.springframework.stereotype.Component;
 
 import com.openmapper.annotations.DaoMethod;
-import com.openmapper.common.reflect.MethodArgumentsExtractor;
 import com.openmapper.common.entity.SQLRecord;
 import com.openmapper.common.mapping.InputMapper;
 import com.openmapper.common.operations.DmlOperation;
+import com.openmapper.common.reflect.MethodArgumentsExtractor;
+import com.openmapper.core.OpenMapperSQLContext;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
 import com.openmapper.core.query.QueryExecutorStrategy;
 import com.openmapper.core.query.impl.DmlOperationsHandler;
 
-import javax.sql.DataSource;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.sql.Statement;
-import java.util.Optional;
-
-public class EntityMappingInvocationHandler implements InvocationHandler {
+@Component
+public class QueryFacadeImpl implements QueryFacade {
 
     private final OpenMapperSQLContext context;
     private final InputMapper mapper;
     private final QueryExecutorStrategy strategy;
     private final QueryExecutor queryExecutor;
 
-    public EntityMappingInvocationHandler(OpenMapperSQLContext context,
+    public QueryFacadeImpl(
+            OpenMapperSQLContext context,
             QueryExecutorStrategy strategy,
             InputMapper mapper,
             DataSource dataSource) {
@@ -36,7 +42,9 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) {
+    public Object invokeMethodQueryWithParameters(Method method, Object[] args) {
+        int argumentsHash = Arrays.hashCode(args);
+
         SQLRecord result = context.getSqlProcedure(getProcedureName(method));
         final String query = mapper.mapSql(result, MethodArgumentsExtractor.extractNamedArgs(method, args));
         return executeDaoMethod(query, method);
@@ -87,4 +95,5 @@ public class EntityMappingInvocationHandler implements InvocationHandler {
         }
         return procedure;
     }
+
 }
