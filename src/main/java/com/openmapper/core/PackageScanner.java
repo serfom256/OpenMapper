@@ -1,6 +1,7 @@
 package com.openmapper.core;
 
-import com.openmapper.config.OpenMapperGlobalContext;
+import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
+
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,25 +13,25 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
-
 @Component
-
 public class PackageScanner {
 
-    private final OpenMapperGlobalContext globalContext;
+    private final OpenMapperGlobalEnvironmentVariables variables;
 
     private final ApplicationContext context;
 
     private static final Logger logger = LoggerFactory.getLogger(PackageScanner.class);
 
-    public PackageScanner(OpenMapperGlobalContext globalContext, ApplicationContext context) {
-        this.globalContext = globalContext;
+    public PackageScanner(OpenMapperGlobalEnvironmentVariables variables, ApplicationContext context) {
+        this.variables = variables;
         this.context = context;
     }
 
     public Set<Class<?>> scanPackagesFor(String packageToScan, Class<? extends Annotation> annotation) {
-        if (packageToScan == null) packageToScan = getRootPackage();
-        if (globalContext.isLogging()) {
+        if (packageToScan == null) {
+            packageToScan = getRootPackage();
+        }
+        if (variables.isLogging()) {
             logger.info("Scanning packages for @DaoLayer annotation: {}", packageToScan);
         }
         Reflections reflections = new Reflections(packageToScan);

@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static com.openmapper.config.OPEN_MAPPER_CONSTANTS.FILE_EXTENSION;
+import static com.openmapper.config.OpenMapperGlobalConstants.FILE_EXTENSION;
 
 public class ConcurrentQueryExtractor implements Extractor {
 

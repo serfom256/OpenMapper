@@ -15,7 +15,7 @@ import com.openmapper.annotations.DaoMethod;
 import com.openmapper.common.entity.SQLRecord;
 import com.openmapper.common.mapping.InputMapper;
 import com.openmapper.common.operations.DmlOperation;
-import com.openmapper.common.reflect.MethodArgumentsExtractor;
+import com.openmapper.common.reflect.EntityPropertyExtractor;
 import com.openmapper.core.OpenMapperSQLContext;
 import com.openmapper.core.query.JdbcQueryExecutor;
 import com.openmapper.core.query.QueryExecutor;
@@ -29,15 +29,18 @@ public class QueryFacadeImpl implements QueryFacade {
     private final InputMapper mapper;
     private final QueryExecutorStrategy strategy;
     private final QueryExecutor queryExecutor;
+    private final EntityPropertyExtractor entityPropertyExtractor;
 
     public QueryFacadeImpl(
             OpenMapperSQLContext context,
             QueryExecutorStrategy strategy,
             InputMapper mapper,
-            DataSource dataSource) {
+            DataSource dataSource,
+            EntityPropertyExtractor methodArgumentsExtractor) {
         this.context = context;
         this.strategy = strategy;
         this.mapper = mapper;
+        this.entityPropertyExtractor = methodArgumentsExtractor;
         this.queryExecutor = new JdbcQueryExecutor(dataSource, new DmlOperationsHandler());
     }
 
@@ -46,7 +49,7 @@ public class QueryFacadeImpl implements QueryFacade {
         int argumentsHash = Arrays.hashCode(args);
 
         SQLRecord result = context.getSqlProcedure(getProcedureName(method));
-        final String query = mapper.mapSql(result, MethodArgumentsExtractor.extractNamedArgs(method, args));
+        final String query = mapper.mapSql(result, entityPropertyExtractor.extract(method, args));
         return executeDaoMethod(query, method);
     }
 
@@ -87,7 +90,7 @@ public class QueryFacadeImpl implements QueryFacade {
         return operation;
     }
 
-    private String getProcedureName(Method method) {
+    private String getProcedureName(Method method) { // TODO move to another class
         DaoMethod daoMethod = method.getAnnotation(DaoMethod.class);
         String procedure = method.getName();
         if (daoMethod != null && !daoMethod.procedure().isEmpty()) {

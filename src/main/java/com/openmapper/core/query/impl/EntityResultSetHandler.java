@@ -25,10 +25,11 @@ public class EntityResultSetHandler implements ResultSetHandler<Object> {
     @SuppressWarnings("unchecked")
     public Object handle(ResultSet rs, Type mappingType) throws SQLException {
         try {
-            if (((Class<?>) mappingType).getAnnotation(Model.class) != null){
+            if (((Class<?>) mappingType).getAnnotation(Model.class) != null) {
                 return objectMapper.extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
             }
-            List<Object> rows = (List<Object>) primitiveMapper.extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
+            List<Object> rows = (List<Object>) primitiveMapper.extract(mappingType, (Class<?>) mappingType,
+                    (Class<?>) mappingType, rs);
             if (rows.size() > 1) {
                 throw new TooManyResultsFoundException("Expected single result got: " + rows.size());
             }
