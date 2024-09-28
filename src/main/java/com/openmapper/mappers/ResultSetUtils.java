@@ -5,7 +5,12 @@ import com.openmapper.exceptions.internal.InvalidResultCountException;
 import com.openmapper.exceptions.internal.ResultSetExtractionException;
 
 import java.math.BigDecimal;
-import java.sql.*;
+import java.security.Timestamp;
+import java.sql.Blob;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.Map;
 

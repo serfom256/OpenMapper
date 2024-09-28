@@ -1,8 +1,9 @@
 package com.openmapper.core;
 
-import com.openmapper.core.facade.QueryFacade;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+
+import com.openmapper.core.query.facade.QueryFacade;
 
 public class QueryMappingInvocationHandler implements InvocationHandler {
 

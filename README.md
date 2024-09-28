@@ -22,12 +22,13 @@ Where `QUERY` - variable to replacement
 
 ## OpenMapper properties:
 
-| Property                  | Value                                   | Type    |
-|---------------------------|-----------------------------------------|---------|
-| opnemapper.sql.tracing    | query tracing                           | boolean |
-| opnemapper.logging        | events tracing                          | boolean |
-| opnemapper.packagesToScan | packages to scan for @DaoLayer entities | list    |
-| opnemapper.fsql.path      | packages with `.fsql` files to scan     | list    |
+| Property                        | Value                                   | Type    |
+| ------------------------------- | --------------------------------------- | ------- |
+| opnemapper.sql.tracing          | query tracing                           | boolean |
+| opnemapper.logging              | events tracing                          | boolean |
+| opnemapper.dao.packagesToScan   | packages to scan for @DaoLayer entities | list    |
+| opnemapper.model.packagesToScan | packages to scan for @Model entities    | list    |
+| opnemapper.fsql.path            | packages with `.fsql` files to scan     | list    |
 
 ---
 
@@ -246,7 +247,7 @@ interface Repository {
 OpenMapper supports Java types from the table below:
 
 | Supported Java mapping types |
-|------------------------------|
+| ---------------------------- |
 | Integer / int                |
 | Long / long                  |
 | Double / double              |
@@ -292,15 +293,15 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.5'
 ## Supported annotations
 
 | Supported annotations | Type                     | Description                                                                                            |
-|-----------------------|--------------------------|--------------------------------------------------------------------------------------------------------|
-| Entity                | Class level              | Every declared entity that used in mapping uses the @Model annotation                                 |
+| --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Entity                | Class level              | Every declared entity that used in mapping uses the @Model annotation                                  |
 | Field                 | Field level              | Used for mapping fields specifying                                                                     |
 | Joined                | Field level              | Used for joining entities by the specified field                                                       |
 | Nested                | Field level              | Used for nested objects                                                                                |
 | DaoLayer              | Class level              | DAO/Repository classes that represents data access layer should be annotated with @DaoLayer annotation |
 | DaoMethod             | Method level             | Used for method that executes the query and returns mapped result                                      |
 | Param                 | Method's parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
-| UseRepository            | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
+| UseRepository         | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
 
 
 ---

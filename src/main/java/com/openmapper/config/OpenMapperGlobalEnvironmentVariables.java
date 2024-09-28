@@ -2,7 +2,8 @@ package com.openmapper.config;
 
 import static com.openmapper.config.OpenMapperGlobalConstants.FSQL_FILES_PATH;
 import static com.openmapper.config.OpenMapperGlobalConstants.LOGGING;
-import static com.openmapper.config.OpenMapperGlobalConstants.PACKAGE_TO_SCAN;
+import static com.openmapper.config.OpenMapperGlobalConstants.MODEL_PACKAGE_TO_SCAN;
+import static com.openmapper.config.OpenMapperGlobalConstants.DAO_PACKAGE_TO_SCAN;
 import static com.openmapper.config.OpenMapperGlobalConstants.QUERY_CACHE_ENABLED;
 import static com.openmapper.config.OpenMapperGlobalConstants.RESULT_CACHE_ENABLED;
 import static com.openmapper.config.OpenMapperGlobalConstants.SQL_TRACING;
@@ -27,7 +28,8 @@ public class OpenMapperGlobalEnvironmentVariables {
     private boolean isSqlTracing;
     private boolean isQueryCacheEnabled;
     private boolean isResultCacheEnabled;
-    private String packageToScan;
+    private String daoPackageToScan;
+    private String modelPackageToScan;
     private List<String> sqlFilePath;
 
     @PostConstruct
@@ -35,7 +37,8 @@ public class OpenMapperGlobalEnvironmentVariables {
         isLogging = getBoolean(LOGGING.value());
         isSqlTracing = getBoolean(SQL_TRACING.value());
         sqlFilePath = getList(FSQL_FILES_PATH.value());
-        packageToScan = getString(PACKAGE_TO_SCAN.value());
+        daoPackageToScan = getString(DAO_PACKAGE_TO_SCAN.value());
+        modelPackageToScan = getString(MODEL_PACKAGE_TO_SCAN.value());
         isQueryCacheEnabled = getBoolean(QUERY_CACHE_ENABLED.value());
         isResultCacheEnabled = getBoolean(RESULT_CACHE_ENABLED.value());
     }
@@ -52,8 +55,12 @@ public class OpenMapperGlobalEnvironmentVariables {
         return sqlFilePath;
     }
 
-    public String getPackageToScan() {
-        return packageToScan;
+    public String getDaoPackageToScan() {
+        return daoPackageToScan;
+    }
+
+    public String getModelPackageToScan() {
+        return modelPackageToScan;
     }
 
     public boolean isLogging() {

@@ -1,10 +1,10 @@
 package com.openmapper.common;
 
-import com.openmapper.common.entity.SQLRecord;
-import com.openmapper.common.entity.SQLToken;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.openmapper.parser.model.SQLRecord;
+import com.openmapper.parser.model.SQLToken;
 
 public class SQLBuilder {
 

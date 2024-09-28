@@ -1,10 +1,10 @@
 package com.openmapper.common;
 
-import com.openmapper.common.entity.SQLProcedure;
-import com.openmapper.common.extractor.ConcurrentQueryExtractor;
-import com.openmapper.common.extractor.Extractor;
-import com.openmapper.common.parser.factory.DefaultParserFactory;
 import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
+import com.openmapper.parser.extractor.ConcurrentQueryExtractor;
+import com.openmapper.parser.extractor.Extractor;
+import com.openmapper.parser.factory.DefaultParserFactory;
+import com.openmapper.parser.model.SQLProcedure;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

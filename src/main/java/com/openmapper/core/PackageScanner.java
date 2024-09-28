@@ -32,7 +32,7 @@ public class PackageScanner {
             packageToScan = getRootPackage();
         }
         if (variables.isLogging()) {
-            logger.info("Scanning packages for @DaoLayer annotation: {}", packageToScan);
+            logger.info("Scanning packages for @{} annotation: {}", annotation.getName(), packageToScan);
         }
         Reflections reflections = new Reflections(packageToScan);
         return reflections.getTypesAnnotatedWith(annotation);
