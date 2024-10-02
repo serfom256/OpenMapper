@@ -20,7 +20,5 @@ public @interface DaoMethod {
 
     Class<? extends Throwable> translateNotFoundExceptionTo() default EntityNotFoundException.class;
 
-    String datasource() default "datasource";
-
     boolean returnKeys() default false;
 }

@@ -3,22 +3,24 @@ package com.openmapper.core.query.facade;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.openmapper.annotations.DaoMethod;
 import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.common.reflect.EntityPropertyExtractor;
+import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
 import com.openmapper.core.context.OpenMapperSQLContext;
-import com.openmapper.core.query.JdbcQueryExecutor;
-import com.openmapper.core.query.QueryExecutor;
-import com.openmapper.core.query.QueryExecutorStrategy;
-import com.openmapper.core.query.impl.DmlOperationsHandler;
+import com.openmapper.core.query.MethodSpecifications;
+import com.openmapper.core.query.executors.QueryExecutor;
+import com.openmapper.core.query.handlers.ResultHandlerStrategy;
+import com.openmapper.core.query.handlers.ResultSetHandler;
+import com.openmapper.exceptions.internal.OptimisticLockException;
 import com.openmapper.parser.mapping.InputMapper;
 import com.openmapper.parser.model.SQLRecord;
 
@@ -27,56 +29,75 @@ public class QueryFacadeImpl implements QueryFacade {
 
     private final OpenMapperSQLContext context;
     private final InputMapper mapper;
-    private final QueryExecutorStrategy strategy;
     private final QueryExecutor queryExecutor;
     private final EntityPropertyExtractor entityPropertyExtractor;
+    private final OpenMapperGlobalEnvironmentVariables variables;
+    private final ResultHandlerStrategy resultHandlerStrategy;
+
+    private static final Logger logger = LoggerFactory.getLogger(QueryFacadeImpl.class);
 
     public QueryFacadeImpl(
             OpenMapperSQLContext context,
-            QueryExecutorStrategy strategy,
             InputMapper mapper,
-            DataSource dataSource,
-            EntityPropertyExtractor methodArgumentsExtractor) {
+            QueryExecutor queryExecutor,
+            EntityPropertyExtractor entityPropertyExtractor,
+            OpenMapperGlobalEnvironmentVariables variables,
+            ResultHandlerStrategy resultHandlerStrategy) {
         this.context = context;
-        this.strategy = strategy;
         this.mapper = mapper;
-        this.entityPropertyExtractor = methodArgumentsExtractor;
-        this.queryExecutor = new JdbcQueryExecutor(dataSource, new DmlOperationsHandler());
+        this.queryExecutor = queryExecutor;
+        this.entityPropertyExtractor = entityPropertyExtractor;
+        this.variables = variables;
+        this.resultHandlerStrategy = resultHandlerStrategy;
     }
 
     @Override
-    public Object invokeMethodQueryWithParameters(Method method, Object[] args) {
+    public Object invokeMethodQueryWithParameters(Method method, Object[] args, DataSource dataSource) {
         SQLRecord result = context.getSqlProcedure(getProcedureName(method));
-        final String query = mapper.mapSql(result, entityPropertyExtractor.extract(method, args));
-        return executeDaoMethod(query, method);
+        while (true) {
+            final String query = mapper.mapSql(result, entityPropertyExtractor.extract(method, args));
+            try {
+                return executeDaoMethod(query, method, dataSource);
+            } catch (OptimisticLockException optimisticLockException) {
+                if (variables.isLogging()) {
+                    logger.warn("Cannot execute update due to optimistic lock, trying again...");
+                }
+            }
+        }
     }
 
-    private Object executeDaoMethod(String query, Method method) {
-        Class<?> returnType;
-        Type genericReturnType = method.getGenericReturnType();
-        if (method.getReturnType() == Optional.class) {
-            returnType = ((Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0]);
-            genericReturnType = ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
-        } else {
-            returnType = method.getReturnType();
-        }
+    private Object executeDaoMethod(String query, Method method, DataSource dataSource) {
+        Class<?> returnType = getReturnType(method);
+        Type genericReturnType = getGenericReturnType(method);
+        DmlOperation operationType = getOperationType(method);
+        ResultSetHandler<?> resultSetHandler = resultHandlerStrategy.getExecutorByMethodReturnType(returnType);
+        boolean returnGeneratedKeys = returnGeneratedKeys(method);
 
-        Object result = queryExecutor.execute( // TODO add optimistic lock support
-                query,
-                strategy.getExecutorByMethodReturnType(returnType),
+        MethodSpecifications methodSpecifications = new MethodSpecifications(
+                resultSetHandler,
                 genericReturnType,
-                getOperationType(method),
-                returnGeneratedKeys(method));
+                operationType,
+                returnGeneratedKeys);
+
+        Object result = queryExecutor.execute(dataSource, query, methodSpecifications);
 
         return method.getReturnType() == Optional.class ? Optional.ofNullable(result) : result;
     }
 
-    private int returnGeneratedKeys(Method method) {
-        DaoMethod daoMethod = method.getAnnotation(DaoMethod.class);
-        if (daoMethod == null) {
-            return Statement.NO_GENERATED_KEYS;
+    private Class<?> getReturnType(Method method) {
+        Type genericReturnType = method.getGenericReturnType();
+        if (method.getReturnType() == Optional.class) {
+            return ((Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0]);
         }
-        return !daoMethod.returnKeys() ? Statement.NO_GENERATED_KEYS : Statement.RETURN_GENERATED_KEYS;
+        return method.getReturnType();
+    }
+
+    protected Type getGenericReturnType(Method method) {
+        Type genericReturnType = method.getGenericReturnType();
+        if (method.getReturnType() == Optional.class) {
+            return ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
+        }
+        return genericReturnType;
     }
 
     private DmlOperation getOperationType(Method method) {
@@ -88,7 +109,7 @@ public class QueryFacadeImpl implements QueryFacade {
         return operation;
     }
 
-    private String getProcedureName(Method method) { // TODO move to another class
+    private String getProcedureName(Method method) {
         DaoMethod daoMethod = method.getAnnotation(DaoMethod.class);
         String procedure = method.getName();
         if (daoMethod != null && !daoMethod.procedure().isEmpty()) {
@@ -97,4 +118,8 @@ public class QueryFacadeImpl implements QueryFacade {
         return procedure;
     }
 
+    private boolean returnGeneratedKeys(Method method) {
+        DaoMethod daoMethod = method.getAnnotation(DaoMethod.class);
+        return daoMethod != null && daoMethod.returnKeys();
+    }
 }

@@ -1,4 +1,4 @@
-package com.openmapper.core.query;
+package com.openmapper.core.query.handlers;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;

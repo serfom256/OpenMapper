@@ -6,10 +6,6 @@ public class EntityFieldAccessException extends RuntimeException {
         super();
     }
 
-    public EntityFieldAccessException(String message) {
-        super(message);
-    }
-
     public EntityFieldAccessException(Throwable cause) {
         super(cause);
     }

@@ -6,10 +6,6 @@ public class ObjectCreationException extends RuntimeException {
         super();
     }
 
-    public ObjectCreationException(String message) {
-        super(message);
-    }
-
     public ObjectCreationException(Throwable cause) {
         super(cause);
     }

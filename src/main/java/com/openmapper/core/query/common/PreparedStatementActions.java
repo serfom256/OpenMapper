@@ -1,10 +1,15 @@
-package com.openmapper.core.query;
+package com.openmapper.core.query.common;
 
 import java.lang.reflect.Type;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.springframework.stereotype.Component;
+
+import com.openmapper.core.query.handlers.ResultSetHandler;
+
+@Component
 public class PreparedStatementActions {
 
     public <T> Object executeQuery(

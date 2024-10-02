@@ -23,7 +23,7 @@ public class FieldValueGenerator {
             Map.entry(Long.class, v -> v == null ? DEFAULT_VALUE : (long) ((long) v + 1)),
             Map.entry(Timestamp.class, v -> new Timestamp(System.currentTimeMillis())));
 
-    public Object getNextVersionedFieldValue(Field field, Object object) {
+    public Object getNextOptimisticLockFieldValue(Field field, Object object) {
         final Class<?> fieldType = field.getType();
 
         if (!supportedValueActions.containsKey(fieldType)) {

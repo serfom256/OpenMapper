@@ -1,7 +1,7 @@
-package com.openmapper.core.query.impl;
+package com.openmapper.core.query.handlers;
 
 import com.openmapper.annotations.entity.Model;
-import com.openmapper.core.query.ResultSetHandler;
+import com.openmapper.exceptions.internal.TooManyResultsFoundException;
 import com.openmapper.exceptions.entity.EntityFieldAccessException;
 import com.openmapper.exceptions.entity.EntityMappingException;
 import com.openmapper.exceptions.entity.ObjectCreationException;
@@ -9,34 +9,32 @@ import com.openmapper.mappers.ResultSetObjectMapper;
 import com.openmapper.mappers.ResultSetPrimitiveMapper;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 
 @Component
-public class IterableResultSetHandler implements ResultSetHandler<Iterable<Object>> {
+public class EntityResultSetHandler implements ResultSetHandler<Object> {
 
     private final ResultSetObjectMapper objectMapper = new ResultSetObjectMapper();
-
     private final ResultSetPrimitiveMapper primitiveMapper = new ResultSetPrimitiveMapper();
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterable<Object> handle(ResultSet rs, Type mappingType) throws SQLException {
-        Class<?> entityMappedType = ((Class<?>) ((ParameterizedType) mappingType).getActualTypeArguments()[0]);
+    public Object handle(ResultSet rs, Type mappingType) throws SQLException {
         try {
-            Iterable<Object> result;
-            if (entityMappedType.getAnnotation(Model.class) != null) {
-                result = (Iterable<Object>) objectMapper.extract(mappingType, entityMappedType, Iterable.class, rs);
-            } else {
-                result = (Iterable<Object>) primitiveMapper.extract(mappingType, entityMappedType, Iterable.class, rs);
+            if (((Class<?>) mappingType).getAnnotation(Model.class) != null) {
+                return objectMapper.extract(mappingType, (Class<?>) mappingType, (Class<?>) mappingType, rs);
             }
-            return result == null ? new ArrayList<>() : result;
+            List<Object> rows = (List<Object>) primitiveMapper.extract(mappingType, (Class<?>) mappingType,
+                    (Class<?>) mappingType, rs);
+            if (rows.size() > 1) {
+                throw new TooManyResultsFoundException("Expected single result got: " + rows.size());
+            }
+            return rows.isEmpty() ? null : rows.get(0);
         } catch (EntityFieldAccessException | ObjectCreationException e) {
             throw new EntityMappingException(e);
         }
     }
-
 }

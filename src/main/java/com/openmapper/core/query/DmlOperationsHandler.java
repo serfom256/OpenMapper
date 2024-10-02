@@ -1,8 +1,8 @@
-package com.openmapper.core.query.impl;
+package com.openmapper.core.query;
 
 import com.openmapper.common.operations.DmlOperation;
-import com.openmapper.core.query.PreparedStatementActions;
-import com.openmapper.core.query.ResultSetHandler;
+import com.openmapper.core.query.common.PreparedStatementActions;
+import com.openmapper.core.query.handlers.ResultSetHandler;
 
 import java.lang.reflect.Type;
 import java.sql.PreparedStatement;

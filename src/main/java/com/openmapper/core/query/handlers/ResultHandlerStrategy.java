@@ -1,9 +1,6 @@
-package com.openmapper.core.query;
+package com.openmapper.core.query.handlers;
 
 import com.openmapper.annotations.entity.Model;
-import com.openmapper.core.query.impl.EmptyResultSetHandler;
-import com.openmapper.core.query.impl.EntityResultSetHandler;
-import com.openmapper.core.query.impl.IterableResultSetHandler;
 import com.openmapper.exceptions.common.UnsupportedTypeException;
 
 import org.springframework.stereotype.Component;
@@ -18,13 +15,13 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 @Component
-public class QueryExecutorStrategy {
+public class ResultHandlerStrategy {
 
     private static final Map<Class<?>, Supplier<ResultSetHandler<?>>> STRATEGY = new HashMap<>(64);
 
     private final EntityResultSetHandler entityResultSetHandler;
 
-    public QueryExecutorStrategy(
+    public ResultHandlerStrategy(
             EntityResultSetHandler entityResultSetHandler,
             EmptyResultSetHandler emptyResultSetHandler,
             IterableResultSetHandler iterableResultSetHandler) {

@@ -4,7 +4,7 @@ import com.openmapper.common.reflect.FieldValueGenerator;
 import com.openmapper.common.reflect.ObjectUtils;
 import com.openmapper.annotations.entity.Field;
 import com.openmapper.annotations.entity.Nested;
-import com.openmapper.annotations.entity.Versioned;
+import com.openmapper.annotations.entity.OptimisticLockField;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,8 +29,8 @@ public class MethodArgumentExtractor {
                 values.put(annotation.name().isEmpty() ? field.getName() : annotation.name(), ObjectUtils.getFieldValue(entity, field));
             } else if (field.getAnnotation(Nested.class) != null) {
                 values.putAll(extractMethodArguments(ObjectUtils.getFieldValue(entity, field)));
-            }else if (field.getAnnotation(Versioned.class) != null) {
-                values.put(field.getAnnotation(Versioned.class).name(), fieldValueGenerator.getNextVersionedFieldValue(field, entity));
+            }else if (field.getAnnotation(OptimisticLockField.class) != null) {
+                values.put(field.getAnnotation(OptimisticLockField.class).name(), fieldValueGenerator.getNextOptimisticLockFieldValue(field, entity));
             }
         }
         return values;

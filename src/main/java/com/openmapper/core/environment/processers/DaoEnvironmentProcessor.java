@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 @Component
 public class DaoEnvironmentProcessor implements EnvironmentProcessor {
 
@@ -43,11 +45,14 @@ public class DaoEnvironmentProcessor implements EnvironmentProcessor {
         Set<Class<?>> classes = scanner.scanPackagesFor(variables.getDaoPackageToScan(), DaoLayer.class);
 
         for (Class<?> clazz : classes) {
-            Object dataSource = beanFactory.getBean(clazz.getAnnotation(DaoLayer.class).dataSource());
+            DataSource dataSource = beanFactory.getBean(DataSource.class,
+                    clazz.getAnnotation(DaoLayer.class).dataSource());
             if (variables.isLogging()) {
                 logger.info("Detected datasource: {}", dataSource);
             }
-            Object proxiedClass = proxy.makeProxyFor(new QueryMappingInvocationHandler(queryFacade), clazz.getName());
+
+            final var queryHandler = new QueryMappingInvocationHandler(queryFacade, dataSource);
+            Object proxiedClass = proxy.makeProxyFor(queryHandler, clazz.getName());
 
             registerProxyClass(proxiedClass, clazz);
         }
