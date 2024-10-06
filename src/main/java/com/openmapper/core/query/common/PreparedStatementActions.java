@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import org.springframework.stereotype.Component;
 
 import com.openmapper.core.query.handlers.ResultSetHandler;
+import com.openmapper.exceptions.internal.OptimisticLockException;
 
 @Component
 public class PreparedStatementActions {
@@ -16,7 +17,7 @@ public class PreparedStatementActions {
             ResultSetHandler<T> handler,
             Type returnType,
             PreparedStatement ps) throws SQLException {
-                
+
         ResultSet rs = ps.executeQuery();
         Object queryResult = handler.handle(rs, returnType);
         rs.close();
@@ -27,12 +28,18 @@ public class PreparedStatementActions {
             ResultSetHandler<T> handler,
             Type returnType,
             PreparedStatement ps,
-            boolean returnPrimaryKeys) throws SQLException {
+            boolean returnPrimaryKeys,
+            boolean hasOptimisticLock) throws SQLException {
 
         int updatedCount = ps.executeUpdate();
         if (returnType == void.class || returnType == Void.class) {
             return Void.TYPE;
         }
+
+        if (hasOptimisticLock && updatedCount == 0) {
+            throw new OptimisticLockException();
+        }
+
         if (!returnPrimaryKeys) {
             return updatedCount;
         }

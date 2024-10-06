@@ -8,10 +8,9 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.openmapper.common.operations.DmlOperation;
-import com.openmapper.core.query.MethodSpecifications;
 import com.openmapper.core.query.common.PreparedStatementActions;
 import com.openmapper.core.query.handlers.ResultSetHandler;
-import com.openmapper.exceptions.internal.OptimisticLockException;
+import com.openmapper.core.query.model.QuerySpecifications;
 
 @Component
 public class DmlUpdateOperationExecutor implements DatabaseOperation {
@@ -25,16 +24,19 @@ public class DmlUpdateOperationExecutor implements DatabaseOperation {
     @Override
     public Object executeQuery(
             PreparedStatement preparedStatement,
-            MethodSpecifications methodSpecifications)
+            QuerySpecifications methodSpecifications)
             throws SQLException {
-        ResultSetHandler<?> resultHandler = methodSpecifications.getHandler();
         Type returnType = methodSpecifications.getReturnType();
-        Object queryResult = preparedStatementActions.executeQuery(resultHandler, returnType, preparedStatement);
+        boolean shouldReturnGeneratedKeys = methodSpecifications.shouldReturnGeneratedKeys();
+        boolean hasPreviousOptimisticLockValue = methodSpecifications.hasOptimisticLock();
+        ResultSetHandler<?> resultHandler = methodSpecifications.getHandler();
 
-        if(methodSpecifications.shouldReturnGeneratedKeys() && queryResult == null){
-            throw new OptimisticLockException();
-        }
-        return queryResult;
+        return preparedStatementActions.executeUpdate(
+                resultHandler,
+                returnType,
+                preparedStatement,
+                shouldReturnGeneratedKeys,
+                hasPreviousOptimisticLockValue);
     }
 
     @Override

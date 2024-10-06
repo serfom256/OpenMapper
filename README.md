@@ -24,11 +24,11 @@ Where `QUERY` - variable to replacement
 
 | Property                        | Value                                   | Type    |
 | ------------------------------- | --------------------------------------- | ------- |
-| opnemapper.sql.tracing          | query tracing                           | boolean |
-| opnemapper.logging              | events tracing                          | boolean |
-| opnemapper.dao.packagesToScan   | packages to scan for @DaoLayer entities | list    |
-| opnemapper.model.packagesToScan | packages to scan for @Model entities    | list    |
-| opnemapper.fsql.path            | packages with `.fsql` files to scan     | list    |
+| openmapper.sql.tracing          | query tracing                           | boolean |
+| openmapper.logging              | events tracing                          | boolean |
+| openmapper.dao.packagesToScan   | packages to scan for @DaoLayer entities | list    |
+| openmapper.model.packagesToScan | packages to scan for @Model entities    | list    |
+| openmapper.fsql.path            | packages with `.fsql` files to scan     | list    |
 
 ---
 

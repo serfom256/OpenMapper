@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.openmapper.core.context.model.ModelMetadata;
 
-@Component
-public class EntityMetadataContext {
+@Component // for further optimizations
+public class ModelMetadataContext {
 
     private final ConcurrentHashMap<Class<?>, ModelMetadata> concurrentHashMap = new ConcurrentHashMap<>();
     private final ModelMetadata emptyModelMetadata = new ModelMetadata(null);

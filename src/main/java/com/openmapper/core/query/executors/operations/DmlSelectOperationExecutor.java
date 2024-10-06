@@ -8,9 +8,9 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.openmapper.common.operations.DmlOperation;
-import com.openmapper.core.query.MethodSpecifications;
 import com.openmapper.core.query.common.PreparedStatementActions;
 import com.openmapper.core.query.handlers.ResultSetHandler;
+import com.openmapper.core.query.model.QuerySpecifications;
 
 @Component
 public class DmlSelectOperationExecutor implements DatabaseOperation {
@@ -24,17 +24,11 @@ public class DmlSelectOperationExecutor implements DatabaseOperation {
     @Override
     public Object executeQuery(
             PreparedStatement preparedStatement,
-            MethodSpecifications methodSpecifications)
+            QuerySpecifications methodSpecifications)
             throws SQLException {
-        Type returnType = methodSpecifications.getReturnType();
-        boolean shouldReturnGeneratedKeys = methodSpecifications.shouldReturnGeneratedKeys();
         ResultSetHandler<?> resultHandler = methodSpecifications.getHandler();
-
-        return preparedStatementActions.executeUpdate(
-                resultHandler,
-                returnType,
-                preparedStatement,
-                shouldReturnGeneratedKeys);
+        Type returnType = methodSpecifications.getReturnType();
+        return preparedStatementActions.executeQuery(resultHandler, returnType, preparedStatement);
     }
 
     @Override

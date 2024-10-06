@@ -1,10 +1,12 @@
 package com.openmapper.core.context;
 
+import com.openmapper.annotations.DaoMethod;
 import com.openmapper.exceptions.common.FunctionNotFoundException;
 import com.openmapper.parser.model.SQLRecord;
 
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,5 +25,18 @@ public class OpenMapperSQLContext {
             throw new FunctionNotFoundException(name);
         }
         return entity;
+    }
+
+    public SQLRecord getSqlProcedure(final Method method) {
+        return getSqlProcedure(getProcedureName(method));
+    }
+
+    private String getProcedureName(Method method) {
+        DaoMethod daoMethod = method.getAnnotation(DaoMethod.class);
+        String procedure = method.getName();
+        if (daoMethod != null && !daoMethod.procedure().isEmpty()) {
+            procedure = daoMethod.procedure();
+        }
+        return procedure;
     }
 }

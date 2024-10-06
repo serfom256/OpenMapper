@@ -15,13 +15,13 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 @Component
-public class ResultHandlerStrategy {
+public class ResultSetHandlerStrategy {
 
     private static final Map<Class<?>, Supplier<ResultSetHandler<?>>> STRATEGY = new HashMap<>(64);
 
     private final EntityResultSetHandler entityResultSetHandler;
 
-    public ResultHandlerStrategy(
+    public ResultSetHandlerStrategy(
             EntityResultSetHandler entityResultSetHandler,
             EmptyResultSetHandler emptyResultSetHandler,
             IterableResultSetHandler iterableResultSetHandler) {
@@ -62,7 +62,7 @@ public class ResultHandlerStrategy {
         STRATEGY.put(Collection.class, () -> iterableResultSetHandler);
     }
 
-    public ResultSetHandler<?> getExecutorByMethodReturnType(Class<?> returnType) {
+    public ResultSetHandler<?> getHandlerByMethodReturnType(Class<?> returnType) {
         Supplier<ResultSetHandler<?>> resultSetHandlerSupplier = STRATEGY.get(returnType);
         if (returnType.getAnnotation(Model.class) != null) {
             return entityResultSetHandler;

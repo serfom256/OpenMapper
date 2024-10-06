@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Component
-@DependsOn(value = "globalEnvironmentLoader")
+@DependsOn(value = "openMapperEnvironmentProcessor")
 public @interface UseRepository {
 }

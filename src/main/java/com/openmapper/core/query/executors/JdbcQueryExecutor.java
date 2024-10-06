@@ -1,7 +1,7 @@
 package com.openmapper.core.query.executors;
 
-import com.openmapper.core.query.MethodSpecifications;
 import com.openmapper.core.query.executors.operations.DatabaseOperation;
+import com.openmapper.core.query.model.QuerySpecifications;
 import com.openmapper.exceptions.internal.QueryExecutionError;
 
 import javax.sql.DataSource;
@@ -25,13 +25,13 @@ public class JdbcQueryExecutor implements QueryExecutor {
     public Object execute(
             DataSource dataSource,
             String query,
-            MethodSpecifications methodSpecifications) {
+            QuerySpecifications querySpecifications) {
 
-        int returnGeneratedKeys = methodSpecifications.shouldReturnGeneratedKeys() ? 1 : 0;
+        int returnGeneratedKeys = querySpecifications.shouldReturnGeneratedKeys() ? 1 : 0;
         try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query, returnGeneratedKeys)) {
             
-            DatabaseOperation databaseOperation = queryExecutionStrategy.getOperationByType(methodSpecifications.getOperation());
-            return databaseOperation.executeQuery(preparedStatement, methodSpecifications);
+            DatabaseOperation databaseOperation = queryExecutionStrategy.getOperationByType(querySpecifications.getOperation());
+            return databaseOperation.executeQuery(preparedStatement, querySpecifications);
         } catch (SQLException e) {
             throw new QueryExecutionError(e);
         }

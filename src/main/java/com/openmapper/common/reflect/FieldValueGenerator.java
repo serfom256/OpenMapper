@@ -1,13 +1,9 @@
 package com.openmapper.common.reflect;
 
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
 import org.springframework.stereotype.Component;
-
-import com.openmapper.exceptions.common.UnsupportedTypeException;
 
 @Component
 public class FieldValueGenerator {
@@ -20,20 +16,15 @@ public class FieldValueGenerator {
             Map.entry(int.class, v -> (int) ((int) v + 1)),
             Map.entry(Integer.class, v -> v == null ? DEFAULT_VALUE : (int) ((int) v + 1)),
             Map.entry(long.class, v -> (long) ((long) v + 1)),
-            Map.entry(Long.class, v -> v == null ? DEFAULT_VALUE : (long) ((long) v + 1)),
-            Map.entry(Timestamp.class, v -> new Timestamp(System.currentTimeMillis())));
+            Map.entry(Long.class, v -> v == null ? DEFAULT_VALUE : (long) ((long) v + 1)));
 
-    public Object getNextOptimisticLockFieldValue(Field field, Object object) {
-        final Class<?> fieldType = field.getType();
-
-        if (!supportedValueActions.containsKey(fieldType)) {
-            throw new UnsupportedTypeException(fieldType.getTypeName());
+    public Object getNextOptimisticLockFieldValue(Object previousValue) {
+        if (previousValue == null) {
+            return 0; // TODO get minimum value from bean
         }
-        final Object fieldValue = ObjectUtils.getFieldValue(object, field);
-        supportedValueActions
-                .get(fieldType)
-                .apply(fieldValue);
 
-        return fieldValue;
+        return supportedValueActions
+                .get(previousValue.getClass())
+                .apply(previousValue);
     }
 }

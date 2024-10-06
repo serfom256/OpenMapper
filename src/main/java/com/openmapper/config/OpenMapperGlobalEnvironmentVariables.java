@@ -10,8 +10,6 @@ import static com.openmapper.config.OpenMapperGlobalConstants.SQL_TRACING;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +17,6 @@ import org.springframework.stereotype.Component;
 public class OpenMapperGlobalEnvironmentVariables {
 
     private final Environment environment;
-
-    public OpenMapperGlobalEnvironmentVariables(Environment environment) {
-        this.environment = environment;
-    }
 
     private boolean isLogging;
     private boolean isSqlTracing;
@@ -32,7 +26,11 @@ public class OpenMapperGlobalEnvironmentVariables {
     private String modelPackageToScan;
     private List<String> sqlFilePath;
 
-    @PostConstruct
+    public OpenMapperGlobalEnvironmentVariables(Environment environment) {
+        this.environment = environment;
+        initVariables();
+    }
+
     private void initVariables() {
         isLogging = getBoolean(LOGGING.value());
         isSqlTracing = getBoolean(SQL_TRACING.value());

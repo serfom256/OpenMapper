@@ -3,6 +3,7 @@ package com.openmapper.mappers;
 import com.openmapper.annotations.entity.Model;
 import com.openmapper.annotations.entity.Joined;
 import com.openmapper.annotations.entity.Nested;
+import com.openmapper.annotations.entity.OptimisticLockField;
 import com.openmapper.common.reflect.ObjectUtils;
 import com.openmapper.core.query.representation.DependencyGraph;
 import com.openmapper.core.query.representation.Graph;
@@ -65,7 +66,12 @@ public class ResultSetObjectMapper implements ResultSetMapper {
             } else if (f.getAnnotation(Nested.class) != null) {// handling nested entities
                 ObjectUtils.modifyFieldValue(f,
                         fld -> fld.set(entityInstance, extractNestedEntity(f.getType(), resultSet)));
-            }
+            }else if (f.getAnnotation(OptimisticLockField.class) != null) { // handling joined entities
+                final OptimisticLockField optimisticLockField = f.getAnnotation(OptimisticLockField.class);
+                final String column = getFieldNameOrDefault(f, optimisticLockField.name());
+                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance,
+                        ResultSetUtils.extractFromResultSet(f.getType(), resultSet, column)));
+            } // TODO get all fields info from entity metadata
         }
 
         final Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance,

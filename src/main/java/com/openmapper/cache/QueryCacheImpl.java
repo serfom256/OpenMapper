@@ -4,8 +4,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,8 +22,7 @@ public class QueryCacheImpl implements QueryCache {
         this.evictionThread = new Thread(this::evictOutdatedEntries);
     }
 
-    @PostConstruct
-    private void init(){
+    void init() {
         evictionThread.start();
     }
 
@@ -36,7 +33,8 @@ public class QueryCacheImpl implements QueryCache {
     private boolean evictOutdatedEntries() {
         while (true) {
             Map.Entry<Long, Object> lastEntry = concurrentMap.lastEntry();
-            while (lastEntry != null && (Instant.now().getEpochSecond() - lastEntry.getKey() > evictionDelayInSeconds)) {
+            while (lastEntry != null
+                    && (Instant.now().getEpochSecond() - lastEntry.getKey() > evictionDelayInSeconds)) {
                 concurrentMap.pollLastEntry();
                 lastEntry = concurrentMap.lastEntry();
             }

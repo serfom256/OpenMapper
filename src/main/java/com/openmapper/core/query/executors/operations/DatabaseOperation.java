@@ -5,13 +5,13 @@ import java.sql.SQLException;
 import java.util.Set;
 
 import com.openmapper.common.operations.DmlOperation;
-import com.openmapper.core.query.MethodSpecifications;
+import com.openmapper.core.query.model.QuerySpecifications;
 
 public interface DatabaseOperation {
 
     public Object executeQuery(
             PreparedStatement preparedStatement,
-            MethodSpecifications methodSpecifications) throws SQLException;
+            QuerySpecifications methodSpecifications) throws SQLException;
 
     public Set<DmlOperation> getSupportedOperations();
 }
