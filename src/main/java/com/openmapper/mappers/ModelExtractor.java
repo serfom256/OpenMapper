@@ -21,47 +21,63 @@ public class ModelExtractor {
 
     private final FieldValueGenerator fieldValueGenerator = new FieldValueGenerator();
 
-    public ModelSpecifications extractSpecification(Object entity, QuerySpecifications querySpecifications) {
+    public ModelSpecifications extractSpecification(Object entity, QuerySpecifications specifications) {
         if (entity == null) {
             return new ModelSpecifications(Collections.emptyMap());
         }
-        
+
         Map<String, Object> values = new HashMap<>();
         ModelSpecifications modelSpecifications = new ModelSpecifications(values);
-        Object previousOptimisticLockValue = querySpecifications.getPreviousOptimisticLockValue();
+        Object previousOptimisticLockValue = specifications.getPreviousOptimisticLockValue();
 
         for (java.lang.reflect.Field field : entity.getClass().getDeclaredFields()) {
             final Field annotation = field.getAnnotation(Field.class);
+
             if (annotation != null) {
                 values.put(annotation.name().isEmpty() ? field.getName() : annotation.name(),
                         ObjectUtils.getFieldValue(entity, field));
+
             } else if (field.getAnnotation(Nested.class) != null) {
-                ModelSpecifications nestedSpec = extractSpecification(ObjectUtils.getFieldValue(entity, field), querySpecifications);
+                ModelSpecifications nestedSpec = extractSpecification(ObjectUtils.getFieldValue(entity, field), specifications);
                 values.putAll(nestedSpec.getParams());
-                if (querySpecifications.getOperation() == UPDATE) { // TODO just replace previous optimistic lock by name in map
-                    modelSpecifications.setOptimisticLockName(nestedSpec.getOptimisticLockName());
-                    modelSpecifications.setGeneratedOptimisticLockValue(nestedSpec.getGeneratedOptimisticLockValue());
-                    modelSpecifications.setPreviousOptimisticLockValue(previousOptimisticLockValue);
+                if (specifications.getOperation() == UPDATE) {
+                    mapToModelSpecifications(modelSpecifications,
+                            nestedSpec.getOptimisticLockName(),
+                            nestedSpec.getGeneratedOptimisticLockValue(),
+                            previousOptimisticLockValue);
                 }
 
             } else if (field.getAnnotation(OptimisticLockField.class) != null) {
+                OptimisticLockField lockField = field.getAnnotation(OptimisticLockField.class);
 
-                OptimisticLockField optimisticLockField = field.getAnnotation(OptimisticLockField.class);
-                Object prevValue = previousOptimisticLockValue;
-                if (querySpecifications.getOperation() == UPDATE && prevValue == null) {
-                    prevValue = ObjectUtils.getFieldValue(entity, field);
+                if (specifications.getOperation() == UPDATE) {
+                    Object prevValue = previousOptimisticLockValue;
+                    if (prevValue == null) {
+                        prevValue = ObjectUtils.getFieldValue(entity, field);
+                    }
+
+                    Object nextValue = fieldValueGenerator.getNextOptimisticLockFieldValue(prevValue);
+
+                    mapToModelSpecifications(modelSpecifications, field.getName(), nextValue, prevValue);
+                    values.put(lockField.name().isEmpty() ? field.getName() : lockField.name(), nextValue);
+                    values.put(field.getAnnotation(OptimisticLockField.class).oldVersion(), prevValue);
+                } else {
+                    values.put(lockField.name().isEmpty() ? field.getName() : lockField.name(),
+                            ObjectUtils.getFieldValue(entity, field));
                 }
 
-                Object nextOptimisticLockValue = fieldValueGenerator.getNextOptimisticLockFieldValue(prevValue);
-                modelSpecifications.setOptimisticLockName(field.getName());
-                modelSpecifications.setGeneratedOptimisticLockValue(nextOptimisticLockValue);
-                modelSpecifications.setPreviousOptimisticLockValue(prevValue);
-
-                values.put(optimisticLockField.name().isEmpty() ? field.getName() : optimisticLockField.name(), nextOptimisticLockValue);
-
-                values.put(field.getAnnotation(OptimisticLockField.class).oldVersion(), prevValue);
             }
         }
         return modelSpecifications;
+    }
+
+    private void mapToModelSpecifications(
+            ModelSpecifications model,
+            String optimisticLockName,
+            Object lockValue,
+            Object prevLockValue) {
+        model.setOptimisticLockName(optimisticLockName);
+        model.setGeneratedOptimisticLockValue(lockValue);
+        model.setPreviousOptimisticLockValue(prevLockValue);
     }
 }

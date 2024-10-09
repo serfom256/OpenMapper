@@ -10,7 +10,7 @@ OpenMapper supports files [.fsql] extension
 
 `.fsql` file structure:
 
-```fslq
+```sql
 name.of.query={
     select count(*) from users where id=[QUERY_PARAMETER]
 }
@@ -48,16 +48,19 @@ public interface MyRepo {
 
 ---
 
-Entity declaration:
+Model declaration:
 
 ```java
 
 @Model(primaryKey = "id")
 public class User {
+    
     @Field(name = "id")
     private int id;
+
     @Field(name = "name")
     private String name;
+
     @Joined(joinBy = "id")
     private List<Course> course;
 
@@ -81,7 +84,7 @@ public class Course {
 
 #### Sql procedure:
 
-```
+```sql
 select.all.users={
     select * from user join course crs on user.id = crs.user_id where user.id>[id]
 }
@@ -131,6 +134,7 @@ Modeling objects relationship in code:
 
 @Model(primaryKey = "id")
 class User {
+
     @Field
     private Integer id;
 
@@ -241,10 +245,126 @@ interface Repository {
 }
 
 ```
+---
+
+### Optimistic lock support:
+
+
+#### Model example:
+```java
+    @Model(primaryKey = "id")
+    public class User {
+
+        @Field
+        private int id;
+
+        @Field
+        private String name;
+
+        @OptimisticLockField(oldVersion = "oldVersion") // oldVersion - link to previous version to update
+        private long version;
+
+        // Getters and setters
+```
+
+#### Queries in `.fsql` file:
+
+```sql
+    updateUser = {
+        update user set name='[name]', version=[version] where version = [oldVersion]  and id = [id]
+    }
+
+    createUser = {
+        insert into user(id, name, version) values([id], '[name]', [version])
+    }
+
+    findUserById = {
+        select * from user where id=[id]
+    }
+```
+#### Repository example:
+```java
+@DaoLayer
+public interface Repository {
+    @DaoMethod(returnKeys = true, operation = DmlOperation.INSERT)
+    int createUser(User user);
+
+    @DaoMethod(operation = DmlOperation.UPDATE) // optimistic lock works only with DmlOperation.UPDATE mode
+    int updateUser(User user);
+
+    User findUserById(int id);
+}
+```
+
+#### Service call example:
+
+```java
+
+    User user = new User(1, "old_name", 1);
+    repository.createUser(user); // creating new user with id, name, and default version (if version not specified value will be set to 0)
+
+    repository.updateUser(new User(1, "new_name", user.getVersion())); // updating name and version (user version that equals 1 will be updated to 2)
+
+    System.out.println(repository.findUserById(1)); // will return User(id=1, name=new_name, version=2)
+```
+
+### If the previous version is higher than current version, the query will fail due to `version could be incremented only`.
+#### Maximum increment version retries count is equal to 100
+
+####  This code produces queries below:
+```sql
+    insert into user(id, name, version) values(1, 'old_name', 1);
+
+    update user set name='new_name', version=2 where version = 1 and id = 1;
+
+    select * from user where id = 1;
+```
+
+---
+### Retrieving generated keys after insert:
+
+#### If you specify `returnKeys = true`(by default false) in repository method, then OpenMapper will try to return generated keys and cast them to return type
+
+#### Model example:
+```java
+    @Model(primaryKey = "id")
+    public class User {
+
+        @Field
+        private int id;
+
+        @Field
+        private String name;
+
+        // Getters and setters
+```
+
+#### Queries in `.fsql` file:
+
+```sql
+    createUser = {
+        insert into user(name, version) values('[name]')
+    }
+```
+#### Repository example:
+```java
+@DaoLayer
+public interface Repository {
+    @DaoMethod(returnKeys = true, operation = DmlOperation.INSERT)
+    int createUser(User user);
+}
+```
+
+#### Service call example:
+```java
+    User user = new User("name", 1);
+    int userId = repository.createUser(user);
+    System.out.println(userId); // will print 1
+```
 
 ---
 
-OpenMapper supports Java types from the table below:
+### OpenMapper supports Java types from the table below:
 
 | Supported Java mapping types |
 | ---------------------------- |
@@ -271,21 +391,19 @@ OpenMapper supports Java types from the table below:
 
 ---
 
-Usage with Maven:
-
+#### Usage with Maven:
 ```xml
 
 <dependency>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.2.5</version>
+    <version>1.3.2</version>
 </dependency>
 ```
 
-Usage with Gradle:
-
+#### Usage with Gradle:
 ```groovy
-implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.5'
+implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.2'
 ```
 
 ---
@@ -294,14 +412,15 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.2.5'
 
 | Supported annotations | Type                     | Description                                                                                            |
 | --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Entity                | Class level              | Every declared entity that used in mapping uses the @Model annotation                                  |
-| Field                 | Field level              | Used for mapping fields specifying                                                                     |
-| Joined                | Field level              | Used for joining entities by the specified field                                                       |
-| Nested                | Field level              | Used for nested objects                                                                                |
-| DaoLayer              | Class level              | DAO/Repository classes that represents data access layer should be annotated with @DaoLayer annotation |
-| DaoMethod             | Method level             | Used for method that executes the query and returns mapped result                                      |
-| Param                 | Method's parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
-| UseRepository         | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
+| @Entity               | Class level              | Every declared entity that used in mapping uses the @Model annotation                                  |
+| @Field                | Field level              | Used for mapping fields specifying                                                                     |
+| @Joined               | Field level              | Used for joining entities by the specified field                                                       |
+| @OptimisticLockField  | Field/Argument level     | Used for joining entities by the specified field                                                       |
+| @Nested               | Field level              | Used for nested objects                                                                                |
+| @DaoLayer             | Class level              | DAO/Repository classes that represents data access layer should be annotated with @DaoLayer annotation |
+| @DaoMethod            | Method level             | Used for method that executes the query and returns mapped result                                      |
+| @Param                | Argument parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
+| @UseRepository        | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
 
 
 ---
