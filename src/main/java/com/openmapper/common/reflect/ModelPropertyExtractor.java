@@ -7,7 +7,7 @@ import com.openmapper.core.query.common.AdditionalSpecificationExtractor;
 import com.openmapper.core.query.model.ModelSpecifications;
 import com.openmapper.mappers.ModelExtractor;
 
-import static com.openmapper.common.operations.DmlOperation.UPDATE;
+import static com.openmapper.model.operations.DmlOperation.UPDATE;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

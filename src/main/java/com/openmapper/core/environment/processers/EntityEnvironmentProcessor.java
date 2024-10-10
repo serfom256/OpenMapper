@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 import com.openmapper.annotations.entity.Model;
 import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
-import com.openmapper.core.PackageScanner;
 import com.openmapper.core.common.ModelSpecificationReader;
 import com.openmapper.core.context.ModelMetadataContext;
 import com.openmapper.core.context.model.ModelMetadata;
 import com.openmapper.core.environment.EnvironmentProcessor;
+import com.openmapper.core.environment.PackageScanner;
 
 @Component
 public class EntityEnvironmentProcessor implements EnvironmentProcessor {
@@ -40,7 +40,7 @@ public class EntityEnvironmentProcessor implements EnvironmentProcessor {
         Set<Class<?>> classes = scanner.scanPackagesFor(variables.getDaoPackageToScan(), Model.class);
 
         for (Class<?> entityClass : classes) {
-            if (variables.isLogging()) {
+            if (variables.isLoggingEnabled()) {
                 logger.info("Found model of type: {}", entityClass.getName());
             }
             ModelMetadata modelMetadata = modelSpecificationReader.readModelMetadata(entityClass);

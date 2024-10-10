@@ -1,7 +1,8 @@
-package com.openmapper.parser.mapping;
+package com.openmapper.core.query.source.mapping.impl;
 
 import com.openmapper.common.SQLBuilder;
 import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
+import com.openmapper.core.query.source.mapping.InputMapper;
 import com.openmapper.parser.model.SQLRecord;
 
 import org.slf4j.Logger;
@@ -19,15 +20,15 @@ public class InputMapperImpl implements InputMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(InputMapperImpl.class);
 
-    public InputMapperImpl(OpenMapperGlobalEnvironmentVariables variables) {
+    public InputMapperImpl(SQLBuilder sqlBuilder, OpenMapperGlobalEnvironmentVariables variables) {
+        this.sqlBuilder = sqlBuilder;
         this.variables = variables;
-        this.sqlBuilder = new SQLBuilder();
     }
 
     @Override
     public String mapSql(SQLRecord entity, Map<String, Object> toReplace) {
         String result = sqlBuilder.buildSql(entity, toReplace);
-        if (variables.isLogging()) {
+        if (variables.isSqlQueryTracingEnabled()) {
             logger.info(result);
         }
         return result;

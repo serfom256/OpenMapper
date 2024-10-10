@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
-import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.core.query.executors.operations.DatabaseOperation;
+import com.openmapper.model.operations.DmlOperation;
 
 @Component
 public class QueryExecutionStrategy {

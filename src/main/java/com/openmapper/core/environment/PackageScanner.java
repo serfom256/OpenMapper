@@ -1,4 +1,4 @@
-package com.openmapper.core;
+package com.openmapper.core.environment;
 
 import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
 
@@ -31,7 +31,7 @@ public class PackageScanner {
         if (packageToScan == null) {
             packageToScan = getRootPackage();
         }
-        if (variables.isLogging()) {
+        if (variables.isLoggingEnabled()) {
             logger.info("Scanning packages for @{} annotation: {}", annotation.getName(), packageToScan);
         }
         Reflections reflections = new Reflections(packageToScan);

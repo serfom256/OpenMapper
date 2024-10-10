@@ -5,7 +5,7 @@ import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
 import com.openmapper.core.context.OpenMapperSQLContext;
 import com.openmapper.core.environment.EnvironmentProcessor;
 import com.openmapper.exceptions.fsql.InvalidDeclarationException;
-import com.openmapper.parser.mapping.SourceMapper;
+import com.openmapper.parser.SourceMapper;
 import com.openmapper.parser.model.SQLProcedure;
 
 import org.springframework.core.io.ResourceLoader;

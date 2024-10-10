@@ -1,27 +1,29 @@
 package com.openmapper.config;
 
 import static com.openmapper.config.OpenMapperGlobalConstants.FSQL_FILES_PATH;
-import static com.openmapper.config.OpenMapperGlobalConstants.LOGGING;
+import static com.openmapper.config.OpenMapperGlobalConstants.INPUT_WRAPPING_ENABLED;
+import static com.openmapper.config.OpenMapperGlobalConstants.LOGGING_ENABLED;
 import static com.openmapper.config.OpenMapperGlobalConstants.MODEL_PACKAGE_TO_SCAN;
 import static com.openmapper.config.OpenMapperGlobalConstants.DAO_PACKAGE_TO_SCAN;
 import static com.openmapper.config.OpenMapperGlobalConstants.QUERY_CACHE_ENABLED;
 import static com.openmapper.config.OpenMapperGlobalConstants.RESULT_CACHE_ENABLED;
-import static com.openmapper.config.OpenMapperGlobalConstants.SQL_TRACING;
+import static com.openmapper.config.OpenMapperGlobalConstants.SQL_TRACING_ENABLED;
+import static com.openmapper.config.OpenMapperGlobalConstants.SQL_TRACING_QUERIES_ENABLED;
 
 import java.util.List;
 
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
-@Component
 public class OpenMapperGlobalEnvironmentVariables {
 
     private final Environment environment;
 
-    private boolean isLogging;
-    private boolean isSqlTracing;
+    private boolean isLoggingEnabled;
+    private boolean isSqlTracingEnabled;
+    private boolean isSqlQueriesTracingEnabled;
     private boolean isQueryCacheEnabled;
     private boolean isResultCacheEnabled;
+    private boolean isInputWrappingEnabled;
     private String daoPackageToScan;
     private String modelPackageToScan;
     private List<String> sqlFilePath;
@@ -32,13 +34,15 @@ public class OpenMapperGlobalEnvironmentVariables {
     }
 
     private void initVariables() {
-        isLogging = getBoolean(LOGGING.value());
-        isSqlTracing = getBoolean(SQL_TRACING.value());
+        isLoggingEnabled = getBoolean(LOGGING_ENABLED.value());
+        isSqlTracingEnabled = getBoolean(SQL_TRACING_ENABLED.value());
+        isSqlQueriesTracingEnabled = getBoolean(SQL_TRACING_QUERIES_ENABLED.value());
         sqlFilePath = getList(FSQL_FILES_PATH.value());
         daoPackageToScan = getString(DAO_PACKAGE_TO_SCAN.value());
         modelPackageToScan = getString(MODEL_PACKAGE_TO_SCAN.value());
         isQueryCacheEnabled = getBoolean(QUERY_CACHE_ENABLED.value());
         isResultCacheEnabled = getBoolean(RESULT_CACHE_ENABLED.value());
+        isInputWrappingEnabled = getBoolean(INPUT_WRAPPING_ENABLED.value());
     }
 
     public boolean isQueryCacheEnabled() {
@@ -61,12 +65,19 @@ public class OpenMapperGlobalEnvironmentVariables {
         return modelPackageToScan;
     }
 
-    public boolean isLogging() {
-        return isLogging;
+    public boolean isLoggingEnabled() {
+        return isLoggingEnabled;
     }
 
-    public boolean isSqlTracing() {
-        return isSqlTracing;
+    public boolean isSqlTracingEnabled() {
+        return isSqlTracingEnabled;
+    }
+    public boolean isSqlQueryTracingEnabled() {
+        return isSqlQueriesTracingEnabled;
+    }
+
+    public boolean isWrappingEnabled() {
+        return isInputWrappingEnabled;
     }
 
     private boolean getBoolean(String propertyName) {

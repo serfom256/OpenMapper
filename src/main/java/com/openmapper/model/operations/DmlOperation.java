@@ -1,4 +1,4 @@
-package com.openmapper.common.operations;
+package com.openmapper.model.operations;
 
 public enum DmlOperation {
     SELECT,//retrieve data from a database

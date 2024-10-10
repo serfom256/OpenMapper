@@ -1,11 +1,11 @@
 package com.openmapper.core.environment.processers;
 
 import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
-import com.openmapper.core.PackageScanner;
 import com.openmapper.annotations.DaoLayer;
-import com.openmapper.core.QueryMappingInvocationHandler;
 import com.openmapper.core.environment.EnvironmentProcessor;
+import com.openmapper.core.environment.PackageScanner;
 import com.openmapper.core.proxy.InvocationProxy;
+import com.openmapper.core.proxy.QueryMappingInvocationHandler;
 import com.openmapper.core.query.facade.QueryFacade;
 
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ public class DaoEnvironmentProcessor implements EnvironmentProcessor {
         for (Class<?> clazz : classes) {
             DataSource dataSource = beanFactory.getBean(DataSource.class,
                     clazz.getAnnotation(DaoLayer.class).dataSource());
-            if (variables.isLogging()) {
+            if (variables.isLoggingEnabled()) {
                 logger.info("Detected datasource: {}", dataSource);
             }
 
@@ -64,7 +64,7 @@ public class DaoEnvironmentProcessor implements EnvironmentProcessor {
         }
         try {
             beanFactory.registerSingleton(clazz.getSimpleName(), proxy);
-            if (variables.isLogging()) {
+            if (variables.isLoggingEnabled()) {
                 logger.debug("Class: '{}' registered", clazz.getName());
             }
         } catch (Exception ignored) {

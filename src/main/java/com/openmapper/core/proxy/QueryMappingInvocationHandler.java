@@ -1,4 +1,4 @@
-package com.openmapper.core;
+package com.openmapper.core.proxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

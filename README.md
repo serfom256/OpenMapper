@@ -271,11 +271,11 @@ interface Repository {
 
 ```sql
     updateUser = {
-        update user set name='[name]', version=[version] where version = [oldVersion]  and id = [id]
+        update user set name=[name], version=[version] where version = [oldVersion]  and id = [id]
     }
 
     createUser = {
-        insert into user(id, name, version) values([id], '[name]', [version])
+        insert into user(id, name, version) values([id], [name], [version])
     }
 
     findUserById = {
@@ -343,7 +343,7 @@ public interface Repository {
 
 ```sql
     createUser = {
-        insert into user(name, version) values('[name]')
+        insert into user(name, version) values([name])
     }
 ```
 #### Repository example:
@@ -397,13 +397,13 @@ public interface Repository {
 <dependency>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.3.2</version>
+    <version>1.3.5</version>
 </dependency>
 ```
 
 #### Usage with Gradle:
 ```groovy
-implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.2'
+implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.5'
 ```
 
 ---
@@ -422,6 +422,20 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.2'
 | @Param                | Argument parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
 | @UseRepository        | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
 
+
+---
+
+## OpenMapper configuration
+
+| Parameter name                         | Parameter type | Default value                      | Description                                                    |
+| -------------------------------------- | -------------- | ---------------------------------- | -------------------------------------------------------------- |
+| openmapper.fsql.path                   | list<string>   | all subdirectories in project root | Package to scan for `.fsql` files                              |
+| openmapper.dao.packagesToScan          | string         | all subdirectories in project root | Package to scan for `.fsql` files                              |
+| openmapper.model.packagesToScan        | string         | all subdirectories in project root | Package to scan for classes, annotated with @Model             |
+| openmapper.sql.tracing.enabled         | boolean        | false                              | Tracing sql  queries                                           |
+| openmapper.sql.tracing.queries.enabled | boolean        | false                              | Tracing sql that will be executed (don't use it in production) |
+| openmapper.logging.enabled             | boolean        | true                               | Enable internal logging                                        |
+| openmapper.input.wrapping.enabled      | boolean        | true                               | Wrapping strings in order to protect from SQL Injections       |
 
 ---
 

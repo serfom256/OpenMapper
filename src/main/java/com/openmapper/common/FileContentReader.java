@@ -31,7 +31,7 @@ public class FileContentReader {
     }
 
     public List<SQLProcedure> readFiles(final List<String> files) {
-        if (variables.isLogging()) {
+        if (variables.isLoggingEnabled()) {
             files.forEach(f -> logger.debug("File loaded: {}", f));
         }
         final List<SQLProcedure> procedures = new ArrayList<>();

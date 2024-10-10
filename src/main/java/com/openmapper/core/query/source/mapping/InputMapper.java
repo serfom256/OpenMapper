@@ -1,4 +1,4 @@
-package com.openmapper.parser.mapping;
+package com.openmapper.core.query.source.mapping;
 
 import java.util.Map;
 

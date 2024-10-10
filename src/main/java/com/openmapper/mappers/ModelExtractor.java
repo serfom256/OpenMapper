@@ -8,7 +8,7 @@ import com.openmapper.annotations.entity.Field;
 import com.openmapper.annotations.entity.Nested;
 import com.openmapper.annotations.entity.OptimisticLockField;
 
-import static com.openmapper.common.operations.DmlOperation.UPDATE;
+import static com.openmapper.model.operations.DmlOperation.UPDATE;
 
 import java.util.Collections;
 import java.util.HashMap;

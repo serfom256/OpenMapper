@@ -1,8 +1,7 @@
 
-package com.openmapper.parser.impl;
+package com.openmapper.parser;
 
 import com.openmapper.exceptions.fsql.FsqlParsingException;
-import com.openmapper.parser.Parser;
 import com.openmapper.parser.model.CharLocation;
 import com.openmapper.parser.model.SQLProcedure;
 import com.openmapper.parser.model.SpanLocation;

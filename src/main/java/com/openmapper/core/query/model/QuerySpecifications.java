@@ -3,8 +3,8 @@ package com.openmapper.core.query.model;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.core.query.handlers.ResultSetHandler;
+import com.openmapper.model.operations.DmlOperation;
 
 public class QuerySpecifications {
 

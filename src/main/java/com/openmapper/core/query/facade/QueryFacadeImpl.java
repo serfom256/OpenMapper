@@ -14,8 +14,8 @@ import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
 import com.openmapper.core.context.OpenMapperSQLContext;
 import com.openmapper.core.query.executors.QueryExecutor;
 import com.openmapper.core.query.model.QuerySpecifications;
+import com.openmapper.core.query.source.mapping.InputMapper;
 import com.openmapper.exceptions.internal.OptimisticLockException;
-import com.openmapper.parser.mapping.InputMapper;
 import com.openmapper.parser.model.SQLRecord;
 
 @Component
@@ -56,7 +56,7 @@ public class QueryFacadeImpl implements QueryFacade {
             try {
                 return executeDaoMethod(query, method, dataSource, querySpecifications);
             } catch (OptimisticLockException optimisticLockException) {
-                if (variables.isLogging()) {
+                if (variables.isLoggingEnabled()) {
                     logger.warn("Cannot execute update due to optimistic lock, trying again...");
                 }
             }

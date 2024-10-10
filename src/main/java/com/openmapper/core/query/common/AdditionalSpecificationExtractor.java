@@ -8,10 +8,10 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.openmapper.annotations.DaoMethod;
-import com.openmapper.common.operations.DmlOperation;
 import com.openmapper.core.query.handlers.ResultSetHandlerStrategy;
 import com.openmapper.core.query.handlers.ResultSetHandler;
 import com.openmapper.core.query.model.QuerySpecifications;
+import com.openmapper.model.operations.DmlOperation;
 
 @Component
 public class AdditionalSpecificationExtractor {

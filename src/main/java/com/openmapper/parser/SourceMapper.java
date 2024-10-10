@@ -1,4 +1,4 @@
-package com.openmapper.parser.mapping;
+package com.openmapper.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
