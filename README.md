@@ -421,7 +421,7 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.5'
 | @DaoMethod            | Method level             | Used for method that executes the query and returns mapped result                                      |
 | @Param                | Argument parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
 | @UseRepository        | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
-
+| @Cached               | Method level             | Used for query cache for this method, ignores configuration `openmapper.query.cache.enabled`           |
 
 ---
 
@@ -436,6 +436,7 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.5'
 | openmapper.sql.tracing.queries.enabled | boolean        | false                              | Tracing sql that will be executed (don't use it in production) |
 | openmapper.logging.enabled             | boolean        | true                               | Enable internal logging                                        |
 | openmapper.input.wrapping.enabled      | boolean        | true                               | Wrapping strings in order to protect from SQL Injections       |
+| openmapper.query.cache.enabled         | boolean        | false                              | Enable global query cache                                      |
 
 ---
 
