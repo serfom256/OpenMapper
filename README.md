@@ -15,22 +15,10 @@ name.of.query={
     select count(*) from users where id=[QUERY_PARAMETER]
 }
 ```
-
-Where `QUERY` - variable to replacement
-
----
-
-## OpenMapper properties:
-
-| Property                        | Value                                   | Type    |
-| ------------------------------- | --------------------------------------- | ------- |
-| openmapper.sql.tracing          | query tracing                           | boolean |
-| openmapper.logging              | events tracing                          | boolean |
-| openmapper.dao.packagesToScan   | packages to scan for @DaoLayer entities | list    |
-| openmapper.model.packagesToScan | packages to scan for @Model entities    | list    |
-| openmapper.fsql.path            | packages with `.fsql` files to scan     | list    |
-
----
+Where:
+- name.of.query - name of sql procedure
+- select count(*) from users... - SQL query
+- [QUERY_PARAMETER] - value to replace when procedure will be executed
 
 ## Code declaration:
 
@@ -41,7 +29,7 @@ Repository declaration:
 @DaoLayer
 public interface MyRepo {
 
-    @DaoMethod(procedure = "name.of.query.from.fsql.file")
+    @DaoMethod(procedure = "name.of.query.from.fsql.file") // this name must be equal with procedure name in .fsql file
     int getUsersCount();
 }
 ```
@@ -69,10 +57,13 @@ public class User {
 
 @Model(primaryKey = "id", joinedBy = "uId")
 public class Course {
+
     @Field(name = "crs.id")
     private int id;
+
     @Field(name = "user_id")
     private int uId;
+
     @Field(name = "data")
     private String data;
 
@@ -90,7 +81,7 @@ select.all.users={
 }
 ```
 
-#### Repository template:
+#### Repository:
 
 ```java
 
@@ -118,7 +109,7 @@ name: name in sql procedure that will be replaced with
 
 ---
 
-## Object mapping relationship:
+## Object relating mapping:
 
 OpenMapper supports different types of entity objects relationship:
 
@@ -126,7 +117,7 @@ OpenMapper supports different types of entity objects relationship:
 - [x] Many-To-One
 - [x] One-To-One
 
-Modeling objects relationship in code:
+Modeling object relations in code:
 
 ### Many To Many:
 
@@ -146,6 +137,8 @@ class User {
 
     @Joined(transients = true)
     List<Course> courses;
+
+    // Getters and setters
 }
 
 @Model(primaryKey = "id")
@@ -162,13 +155,9 @@ class Course {
 
     @Joined(joinBy = "userId", to = "id")
     List<User> users;
-}
 
-interface Repository {
-    @DaoMethod
-    List<User> getAll();
+    // Getters and setters
 }
-
 ```
 
 ### Many To One:
@@ -186,6 +175,8 @@ class User {
 
     @Joined(joinBy = "id", to = "userId")
     private List<Course> courses;
+
+    // Getters and setters
 }
 
 @Model(primaryKey = "id")
@@ -199,11 +190,8 @@ class Course {
 
     @Field
     private String data;
-}
 
-interface Repository {
-    @DaoMethod
-    User getAll();
+    // Getters and setters
 }
 
 ```
@@ -223,6 +211,8 @@ class User {
 
     @Joined(joinBy = "id", to = "userId")
     private Course courses;
+
+    // Getters and setters
 }
 
 @Model(primaryKey = "id")
@@ -236,14 +226,9 @@ class Course {
 
     @Field
     private String data;
+
+    // Getters and setters
 }
-
-interface Repository {
-
-    @DaoMethod
-    User getAll();
-}
-
 ```
 ---
 
@@ -252,35 +237,36 @@ interface Repository {
 
 #### Model example:
 ```java
-    @Model(primaryKey = "id")
-    public class User {
+@Model(primaryKey = "id")
+public class User {
 
-        @Field
-        private int id;
+    @Field
+    private int id;
 
-        @Field
-        private String name;
+    @Field
+    private String name;
 
-        @OptimisticLockField(oldVersion = "oldVersion") // oldVersion - link to previous version to update
-        private long version;
+    @OptimisticLockField(oldVersion = "oldVersion") // oldVersion - link to previous version to update
+    private long version;
 
-        // Getters and setters
+    // Getters and setters
+}
 ```
 
 #### Queries in `.fsql` file:
 
 ```sql
-    updateUser = {
-        update user set name=[name], version=[version] where version = [oldVersion]  and id = [id]
-    }
+updateUser = {
+    update user set name=[name], version=[version] where version = [oldVersion]  and id = [id]
+}
 
-    createUser = {
-        insert into user(id, name, version) values([id], [name], [version])
-    }
+createUser = {
+    insert into user(id, name, version) values([id], [name], [version])
+}
 
-    findUserById = {
-        select * from user where id=[id]
-    }
+findUserById = {
+    select * from user where id=[id]
+}
 ```
 #### Repository example:
 ```java
@@ -299,13 +285,12 @@ public interface Repository {
 #### Service call example:
 
 ```java
+User user = new User(1, "old_name", 1);
+repository.createUser(user); // creating new user with id, name, and default version (if version not specified value will be set to 0)
 
-    User user = new User(1, "old_name", 1);
-    repository.createUser(user); // creating new user with id, name, and default version (if version not specified value will be set to 0)
+repository.updateUser(new User(1, "new_name", user.getVersion())); // updating name and version (user version that equals 1 will be updated to 2)
 
-    repository.updateUser(new User(1, "new_name", user.getVersion())); // updating name and version (user version that equals 1 will be updated to 2)
-
-    System.out.println(repository.findUserById(1)); // will return User(id=1, name=new_name, version=2)
+System.out.println(repository.findUserById(1)); // will return User(id=1, name=new_name, version=2)
 ```
 
 ### If the previous version is higher than current version, the query will fail due to `version could be incremented only`.
@@ -313,11 +298,11 @@ public interface Repository {
 
 ####  This code produces queries below:
 ```sql
-    insert into user(id, name, version) values(1, 'old_name', 1);
+insert into user(id, name, version) values(1, 'old_name', 1);
 
-    update user set name='new_name', version=2 where version = 1 and id = 1;
+update user set name='new_name', version=2 where version = 1 and id = 1;
 
-    select * from user where id = 1;
+select * from user where id = 1;
 ```
 
 ---
@@ -327,24 +312,25 @@ public interface Repository {
 
 #### Model example:
 ```java
-    @Model(primaryKey = "id")
-    public class User {
+@Model(primaryKey = "id")
+public class User {
 
-        @Field
-        private int id;
+    @Field
+    private int id;
 
-        @Field
-        private String name;
+    @Field
+    private String name;
 
-        // Getters and setters
+    // Getters and setters
+}
 ```
 
 #### Queries in `.fsql` file:
 
 ```sql
-    createUser = {
-        insert into user(name, version) values([name])
-    }
+createUser = {
+    insert into user(name, version) values([name])
+}
 ```
 #### Repository example:
 ```java
@@ -357,9 +343,9 @@ public interface Repository {
 
 #### Service call example:
 ```java
-    User user = new User("name", 1);
-    int userId = repository.createUser(user);
-    System.out.println(userId); // will print 1
+User user = new User("name", 1);
+int userId = repository.createUser(user);
+System.out.println(userId); // will print 1
 ```
 
 ---
