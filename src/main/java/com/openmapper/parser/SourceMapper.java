@@ -3,11 +3,15 @@ package com.openmapper.parser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
 
 import com.openmapper.parser.model.SQLRecord;
 import com.openmapper.parser.model.SQLToken;
 
 
+@Component
 public class SourceMapper {
 
     private static final String REGEX = "((?=\\W)|(?<=\\W))";
@@ -26,7 +30,7 @@ public class SourceMapper {
         final String[] tokens = sqlProcedure.split(REGEX);
         final List<SQLToken> tokenList = new ArrayList<>();
 
-        final var variables = new HashMap<String, SQLToken>();
+        final Map<String, SQLToken> variables = new HashMap<>();
         final StringBuilder sequence = new StringBuilder();
 
         while (position < tokens.length) {

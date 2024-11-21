@@ -41,7 +41,6 @@ public class ConcurrentQueryExtractor implements Extractor {
         return parserFactory.getParser(file.getName(), FileUtil.readFile(file)).parse();
     }
 
-
     private List<Future<List<SQLProcedure>>> extractTree(File file) {
         if (canParse(file)) {
             return Collections.singletonList(

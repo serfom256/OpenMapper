@@ -1,6 +1,7 @@
 package com.openmapper.common.reflect;
 
 import com.openmapper.annotations.Param;
+import com.openmapper.annotations.entity.Dto;
 import com.openmapper.annotations.entity.Model;
 import com.openmapper.core.query.model.QuerySpecifications;
 import com.openmapper.core.query.common.AdditionalSpecificationExtractor;
@@ -44,6 +45,11 @@ public class ModelPropertyExtractor {
                 params.putAll(specifications.getParams());
                 querySpecifications.setPreviousOptimisticLockValue(specifications.getGeneratedOptimisticLockValue());
                 querySpecifications.setHasOptimisticLock(specifications.getOptimisticLockName() != null);
+
+            } else if (parameter.getType().getAnnotation(Dto.class) != null) {
+                ModelSpecifications specifications = modelExtractor.extractSpecification(args[i], querySpecifications);
+                params.putAll(specifications.getParams());
+                
             } else {
                 final Param annotation = parameter.getAnnotation(Param.class);
                 params.put(annotation == null ? parameter.getName() : annotation.name(), args[i]);

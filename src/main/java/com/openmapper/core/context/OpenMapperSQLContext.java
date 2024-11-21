@@ -1,6 +1,7 @@
 package com.openmapper.core.context;
 
 import com.openmapper.annotations.DaoMethod;
+import com.openmapper.core.common.DaoMethodFacade;
 import com.openmapper.exceptions.common.FunctionNotFoundException;
 import com.openmapper.parser.model.SQLRecord;
 
@@ -13,22 +14,31 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class OpenMapperSQLContext {
 
-    private final Map<String, SQLRecord> context = new ConcurrentHashMap<>(32);
+    private final Map<String, SQLRecord> context = new ConcurrentHashMap<>();
+
+    private final DaoMethodFacade daoMethodFacade;
+
+    public OpenMapperSQLContext(DaoMethodFacade daoMethodFacade) {
+        this.daoMethodFacade = daoMethodFacade;
+    }
 
     public void updateContext(String name, SQLRecord entity) {
         context.put(name, entity);
     }
 
-    public SQLRecord getSqlProcedure(final String name) {
+    public SQLRecord getSqlProcedure(final Method method, Object[] arguments) {
+        if (daoMethodFacade.hasEmbeddedSqlProcedure(method)) {
+            return daoMethodFacade.extractProcedureFromMethodArguments(method, arguments);
+        }
+        return getSqlProcedure(getProcedureName(method));
+    }
+
+    private SQLRecord getSqlProcedure(final String name) {
         SQLRecord entity = context.get(name);
         if (entity == null) {
             throw new FunctionNotFoundException(name);
         }
         return entity;
-    }
-
-    public SQLRecord getSqlProcedure(final Method method) {
-        return getSqlProcedure(getProcedureName(method));
     }
 
     private String getProcedureName(Method method) {

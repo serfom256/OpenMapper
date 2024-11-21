@@ -23,22 +23,23 @@ import static com.openmapper.config.OpenMapperGlobalConstants.FILE_EXTENSION;
 @Component
 public class ProcedureSourceEnvironmentProcessor implements EnvironmentProcessor {
 
+    private final SourceMapper mapper;
     private final FileContentReader fileContentReader;
     private final OpenMapperGlobalEnvironmentVariables variables;
-
-    private final SourceMapper mapper = new SourceMapper();
     private final OpenMapperSQLContext context;
     private final ResourceLoader resourceLoader;
 
     public ProcedureSourceEnvironmentProcessor(
-            OpenMapperGlobalEnvironmentVariables variables,
+            SourceMapper mapper,
             FileContentReader fileContentReader,
+            OpenMapperGlobalEnvironmentVariables variables,
             OpenMapperSQLContext context,
             ResourceLoader resourceLoader) {
+        this.mapper = mapper;
         this.fileContentReader = fileContentReader;
+        this.variables = variables;
         this.context = context;
         this.resourceLoader = resourceLoader;
-        this.variables = variables;
     }
 
     @Override

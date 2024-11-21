@@ -51,9 +51,9 @@ public class QueryFacadeImpl implements QueryFacade {
     public Object invokeMethodQueryWithParameters(Method method, Object[] args, DataSource dataSource) {
 
         int optimisticLockRetries = OPTIMISTIC_LOCK_RETRIES_DEFAULT_COUNT;
-        SQLRecord result = context.getSqlProcedure(method);
+        SQLRecord sql = context.getSqlProcedure(method, args);
 
-        final QueryParameters queryParameters = queryCacheFacade.getQuery(method, args, result);
+        final QueryParameters queryParameters = queryCacheFacade.getQuery(method, args, sql);
         String query = queryParameters.getQuery();
         QuerySpecifications querySpecifications = queryParameters.getQuerySpecifications();
 
@@ -65,7 +65,7 @@ public class QueryFacadeImpl implements QueryFacade {
                     logger.warn("Cannot execute update due to optimistic lock, trying again...");
                 }
                 modelPropertyExtractor.extractQuerySpecifications(method, args, querySpecifications);
-                query = mapper.mapSql(result, querySpecifications.getParams());
+                query = mapper.mapSql(sql, querySpecifications.getParams());
             }
         }
 

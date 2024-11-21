@@ -349,6 +349,72 @@ System.out.println(userId); // will print 1
 ```
 
 ---
+### Using @Dto annotation:
+
+#### Dto declaration example:
+```java
+@Dto
+public class DtoUser {
+
+    @Field
+    private int id;
+
+    @Field
+    private String name;
+    
+    // Getters and setters
+}
+```
+
+#### Repository example:
+```java
+@DaoLayer
+public interface Repository {
+    @DaoMethod(returnKeys = true, operation = DmlOperation.INSERT)
+    int createUser(DtoUser user);
+}
+```
+
+#### Service call example:
+```java
+DtoUser user = new DtoUser();
+user.setName("user1");
+int userId = repository.createUser(user);
+```
+The main difference between `@Dto` and `@Model` is that @Dto doesn't require primary key specifying, and it cannot be mapped as a query result
+
+---
+### Using @Sql annotation:
+
+#### Repository example:
+```java
+@DaoLayer
+public interface Repository {
+    @DaoMethod(operation = DmlOperation.SELECT)
+    User findUserBy(@Sql query, int id);
+}
+```
+
+#### Service call example:
+```java
+int id = 1;
+boolean usePagination = true;
+boolean useSorting = true;
+
+String query = "SELECT * FROM user WHERE id = [id]";
+
+if (userPagination) {
+    query += "OFFSET 10 LIMIT 10";
+}
+if (useSorting){
+    query += "ORDER BY id DESC";
+}
+
+User user = repository.findUserBy(query, id);
+```
+
+---
+
 
 ### OpenMapper supports Java types from the table below:
 
@@ -383,13 +449,13 @@ System.out.println(userId); // will print 1
 <dependency>
     <groupId>com.openmapper</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>1.3.5</version>
+    <version>version</version>
 </dependency>
 ```
 
 #### Usage with Gradle:
 ```groovy
-implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.5'
+implementation 'com.openmapper:openmapper-spring-boot-starter:version'
 ```
 
 ---
@@ -408,6 +474,8 @@ implementation 'com.openmapper:openmapper-spring-boot-starter:1.3.5'
 | @Param                | Argument parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
 | @UseRepository        | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
 | @Cached               | Method level             | Used for query cache for this method, ignores configuration `openmapper.query.cache.enabled`           |
+| @Sql                  | Argument level level     | Used for specifying custom query as a string                                                           |
+| @Dto                  | Method level             | Used for specifying abstract data type as query parameters                                             |
 
 ---
 

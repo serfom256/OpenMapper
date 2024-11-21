@@ -17,8 +17,13 @@ import java.util.List;
 @Component
 public class EntityResultSetHandler implements ResultSetHandler<Object> {
 
-    private final ResultSetObjectMapper objectMapper = new ResultSetObjectMapper();
-    private final ResultSetPrimitiveMapper primitiveMapper = new ResultSetPrimitiveMapper();
+    private final ResultSetObjectMapper objectMapper;
+    private final ResultSetPrimitiveMapper primitiveMapper;
+
+    public EntityResultSetHandler(ResultSetObjectMapper objectMapper, ResultSetPrimitiveMapper primitiveMapper) {
+        this.objectMapper = objectMapper;
+        this.primitiveMapper = primitiveMapper;
+    }
 
     @Override
     @SuppressWarnings("unchecked")

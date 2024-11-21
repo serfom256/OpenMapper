@@ -17,9 +17,13 @@ import java.util.ArrayList;
 @Component
 public class IterableResultSetHandler implements ResultSetHandler<Iterable<Object>> {
 
-    private final ResultSetObjectMapper objectMapper = new ResultSetObjectMapper();
+    private final ResultSetObjectMapper objectMapper;
+    private final ResultSetPrimitiveMapper primitiveMapper;
 
-    private final ResultSetPrimitiveMapper primitiveMapper = new ResultSetPrimitiveMapper();
+    public IterableResultSetHandler(ResultSetObjectMapper objectMapper, ResultSetPrimitiveMapper primitiveMapper) {
+        this.objectMapper = objectMapper;
+        this.primitiveMapper = primitiveMapper;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -37,5 +41,4 @@ public class IterableResultSetHandler implements ResultSetHandler<Iterable<Objec
             throw new EntityMappingException(e);
         }
     }
-
 }
