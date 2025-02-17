@@ -1,5 +1,6 @@
-package com.openmapper.core.environment.processers;
+package com.openmapper.core.environment.processors;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.openmapper.annotations.entity.Dto;
 import com.openmapper.annotations.entity.Model;
+import com.openmapper.annotations.entity.Nested;
 import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
 import com.openmapper.core.common.ModelSpecificationReader;
 import com.openmapper.core.context.ModelMetadataContext;
@@ -49,7 +51,20 @@ public class ModelEnvironmentProcessor implements EnvironmentProcessor {
         if (variables.isLoggingEnabled()) {
             logger.info("Found model of type: {}", modelClass.getName());
         }
+        if (modelMetadataContext.isRegistered(modelClass)) {
+            return;
+        }
         ModelMetadata modelMetadata = modelSpecificationReader.readModelMetadata(modelClass);
         modelMetadataContext.registerModel(modelClass, modelMetadata);
+        processModelNestedFields(modelClass);
+    }
+
+    private void processModelNestedFields(Class<?> modelClass) {
+        Field[] declaredFields = modelClass.getDeclaredFields();
+        for (Field field : declaredFields) {
+            if (field.isAnnotationPresent(Nested.class)) {
+                addModelToContext(field.getType());
+            }
+        }
     }
 }

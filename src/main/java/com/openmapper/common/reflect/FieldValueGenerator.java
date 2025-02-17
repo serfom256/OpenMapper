@@ -20,7 +20,7 @@ public class FieldValueGenerator {
 
     public Object getNextOptimisticLockFieldValue(Object previousValue) {
         if (previousValue == null) {
-            return 0; // TODO get minimum value from bean
+            return 0;
         }
 
         return supportedValueActions

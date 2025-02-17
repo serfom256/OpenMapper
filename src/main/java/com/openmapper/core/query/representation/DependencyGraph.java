@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DependencyGraph {
 
+    @Nullable
     public Object createDependencyGraph(Graph graph,
             Class<?> thisType,
             Class<?> returnType,
@@ -26,6 +28,9 @@ public class DependencyGraph {
         }
 
         final Map<Object, Object> returnObject = graph.get(thisType);
+        if (returnObject == null) {
+            return null;
+        }
 
         final Field[] declaredFields = thisType.getDeclaredFields();
         final List<Object> joinedObjects = new ArrayList<>();
@@ -53,7 +58,7 @@ public class DependencyGraph {
                 }
             }
             if (joinedField != null) {
-                if (ObjectUtils.getFieldValue(entity, joinedField).equals(joinedBy)){
+                if (ObjectUtils.getFieldValue(entity, joinedField).equals(joinedBy)) {
                     joinedObjects.add(entity);
                 }
             } else {
@@ -81,11 +86,16 @@ public class DependencyGraph {
         return mapManyToOneRelationship(graph, thisType, joinedByValue, joinedField);
     }
 
+    @Nullable
     private List<Object> mapManyToManyRelationship(Graph graph,
             Class<?> thisType,
             Object joinedByValue,
             String joinedField) {
         Map<Object, Object> returnObject = graph.get(thisType);
+        if (returnObject == null) {
+            return null;
+        }
+
         final List<Object> result = new ArrayList<>(5);
         for (Map.Entry<Object, Object> entry : returnObject.entrySet()) {
             if (ObjectUtils.getFieldValue(entry.getValue(), joinedField).equals(joinedByValue)) {
@@ -95,8 +105,13 @@ public class DependencyGraph {
         return result;
     }
 
+    @Nullable
     private Object mapManyToOneRelationship(Graph graph, Class<?> thisType, Object joinedByValue, String joinedField) {
         Map<Object, Object> returnObject = graph.get(thisType);
+        if (returnObject == null) {
+            return null;
+        }
+
         for (Map.Entry<Object, Object> entry : returnObject.entrySet()) {
             if (ObjectUtils.getFieldValue(entry.getValue(), joinedField).equals(joinedByValue)) {
                 return entry.getValue();

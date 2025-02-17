@@ -1,13 +1,18 @@
 package com.openmapper.core.query.model;
 
 import java.lang.reflect.Type;
+import java.sql.Connection;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import com.openmapper.core.query.handlers.ResultSetHandler;
 import com.openmapper.model.operations.DmlOperation;
 
 public class QuerySpecifications {
 
+    private DataSource dataSource;
+    private Connection connection;
     private ResultSetHandler<?> handler;
     private Type returnType;
     private DmlOperation operation;
@@ -15,6 +20,14 @@ public class QuerySpecifications {
     private Object previousOptimisticLockValue;
     private boolean hasOptimisticLock;
     private Map<String, Object> params;
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
 
     public ResultSetHandler<?> getHandler() {
         return handler;
@@ -38,6 +51,14 @@ public class QuerySpecifications {
 
     public boolean hasOptimisticLock() {
         return hasOptimisticLock;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
     public void setHandler(ResultSetHandler<?> handler) {

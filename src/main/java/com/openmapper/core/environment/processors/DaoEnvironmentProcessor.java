@@ -1,4 +1,4 @@
-package com.openmapper.core.environment.processers;
+package com.openmapper.core.environment.processors;
 
 import com.openmapper.config.OpenMapperGlobalEnvironmentVariables;
 import com.openmapper.annotations.DaoLayer;

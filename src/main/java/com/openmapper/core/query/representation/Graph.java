@@ -2,16 +2,19 @@ package com.openmapper.core.query.representation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * Graph represents mapped class type <-> primary-key <-> entity instance association
+ * Graph represents mapped class type <-> primary-key <-> entity instance
+ * association
  */
 public class Graph {
 
-    private final Map<Class<?>, Map<Object, Object>> entityGraph;
+    private final Map<Class<?>, Map<Object, Object>> entityGraph = new HashMap<>(4);
+    private final Set<String> availableColumns;
 
-    public Graph() {
-        this.entityGraph = new HashMap<>(4);
+    public Graph(Set<String> availableColumns) {
+        this.availableColumns = availableColumns;
     }
 
     public Map<Object, Object> getIfAbsent(final Class<?> clazz) {
@@ -26,4 +29,7 @@ public class Graph {
         return entityGraph.isEmpty();
     }
 
+    public boolean containsColumn(String name) {
+        return availableColumns.contains(name);
+    }
 }

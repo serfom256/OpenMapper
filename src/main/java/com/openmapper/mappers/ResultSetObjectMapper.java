@@ -16,8 +16,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +37,7 @@ public class ResultSetObjectMapper implements ResultSetMapper {
     @Override
     public Object extract(Type concreteType, Class<?> returnClass, Class<?> actualReturnClass, ResultSet resultSet)
             throws SQLException {
-        final Graph graph = new Graph();
+        final Graph graph = new Graph(getColumnsSet(resultSet));
 
         while (resultSet.next()) {
             extract(returnClass, concreteType, resultSet, graph, new HashSet<>(8));
@@ -43,7 +45,12 @@ public class ResultSetObjectMapper implements ResultSetMapper {
         if (graph.isEmpty())
             return null;
 
-        return dependencyGraph.createDependencyGraph(graph, returnClass, actualReturnClass, null, null,
+        return dependencyGraph.createDependencyGraph(
+                graph,
+                returnClass,
+                actualReturnClass,
+                null,
+                null,
                 new HashSet<>(8));
     }
 
@@ -55,17 +62,19 @@ public class ResultSetObjectMapper implements ResultSetMapper {
             Set<Class<?>> usedTypes) {
         targetType = ObjectUtils.getInnerClassType(targetType, actualType);
 
-        if (usedTypes.contains(targetType))
+        if (usedTypes.contains(targetType)) {
             return;
+        }
+
+        Map<Field, Annotation> annotatedFields = getFieldsMap(targetType, graph);
+        if (!filterAndCheckMappedFields(annotatedFields, graph)) {
+            return;
+        }
 
         final Object entityInstance = ObjectUtils.createNewInstance(targetType);
         final Map<Object, Object> entityMap = graph.getIfAbsent(targetType);
 
         usedTypes.add(targetType);
-
-        ModelMetadata modelMetadata = modelMetadataContext.getMetadataByType(targetType);
-
-        Map<Field, Annotation> annotatedFields = modelMetadata.getAnnotatedFields();
 
         for (Map.Entry<Field, Annotation> entry : annotatedFields.entrySet()) {
             final Class<? extends Annotation> annotationType = entry.getValue().annotationType();
@@ -73,28 +82,48 @@ public class ResultSetObjectMapper implements ResultSetMapper {
             final Annotation annotation = entry.getValue();
 
             if (annotationType.equals(com.openmapper.annotations.entity.Field.class)) {
-                com.openmapper.annotations.entity.Field fieldAnnotation = (com.openmapper.annotations.entity.Field) annotation;
-                final String column = getFieldNameOrDefault(f, fieldAnnotation.name());
+                var fieldAnnotation = (com.openmapper.annotations.entity.Field) annotation;
+                String column = getFieldNameOrDefault(f, fieldAnnotation.name());
                 modifyField(f, entityInstance, resultSet, column);
 
             } else if (annotationType.equals(OptimisticLockField.class)) {
-                final String column = getFieldNameOrDefault(f, ((OptimisticLockField) annotation).name());
+                String column = getFieldNameOrDefault(f, ((OptimisticLockField) annotation).name());
                 modifyField(f, entityInstance, resultSet, column);
 
             } else if (annotationType.equals(Joined.class)) {
                 extract(f.getType(), f.getGenericType(), resultSet, graph, usedTypes);
-                
+
             } else if (annotationType.equals(Nested.class)) {
                 ObjectUtils.modifyFieldValue(f,
-                        fld -> fld.set(entityInstance, extractNestedEntity(f.getType(), resultSet)));
+                        fld -> fld.set(entityInstance, extractNested(f.getType(), resultSet, graph)));
             }
         }
-
-        final Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance,
-                targetType.getAnnotation(Model.class).primaryKey());
+        String pk = targetType.getAnnotation(Model.class).primaryKey();
+        final Object primaryKeyValue = ObjectUtils.getFieldValue(entityInstance, pk);
 
         entityMap.put(primaryKeyValue, entityInstance);
         usedTypes.remove(targetType);
+    }
+
+    private Object extractNested(Class<?> concreteType, ResultSet resultSet, Graph graph) { // TODO fix mapping
+
+        Map<Field, Annotation> annotatedFields = getFieldsMap(concreteType, graph);
+        if (!filterAndCheckMappedFields(annotatedFields, graph)) {
+            return null;
+        }
+
+        final Object entityInstance = ObjectUtils.createNewInstance(concreteType);
+
+        for (Field f : entityInstance.getClass().getDeclaredFields()) {
+            var annotation = f.getAnnotation(com.openmapper.annotations.entity.Field.class);
+            if (annotation != null) {
+                String column = getFieldNameOrDefault(f, annotation.name());
+                Object value = ResultSetUtils.extractFromResultSet(f.getType(), resultSet, column);
+                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, value));
+            }
+        }
+
+        return entityInstance;
     }
 
     private void modifyField(Field f, Object entityInstance, ResultSet resultSet, String column) {
@@ -102,23 +131,45 @@ public class ResultSetObjectMapper implements ResultSetMapper {
         ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance, valueFromResultSet));
     }
 
-    private Object extractNestedEntity(Class<?> concreteType, ResultSet resultSet) { // TODO fix mapping
-        final Object entityInstance = ObjectUtils.createNewInstance(concreteType);
-
-        for (Field f : entityInstance.getClass().getDeclaredFields()) {
-            com.openmapper.annotations.entity.Field annotation = f
-                    .getAnnotation(com.openmapper.annotations.entity.Field.class);
-            if (annotation != null) {
-                final String column = getFieldNameOrDefault(f, annotation.name());
-                ObjectUtils.modifyFieldValue(f, fld -> fld.set(entityInstance,
-                        ResultSetUtils.extractFromResultSet(f.getType(), resultSet, column)));
-            }
-        }
-
-        return entityInstance;
-    }
-
     private String getFieldNameOrDefault(Field field, String defaultName) {
         return defaultName.isEmpty() ? field.getName() : defaultName;
+    }
+
+    private Set<String> getColumnsSet(ResultSet rs) throws SQLException {
+        ResultSetMetaData rsMeta = rs.getMetaData();
+        int columnCount = rsMeta.getColumnCount();
+
+        Set<String> columnSet = new HashSet<>();
+        for (int i = 1; i <= columnCount; i++) {
+            columnSet.add(rsMeta.getColumnLabel(i));
+        }
+        return columnSet;
+    }
+
+    private boolean filterAndCheckMappedFields(Map<Field, Annotation> annotatedFields, Graph graph) {
+        Iterator<Map.Entry<Field, Annotation>> iterator = annotatedFields.entrySet().iterator();
+        boolean shouldMap = false;
+        
+        while (iterator.hasNext()) {
+            Map.Entry<Field, Annotation> e = iterator.next();
+            if (e.getValue() instanceof com.openmapper.annotations.entity.Field) {
+                var mappedField = (com.openmapper.annotations.entity.Field) e.getValue();
+                if (!shouldMap(e.getKey(), mappedField.name(), graph)) {
+                    iterator.remove();
+                } else {
+                    shouldMap = true;
+                }
+            }
+        }
+        return shouldMap;
+    }
+
+    private boolean shouldMap(Field f, String columnName, Graph graph) {
+        return graph.containsColumn(getFieldNameOrDefault(f, columnName));
+    }
+
+    private Map<Field, Annotation> getFieldsMap(Class<?> targetType, Graph graph) {
+        ModelMetadata modelMetadata = modelMetadataContext.getMetadataByType(targetType);
+        return modelMetadata.getAnnotatedFields();
     }
 }

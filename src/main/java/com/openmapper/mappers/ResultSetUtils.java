@@ -1,6 +1,5 @@
 package com.openmapper.mappers;
 
-
 import com.openmapper.exceptions.internal.InvalidResultCountException;
 import com.openmapper.exceptions.internal.ResultSetExtractionException;
 
@@ -105,8 +104,8 @@ public class ResultSetUtils {
 
     private static void checkConstraints(ResultSet resultSet) throws SQLException {
         if (resultSet.getMetaData().getColumnCount() != 1) {
-            throw new InvalidResultCountException("Invalid result set length. Expected 1 got: " + resultSet.getMetaData().getColumnCount());
+            throw new InvalidResultCountException(
+                    "Invalid result set length. Expected 1 got: " + resultSet.getMetaData().getColumnCount());
         }
     }
-
 }

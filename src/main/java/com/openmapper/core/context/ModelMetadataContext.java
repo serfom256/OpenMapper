@@ -19,4 +19,8 @@ public class ModelMetadataContext {
     public ModelMetadata getMetadataByType(Class<?> modelClass) {
         return concurrentHashMap.getOrDefault(modelClass, emptyModelMetadata);
     }
+
+    public boolean isRegistered(Class<?> modeClass) {
+        return concurrentHashMap.containsKey(modeClass);
+    }
 }

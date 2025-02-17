@@ -1,4 +1,4 @@
-package com.openmapper.core.environment.processers;
+package com.openmapper.core.environment.processors;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

@@ -49,7 +49,7 @@ public class QueryFacadeImpl implements QueryFacade {
 
     @Override
     public Object invokeMethodQueryWithParameters(Method method, Object[] args, DataSource dataSource) {
-
+        // TODO throw exception if nothing found and mapping types are different
         int optimisticLockRetries = OPTIMISTIC_LOCK_RETRIES_DEFAULT_COUNT;
         SQLRecord sql = context.getSqlProcedure(method, args);
 
@@ -57,9 +57,11 @@ public class QueryFacadeImpl implements QueryFacade {
         String query = queryParameters.getQuery();
         QuerySpecifications querySpecifications = queryParameters.getQuerySpecifications();
 
+        querySpecifications.setDataSource(dataSource);
+
         while (optimisticLockRetries-- > 0) {
             try {
-                return executeDaoMethod(query, method, dataSource, querySpecifications);
+                return executeDaoMethod(query, method, querySpecifications);
             } catch (OptimisticLockException optimisticLockException) {
                 if (variables.isLoggingEnabled()) {
                     logger.warn("Cannot execute update due to optimistic lock, trying again...");
@@ -75,9 +77,8 @@ public class QueryFacadeImpl implements QueryFacade {
     private Object executeDaoMethod(
             String query,
             Method method,
-            DataSource dataSource,
             QuerySpecifications querySpecifications) {
-        Object result = queryExecutor.execute(dataSource, query, querySpecifications);
+        Object result = queryExecutor.execute(query, querySpecifications);
 
         return method.getReturnType() == Optional.class ? Optional.ofNullable(result) : result;
     }
