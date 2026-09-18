@@ -1,0 +1,26 @@
+package io.github.serfom256.core.query.executors;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
+import io.github.serfom256.core.query.executors.operations.DatabaseOperation;
+import io.github.serfom256.model.operations.DmlOperation;
+
+public class QueryExecutionStrategy {
+
+    private final Map<DmlOperation, DatabaseOperation> databaseOperations = new EnumMap<>(DmlOperation.class);
+
+    public QueryExecutionStrategy(List<DatabaseOperation> databaseOperationList) {
+        databaseOperationList.forEach(operation -> operation.getSupportedOperations()
+                .forEach(opType -> databaseOperations.put(opType, operation)));
+    }
+
+    public DatabaseOperation getOperationByType(DmlOperation operation) {
+        DatabaseOperation databaseOperation = databaseOperations.get(operation);
+        if (databaseOperation == null) {
+            throw new IllegalStateException("DatabaseOperation not found for operation type: %s".formatted(operation));
+        }
+        return databaseOperation;
+    }
+}

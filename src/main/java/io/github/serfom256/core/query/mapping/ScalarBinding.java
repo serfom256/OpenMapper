@@ -1,0 +1,74 @@
+package io.github.serfom256.core.query.mapping;
+
+import io.github.serfom256.mappers.ResultSetUtils;
+
+import java.lang.invoke.MethodHandle;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/** Binds one result-set column to one scalar field of an entity. */
+final class ScalarBinding {
+
+    private final String fieldName;
+    private final String column;
+    private final MethodHandle setter;
+    private final ResultSetUtils.ColumnExtractor extractor;
+    private final Class<?> fieldType;
+
+    ScalarBinding(String fieldName, String column, MethodHandle setter,
+                  ResultSetUtils.ColumnExtractor extractor, Class<?> fieldType) {
+        this.fieldName = fieldName;
+        this.column = column;
+        this.setter = setter;
+        this.extractor = extractor;
+        this.fieldType = fieldType;
+    }
+
+    Class<?> fieldType() {
+        return fieldType;
+    }
+
+    Object defaultValue() {
+        if (!fieldType.isPrimitive()) {
+            return null;
+        }
+        if (fieldType == boolean.class) {
+            return Boolean.FALSE;
+        }
+        if (fieldType == char.class) {
+            return (char) 0;
+        }
+        if (fieldType == long.class) {
+            return 0L;
+        }
+        if (fieldType == float.class) {
+            return 0f;
+        }
+        if (fieldType == double.class) {
+            return 0d;
+        }
+        if (fieldType == byte.class) {
+            return (byte) 0;
+        }
+        if (fieldType == short.class) {
+            return (short) 0;
+        }
+        return 0;
+    }
+
+    String fieldName() {
+        return fieldName;
+    }
+
+    String column() {
+        return column;
+    }
+
+    Object read(ResultSet resultSet) throws SQLException {
+        return extractor.extract(resultSet, column);
+    }
+
+    void apply(Object instance, ResultSet resultSet) throws SQLException {
+        ReflectiveAccessors.set(setter, instance, extractor.extract(resultSet, column));
+    }
+}

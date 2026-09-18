@@ -1,0 +1,188 @@
+# Simple entity operations
+findProductById = {
+    SELECT id, name, price, quantity, description FROM product WHERE id = [id]
+}
+
+findProducts = {
+    SELECT id, name, price, quantity, description FROM product ORDER BY id LIMIT [limit]
+}
+
+findByName = {
+    SELECT id, name, price, quantity, description FROM product WHERE name = [name]
+}
+
+insertProduct = {
+    INSERT INTO product (name, price, quantity, description) VALUES ([name], [price], [quantity], [description])
+}
+
+updateProduct = {
+    UPDATE product SET name = [name], price = [price], quantity = [quantity], description = [description] WHERE id = [id]
+}
+
+deleteProduct = {
+    DELETE FROM product WHERE id = [id]
+}
+
+# One-to-One: User with Profile
+findUserWithProfile = {
+    SELECT u.id, u.username, u.email, p.id as profile_id, p.user_id, p.bio, p.avatar_url FROM bench_user u LEFT JOIN user_profile p ON u.id = p.user_id WHERE u.id = [id]
+}
+
+# One-to-Many: Author with Books
+findAuthorWithBooks = {
+    SELECT a.id, a.name, a.country, b.id as book_id, b.title, b.author_id, b.published_year, b.isbn FROM author a LEFT JOIN book b ON a.id = b.author_id WHERE a.id = [id]
+}
+
+updateAuthor = {
+    UPDATE author SET name = [name], country = [country] WHERE id = [id]
+}
+
+deleteAuthor = {
+    DELETE FROM author WHERE id = [id]
+}
+
+# Optimistic locking
+insertVersionedItem = {
+    INSERT INTO versioned_item (name, version) VALUES ([name], [version])
+}
+
+findVersionedItemById = {
+    SELECT id, name, version FROM versioned_item WHERE id = [id]
+}
+
+updateVersionedItem = {
+    UPDATE versioned_item SET name = [name], version = [version] WHERE id = [id] AND version = [old_version]
+}
+
+findProductsByIds = {
+    SELECT id, name, price, quantity, description FROM product WHERE id IN ([ids]) ORDER BY id
+}
+
+findAllAuthorsWithBooks = {
+    SELECT a.id, a.name, a.country, b.id as book_id, b.title, b.author_id FROM author a LEFT JOIN book b ON a.id = b.author_id ORDER BY a.id
+}
+
+findAllAuthorsWithBooksUnordered = {
+    SELECT a.id, a.name, a.country, b.id as book_id, b.title, b.author_id FROM author a LEFT JOIN book b ON a.id = b.author_id ORDER BY b.id
+}
+
+findProductsPaged = {
+    SELECT id, name, price, quantity, description FROM product WHERE name = [name] ORDER BY id LIMIT [limit] OFFSET [offset]
+}
+
+countProductsByName = {
+    SELECT count(*) FROM product WHERE name = [name]
+}
+
+insertAuthorReturningId = {
+    INSERT INTO author (name, country) VALUES ([name], [country])
+}
+
+insertBookForAuthor = {
+    INSERT INTO book (title, author_id, published_year, isbn) VALUES ([title], [author_id], [published_year], [isbn])
+}
+
+upsertInventory = {
+    INSERT INTO inventory (sku, quantity, version) VALUES ([sku], [quantity], [version]) ON CONFLICT (sku) DO UPDATE SET quantity = [quantity], version = [version] WHERE inventory.version = [old_version]
+}
+
+findInventory = {
+    SELECT sku, quantity, version FROM inventory WHERE sku = [sku]
+}
+
+findAuthorWithBookCount = {
+    SELECT a.id, a.name, a.country, (SELECT count(*) FROM book b WHERE b.author_id = a.id) AS book_count FROM author a WHERE a.id = [id]
+}
+
+insertAuthorComputed = {
+    INSERT INTO author (name, country) VALUES ([name], [country])
+}
+
+insertTask = {
+    INSERT INTO task (title, status, priority) VALUES ([title], [status], [priority])
+}
+
+findTaskById = {
+    SELECT id, title, status, priority FROM task WHERE id = [id]
+}
+
+findTasksByStatus = {
+    SELECT id, title, status, priority FROM task WHERE status = [status] ORDER BY id
+}
+
+findStudentWithCourses = {
+    SELECT s.id, s.name, c.id AS course_id, c.title FROM student s LEFT JOIN student_course sc ON s.id = sc.student_id LEFT JOIN course c ON c.id = sc.course_id WHERE s.id = [id] ORDER BY s.id
+}
+
+insertStudent = {
+    INSERT INTO student (name) VALUES ([name])
+}
+
+linkStudentCourse = {
+    INSERT INTO student_course (student_id, course_id) VALUES ([student_id], [course_id])
+}
+
+insertAuditedNote = {
+    INSERT INTO audited_note (created_by, body) VALUES ([created_by], [body])
+}
+
+findAuditedNoteById = {
+    SELECT id, created_by, body FROM audited_note WHERE id = [id]
+}
+
+insertCatalogItem = {
+    INSERT INTO catalog_item (item_type, name, bundle_size, sku_code) VALUES ([item_type], [name], [bundle_size], [sku_code])
+}
+
+findCatalogItemsByName = {
+    SELECT id, item_type, name, bundle_size, sku_code FROM catalog_item WHERE name = [name] ORDER BY id
+}
+
+insertJoinedItem = {
+    INSERT INTO joined_item (item_type, name) VALUES ([item_type], [name])
+}
+
+insertJoinedBundle = {
+    INSERT INTO joined_bundle (item_id, bundle_size) VALUES ([item_id], [bundle_size])
+}
+
+insertJoinedSku = {
+    INSERT INTO joined_sku (item_id, sku_code) VALUES ([item_id], [sku_code])
+}
+
+findJoinedItemsByName = {
+    SELECT i.id, i.item_type, i.name, b.bundle_size, s.sku_code
+    FROM joined_item i
+    LEFT JOIN joined_bundle b ON b.item_id = i.id
+    LEFT JOIN joined_sku s ON s.item_id = i.id
+    WHERE i.name = [name]
+    ORDER BY i.id
+}
+
+insertTicket = {
+    INSERT INTO ticket (id, title) VALUES ([id], [title])
+}
+
+insertTicketComment = {
+    INSERT INTO ticket_comment (comment_id, ticket_id, body) VALUES ([comment_id], [ticket_id], [body])
+}
+
+findTicketById = {
+    SELECT t.id, t.title, c.comment_id, c.ticket_id, c.body
+    FROM ticket t LEFT JOIN ticket_comment c ON c.ticket_id = t.id
+    WHERE t.id = [id] ORDER BY t.id
+}
+
+findProductsExcludingIds = {
+    SELECT id, name, price, quantity, description FROM product
+    WHERE description = [description] AND id NOT IN ([ids]) ORDER BY id
+}
+
+insertJsonDoc = {
+    INSERT INTO json_doc (name, attributes, tags, spec, payload)
+    VALUES ([name], [attributes], [tags], [spec], CAST([payload] AS JSONB))
+}
+
+findJsonDocByName = {
+    SELECT id, name, attributes, tags, spec, payload FROM json_doc WHERE name = [name]
+}

@@ -1,0 +1,22 @@
+# Test configuration for OpenMapper integration tests.
+# This is how a real consumer configures the starter: standard Spring properties
+# bound to the Environment, which OpenMapperGlobalEnvironmentVariables reads.
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+
+openmapper:
+  dao:
+    packagesToScan: io.github.serfom256.benchmark
+  query:
+    cache:
+      enabled: false
+  logging:
+    enabled: false
+  sql:
+    tracing:
+      enabled: false
+      queries:
+        enabled: false
