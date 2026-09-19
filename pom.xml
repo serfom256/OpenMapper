@@ -42,14 +42,9 @@
 
         <reflections.version>0.10.2</reflections.version>
         <jspecify.version>1.0.0</jspecify.version>
-        <!-- Must be at least the Kotlin used by the newest supported Boot line: a
-             compiler cannot read metadata newer than itself, and Boot 4 ships 2.2.
-             Newer compilers read older metadata, so one version covers every leg. -->
         <kotlin.version>2.2.21</kotlin.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <jackson3.version>3.0.4</jackson3.version>
-        <!-- Jackson 3 needs JsonFormat.Shape.POJO, added in jackson-annotations 2.19.
-             Boot 3.0 pins 2.14, so the matrix must raise it to exercise that codec. -->
         <jackson.annotations.version>2.19.4</jackson.annotations.version>
 
         <jmh.version>1.37</jmh.version>
@@ -61,7 +56,7 @@
         <source.plugin.version>3.3.1</source.plugin.version>
         <javadoc.plugin.version>3.11.2</javadoc.plugin.version>
         <gpg.plugin.version>3.2.7</gpg.plugin.version>
-        <central.publishing.plugin.version>0.7.0</central.publishing.plugin.version>
+        <central.publishing.plugin.version>0.11.0</central.publishing.plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -242,8 +237,6 @@
     </build>
 
     <profiles>
-        <!-- Everything Maven Central requires but a normal build should not pay for:
-             sources, javadoc, signatures and the upload itself. Activate with -Prelease. -->
         <profile>
             <id>release</id>
             <build>
