@@ -21,13 +21,6 @@ import io.github.serfom256.mappers.ModelExtractor;
 import io.github.serfom256.mappers.ResultSetObjectMapper;
 import io.github.serfom256.mappers.ResultSetPrimitiveMapper;
 
-/**
- * Result-set to model mapping, and the reflective helpers behind it.
- *
- * <p>{@link Serializer} is optional: it exists only when a Jackson codec is on
- * the classpath, so it is resolved through an {@link ObjectProvider} rather than
- * declared as a hard dependency.
- */
 @Configuration(proxyBeanMethods = false)
 public class OpenMapperMappingConfiguration {
 

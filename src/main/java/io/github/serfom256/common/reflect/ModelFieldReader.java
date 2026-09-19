@@ -9,18 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.serfom256.exceptions.entity.EntityFieldAccessException;
 
-/**
- * Reads mapped field values off an entity when building a statement's bind
- * parameters.
- *
- * <p>Each field is resolved to a {@link MethodHandle} once and reused, mirroring
- * what {@link io.github.serfom256.core.query.mapping.MappingPlan} does on the read
- * side. The previous approach called {@code setAccessible(true)}, read the
- * value, then {@code setAccessible(false)} on every field of every entity of
- * every write. Besides the cost, {@code setAccessible} mutates state shared
- * across threads, so two threads writing the same entity type could clear the
- * flag out from under each other.
- */
 public class ModelFieldReader {
 
     private final Map<Field, MethodHandle> getters = new ConcurrentHashMap<>();

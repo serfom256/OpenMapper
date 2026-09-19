@@ -69,7 +69,6 @@ class JdbcQueryExecutorTest {
 
         executor.execute(new BoundSql("SELECT * FROM t WHERE a = ? AND b = ?", List.of("x' OR '1'='1", 42)), specs);
 
-        // values are bound, never concatenated into the SQL text
         verify(preparedStatement).setObject(1, "x' OR '1'='1");
         verify(preparedStatement).setObject(2, 42);
     }
@@ -94,8 +93,6 @@ class JdbcQueryExecutorTest {
 
     @Test
     void execute_withoutGeneratedKeys_usesThePlainOverload() throws SQLException {
-        // Passing 0 to prepareStatement(String, int) is not a JDBC constant: HSQLDB
-        // rejects it outright, so the no-keys path must use the single-argument form.
         when(dataSource.getConnection()).thenReturn(connection);
         when(connection.prepareStatement("SELECT 1")).thenReturn(preparedStatement);
         when(strategy.getOperationByType(DmlOperation.SELECT)).thenReturn(dbOperation);

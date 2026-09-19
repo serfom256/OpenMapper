@@ -7,14 +7,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * End-to-end proof that string parameters are bound, not concatenated. Before
- * the
- * parameterised-query fix, an injection payload in a String parameter altered
- * the
- * executed SQL (e.g. returning every row); now it is treated as a literal
- * value.
- */
 class SqlInjectionTest extends IntegrationTestBase {
 
     @Test
@@ -28,9 +20,6 @@ class SqlInjectionTest extends IntegrationTestBase {
 
     @Test
     void findByName_injectionPayload_isTreatedAsLiteral() {
-        // Classic "OR '1'='1" auth-bypass payload. With string concatenation this
-        // returned the entire table; with bind parameters it matches a literal name
-        // that does not exist, so it returns nothing.
         List<ProductOM> result = productDao.findByName("x' OR '1'='1");
         assertTrue(result.isEmpty(),
                 "injection payload must not return any rows — it should be a literal value");

@@ -4,15 +4,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 
-/**
- * Raises the exception a DAO method asked for when its query matched no row.
- *
- * <p>Whether to translate at all, and to what, is decided once when the method's
- * {@link io.github.serfom256.core.query.method.DaoMethodPlan} is built -- including
- * skipping return types that already express absence. This class only acts on
- * that decision, so nothing here runs on the hot path unless a query really did
- * come back empty.
- */
 public class NotFoundTranslator {
 
     private static final String NOT_FOUND_MESSAGE = "No result found for %s.%s()";
@@ -25,10 +16,6 @@ public class NotFoundTranslator {
             "%s is a checked exception, so %s.%s() must declare it in a throws clause"
                     + " (or use an unchecked exception instead)";
 
-    /**
-     * Throws the configured exception when {@code result} is absent and the
-     * method opted into translation; otherwise returns normally.
-     */
     public void translateIfAbsent(Class<? extends Throwable> notFoundException, Method method, Object result) {
         if (result != null || notFoundException == null) {
             return;

@@ -8,10 +8,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Lazily builds and caches one {@link MappingPlan} per entity type. Plans are
- * immutable and reused across all queries, so each type is compiled at most once.
- */
 public class MappingPlanRegistry {
 
     private final Map<Class<?>, MappingPlan> plans = new ConcurrentHashMap<>();

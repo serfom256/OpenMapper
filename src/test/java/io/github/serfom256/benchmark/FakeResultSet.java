@@ -7,15 +7,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.Map;
 
-/**
- * Minimal in-memory {@link ResultSet} over a single row, for benchmarks that
- * measure mapping rather than the database.
- *
- * <p>A mock framework is unusable here: stubbing costs far more than the mapping
- * being measured, and re-stubbing inside a benchmark method swamps the result
- * entirely. A dynamic proxy adds a constant that is identical for every mapping
- * strategy, so comparisons between them stay meaningful.
- */
 public final class FakeResultSet {
 
     private FakeResultSet() {

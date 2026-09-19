@@ -17,14 +17,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import io.github.serfom256.benchmark.model.om.ProductOM;
 
-/**
- * Verifies that DAO calls join an enclosing Spring transaction.
- *
- * <p>Assertions about what actually reached the database are made through
- * {@link IntegrationTestBase#existsInDb}, which uses its own pooled connection.
- * Checking from inside the transaction would pass whether or not openMapper
- * joined it.
- */
 class TransactionOperationsTest extends IntegrationTestBase {
 
     @Autowired

@@ -38,10 +38,6 @@ import io.github.serfom256.core.query.source.mapping.impl.InputMapperImpl;
 import io.github.serfom256.mappers.ResultSetObjectMapper;
 import io.github.serfom256.mappers.ResultSetPrimitiveMapper;
 
-/**
- * The query pipeline: statement building, execution strategy, result-set
- * handling, and the caching facade in front of it.
- */
 @Configuration(proxyBeanMethods = false)
 public class OpenMapperQueryConfiguration {
 

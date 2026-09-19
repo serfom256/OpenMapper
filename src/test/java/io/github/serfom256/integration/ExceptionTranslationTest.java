@@ -8,11 +8,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import io.github.serfom256.benchmark.model.om.ProductOM;
 
-/**
- * Database failures surface as Spring's {@code DataAccessException} hierarchy,
- * so callers handle them the same way they would with JPA or {@code JdbcTemplate}
- * rather than catching an openMapper-specific type.
- */
 class ExceptionTranslationTest extends IntegrationTestBase {
 
     @Test

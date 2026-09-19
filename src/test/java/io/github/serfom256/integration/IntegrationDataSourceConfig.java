@@ -9,13 +9,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
-/**
- * Supplies the Testcontainers-backed DataSource to the integration test context.
- * Providing this bean makes Spring Boot's DataSourceAutoConfiguration back off,
- * and {@link DatabaseSetup#initialize()} ensures the schema and seed data exist
- * before the DataSource is used. Gated to the {@code it} profile so it never
- * leaks into the benchmark contexts.
- */
 @TestConfiguration
 @Profile("it")
 public class IntegrationDataSourceConfig {

@@ -24,16 +24,11 @@ public class ResultSetUtils {
         Object extract(ResultSet resultSet, String name) throws SQLException;
     }
 
-    /** Reads a single column of a known type from a result set. */
     @FunctionalInterface
     public interface ColumnExtractor {
         Object extract(ResultSet resultSet, String column) throws SQLException;
     }
 
-    /**
-     * Resolves the column extractor for a Java type once, so callers can cache it
-     * instead of doing a type lookup per row. Fails fast for unsupported types.
-     */
     public static ColumnExtractor extractorForColumn(Class<?> type) {
         ResultSetExtractorByColumn extractor = RESULT_SET_TYPES_BY_NAME.get(type);
         if (extractor == null) {

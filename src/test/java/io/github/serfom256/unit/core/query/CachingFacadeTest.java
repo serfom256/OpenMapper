@@ -78,8 +78,6 @@ class CachingFacadeTest {
         Method m = TestDao.class.getDeclaredMethod("find", long.class);
         QueryParameters result = facade.getQuery(TestPlans.planFor(m), m, new Object[]{1L}, sqlRecord);
 
-        // the cached query is reused without rebuilding; the returned wrapper is a
-        // fresh one, because the caller mutates the specifications it carries
         assertSame(cached.getBoundSql(), result.getBoundSql());
         verify(mapper, never()).mapSql(any(), any());
     }
@@ -108,7 +106,6 @@ class CachingFacadeTest {
         Method m = TestDao.class.getDeclaredMethod("find", long.class);
 
         QueryParameters first = facade.getQuery(TestPlans.planFor(m), m, new Object[]{1L}, sqlRecord);
-        // the entry the facade stored is what a second caller would receive
         org.mockito.ArgumentCaptor<QueryParameters> stored =
                 org.mockito.ArgumentCaptor.forClass(QueryParameters.class);
         verify(queryCache).put(any(), stored.capture());
@@ -119,10 +116,8 @@ class CachingFacadeTest {
         assertNotSame(first.getQuerySpecifications(), second.getQuerySpecifications(),
                 "two callers share one QuerySpecifications, which each of them then mutates");
 
-        // the immutable half may safely be shared
         assertSame(first.getBoundSql(), second.getBoundSql());
 
-        // and mutating one must not be visible to the other
         second.getQuerySpecifications().setHasOptimisticLock(true);
         assertFalse(first.getQuerySpecifications().hasOptimisticLock());
     }

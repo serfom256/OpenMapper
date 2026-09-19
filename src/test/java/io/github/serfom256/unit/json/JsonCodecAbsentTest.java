@@ -15,11 +15,6 @@ import io.github.serfom256.annotations.entity.Model;
 import io.github.serfom256.core.query.mapping.MappingPlanRegistry;
 import io.github.serfom256.exceptions.entity.ModelValidationException;
 
-/**
- * Jackson is an optional dependency, so a {@code @Json} field can be declared with no
- * codec on the classpath. That has to fail at startup with an actionable message rather
- * than at the first query with a null pointer.
- */
 class JsonCodecAbsentTest {
 
     @Model(primaryKey = "id")

@@ -15,11 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Reads and parses {@code .fsql} resources. Resources are read through their
- * {@link InputStream}, so this works whether the file lives on the filesystem or
- * inside a jar.
- */
 public class FileContentReader {
 
     private final OpenMapperGlobalEnvironmentVariables variables;

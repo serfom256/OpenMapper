@@ -7,20 +7,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import io.github.serfom256.core.query.model.QueryParameters;
 
-/**
- * Bounded, time-limited cache of prepared queries.
- *
- * <p>Entries expire on access and the map is capped at a fixed size, so eviction
- * needs no background thread. An earlier implementation started a non-daemon
- * eviction thread from its constructor, which kept the JVM alive after
- * {@code main} returned in any application that built an openMapper context.
- *
- * <p>Insertion order and the entries themselves live in a single
- * {@link LinkedHashMap} under one lock. Tracking order in a queue alongside a
- * concurrent map let the two drift: expiring an entry on read removed it from
- * the map but not the queue, so the queue grew without bound and eviction then
- * discarded live entries while walking past dead keys.
- */
 public class QueryCacheImpl implements QueryCache {
 
     private static final int MAX_ENTRIES = 10_000;

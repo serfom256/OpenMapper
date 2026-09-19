@@ -10,15 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-/**
- * Builds and invokes {@link MethodHandle}s for entity construction and field
- * access.
- *
- * <p>Handles are created once (at plan-build time) and normalised to a generic
- * {@code () -> Object}, {@code (Object) -> Object} or {@code (Object, Object) -> void}
- * signature, so the per-row mapping code can invoke them with {@code invokeExact}
- * without any reflection or {@code setAccessible} toggling at runtime.
- */
 final class ReflectiveAccessors {
 
     private ReflectiveAccessors() {
@@ -43,12 +34,6 @@ final class ReflectiveAccessors {
         }
     }
 
-    /**
-     * The constructor whose parameters correspond, in order and by type, to the
-     * type's instance fields -- the canonical constructor of a record or the
-     * primary constructor of a Kotlin data class. Returns {@code null} when no
-     * constructor matches.
-     */
     static Constructor<?> canonicalConstructor(Class<?> type, Class<?>[] fieldTypes) {
         for (Constructor<?> candidate : type.getDeclaredConstructors()) {
             if (Arrays.equals(candidate.getParameterTypes(), fieldTypes)) {
@@ -58,7 +43,6 @@ final class ReflectiveAccessors {
         return null;
     }
 
-    /** A handle taking one {@code Object[]} of arguments, for canonical construction. */
     static MethodHandle spreadingConstructor(Constructor<?> constructor) {
         try {
             int arity = constructor.getParameterCount();

@@ -7,9 +7,6 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.lang.reflect.Type;
 
-/**
- * {@link Serializer} backed by a default Jackson 3 {@link JsonMapper}.
- */
 public class Jackson3JsonCodec implements Serializer {
 
     private final ObjectMapper mapper = JsonMapper.builder().build();

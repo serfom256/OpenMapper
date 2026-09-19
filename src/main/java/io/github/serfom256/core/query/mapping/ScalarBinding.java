@@ -6,7 +6,6 @@ import java.lang.invoke.MethodHandle;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/** Binds one result-set column to one scalar field of an entity. */
 final class ScalarBinding {
 
     private final String fieldName;

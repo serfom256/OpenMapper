@@ -7,11 +7,6 @@ import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Maps a result set to an entity (or list of entities) by delegating to the
- * single-pass {@link ResultSetGraphReader}. This class only adapts the
- * {@link ResultSetMapper} contract to the reader.
- */
 public class ResultSetObjectMapper implements ResultSetMapper {
 
     private final ResultSetGraphReader graphReader;

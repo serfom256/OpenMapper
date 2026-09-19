@@ -1,4 +1,3 @@
-# Simple entity operations
 findProductById = {
     SELECT id, name, price, quantity, description FROM product WHERE id = [id]
 }
@@ -23,12 +22,10 @@ deleteProduct = {
     DELETE FROM product WHERE id = [id]
 }
 
-# One-to-One: User with Profile
 findUserWithProfile = {
     SELECT u.id, u.username, u.email, p.id as profile_id, p.user_id, p.bio, p.avatar_url FROM bench_user u LEFT JOIN user_profile p ON u.id = p.user_id WHERE u.id = [id]
 }
 
-# One-to-Many: Author with Books
 findAuthorWithBooks = {
     SELECT a.id, a.name, a.country, b.id as book_id, b.title, b.author_id, b.published_year, b.isbn FROM author a LEFT JOIN book b ON a.id = b.author_id WHERE a.id = [id]
 }
@@ -41,7 +38,6 @@ deleteAuthor = {
     DELETE FROM author WHERE id = [id]
 }
 
-# Optimistic locking
 insertVersionedItem = {
     INSERT INTO versioned_item (name, version) VALUES ([name], [version])
 }

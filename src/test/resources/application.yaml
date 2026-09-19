@@ -1,6 +1,3 @@
-# Test configuration for OpenMapper integration tests.
-# This is how a real consumer configures the starter: standard Spring properties
-# bound to the Environment, which OpenMapperGlobalEnvironmentVariables reads.
 spring:
   autoconfigure:
     exclude:

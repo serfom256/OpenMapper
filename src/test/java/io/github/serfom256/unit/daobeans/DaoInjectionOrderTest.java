@@ -14,13 +14,6 @@ import org.springframework.context.annotation.Configuration;
 
 import io.github.serfom256.config.OpenMapperConfig;
 
-/**
- * A {@code @DaoLayer} interface must be injectable into any bean, whatever order
- * the container happens to create beans in. openMapper used to register DAO
- * proxies while the context was already instantiating beans, so a bean created
- * before openMapper's own startup bean failed with NoSuchBeanDefinitionException
- * -- which is what a plain {@code @Repository} in Broadleaf Commerce hit.
- */
 class DaoInjectionOrderTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()

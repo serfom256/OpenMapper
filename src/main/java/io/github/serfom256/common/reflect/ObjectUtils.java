@@ -33,9 +33,6 @@ public class ObjectUtils {
                 NavigableSet.class, SortedSet.class, TreeSet.class));
     }
 
-    /**
-     * Creates new class instance
-     */
     public static Object createNewInstance(Class<?> type) throws ObjectCreationException {
         Class<?> clazz;
         try {
@@ -85,13 +82,6 @@ public class ObjectUtils {
         return ITERABLE.contains(clazz);
     }
 
-    /**
-     * Returns iterable generic object's wrapped class type
-     *
-     * @param clazz concrete class type
-     * @param type  expected return type
-     * @return unwrapped type
-     */
     public static Field[] mappedFields(Class<?> type) {
         List<Field> fields = new ArrayList<>();
         Set<String> declared = new HashSet<>();

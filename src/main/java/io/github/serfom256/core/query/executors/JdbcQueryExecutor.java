@@ -20,22 +20,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Stream;
 
-/**
- * Executes statements against the connection Spring associates with the current
- * transaction.
- *
- * <p>Failures are translated into Spring's {@link DataAccessException} hierarchy,
- * so callers catch the same {@code DuplicateKeyException} or
- * {@code DataIntegrityViolationException} they would from JPA or
- * {@code JdbcTemplate}.
- *
- * <p>Connections come from {@link DataSourceUtils} rather than
- * {@link DataSource#getConnection()}. Inside a {@code @Transactional} method
- * that returns the transaction's own connection, so DAO calls take part in it;
- * calling the DataSource directly would hand back a second, autocommitting
- * connection whose writes no rollback could undo. Outside a transaction
- * {@code DataSourceUtils} behaves like the DataSource itself.
- */
 public class JdbcQueryExecutor implements QueryExecutor {
 
     private final QueryExecutionStrategy queryExecutionStrategy;

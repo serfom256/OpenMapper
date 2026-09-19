@@ -22,12 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Compiles a {@link MappingPlan} for an entity type by reading its annotations
- * once and resolving every field/constructor into a method handle. The plan
- * never references the (mutable, shared) model metadata, so building it has no
- * side effects on other consumers.
- */
 final class MappingPlanBuilder {
 
     private final Serializer jsonCodec;

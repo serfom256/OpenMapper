@@ -33,11 +33,11 @@ public class SourceMapper {
 
             final String token = tokens[position];
 
-            if (token.equals(VARIABLE_START_IDENTIFIER)) { // check variable opens
+            if (token.equals(VARIABLE_START_IDENTIFIER)) {
                 expect(VARIABLE_START_IDENTIFIER, token, "Expected open bracket ']' before the variable");
                 expectedVariable = true;
 
-            } else if (expectedVariable) { // get variable
+            } else if (expectedVariable) {
                 variables.put(token, new SQLToken(token, position));
                 variablePositions.put(position, token);
                 tokenList.add(new SQLToken(sequence.toString(), position - 1));
@@ -48,7 +48,7 @@ public class SourceMapper {
 
                 sequence.setLength(0);
 
-            } else if (expectedCloseIdentifier) { // check variable closes
+            } else if (expectedCloseIdentifier) {
                 expect(VARIABLE_CLOSE_IDENTIFIER, token, "Expected close bracket ']' after the variable");
                 expectedCloseIdentifier = false;
             } else {

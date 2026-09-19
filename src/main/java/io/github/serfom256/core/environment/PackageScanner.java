@@ -2,7 +2,6 @@ package io.github.serfom256.core.environment;
 
 import io.github.serfom256.config.OpenMapperGlobalEnvironmentVariables;
 
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -42,8 +41,8 @@ public class PackageScanner {
         if (variables.isLoggingEnabled()) {
             logger.info("Scanning packages for @{} annotation: {}", annotation.getName(), packageToScan);
         }
-        Reflections reflections = new Reflections(packageToScan);
-        return reflections.getTypesAnnotatedWith(annotation);
+        return new AnnotatedTypeScanner(context.getEnvironment(), context.getClassLoader())
+                .scan(packageToScan, annotation);
     }
 
     private @Nullable String getRootPackage() {

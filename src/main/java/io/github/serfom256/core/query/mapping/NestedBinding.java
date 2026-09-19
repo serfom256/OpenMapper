@@ -6,10 +6,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Binds one {@code @Nested} embedded object. A nested object has no identity of
- * its own; it is built fresh from the same row whenever its owner is created.
- */
 final class NestedBinding {
 
     private final MethodHandle setter;

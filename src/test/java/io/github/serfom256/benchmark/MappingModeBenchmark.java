@@ -21,12 +21,6 @@ import io.github.serfom256.benchmark.model.rec.ProductRec;
 import io.github.serfom256.core.query.mapping.MappingPlanRegistry;
 import io.github.serfom256.core.query.mapping.ResultSetGraphReader;
 
-/**
- * Row mapping with the database taken out: setter-based population of a mutable
- * class against canonical-constructor population of a record, over the same
- * five-column row. The rest of the suite is dominated by the JDBC round trip,
- * which hides a difference this size.
- */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup(iterations = 3, time = 2)

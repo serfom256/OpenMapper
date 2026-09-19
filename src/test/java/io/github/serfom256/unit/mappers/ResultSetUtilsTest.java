@@ -86,7 +86,6 @@ class ResultSetUtilsTest {
 
     @Test
     void extractTimestamp_byColumnName() throws SQLException {
-        // Regression for BUG-5: java.sql.Timestamp must map (was java.security.Timestamp)
         java.sql.Timestamp ts = new java.sql.Timestamp(System.currentTimeMillis());
         when(resultSet.getTimestamp("created")).thenReturn(ts);
         Object result = ResultSetUtils.extractFromResultSet(java.sql.Timestamp.class, resultSet, "created");
@@ -95,7 +94,6 @@ class ResultSetUtilsTest {
 
     @Test
     void extractUnsupportedType_throwsNPE() {
-        // Documents the bug: unsupported types cause NPE, not a descriptive exception
         assertThrows(NullPointerException.class,
                 () -> ResultSetUtils.extractFromResultSet(java.util.UUID.class, resultSet, "col"));
     }

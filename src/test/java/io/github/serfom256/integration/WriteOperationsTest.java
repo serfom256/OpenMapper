@@ -17,7 +17,6 @@ class WriteOperationsTest extends IntegrationTestBase {
         p.setDescription("integration test insert");
         productDao.insertProduct(p);
 
-        // Verify via JDBC that a row with this name exists
         try (var conn = getConnection();
              var ps = conn.prepareStatement("SELECT COUNT(*) FROM product WHERE name = ?")) {
             ps.setString(1, "integration-insert");

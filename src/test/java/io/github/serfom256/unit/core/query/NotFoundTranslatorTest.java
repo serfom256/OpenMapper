@@ -19,9 +19,6 @@ import io.github.serfom256.unit.support.TestPlans;
 
 class NotFoundTranslatorTest {
 
-    // These are public with public constructors on purpose: openMapper instantiates
-    // the configured type reflectively, so it must be publicly constructible.
-
     public static class NoArgOnly extends RuntimeException {
         public NoArgOnly() {
         }

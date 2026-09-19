@@ -14,10 +14,6 @@ import io.github.serfom256.core.common.ModelSpecificationReader;
 import io.github.serfom256.core.query.mapping.MappingPlanRegistry;
 import io.github.serfom256.exceptions.entity.ModelValidationException;
 
-/**
- * Model problems are reported when the model is read, not on the first query that
- * happens to touch it.
- */
 class ModelValidationTest {
 
     private final ModelSpecificationReader reader = new ModelSpecificationReader();

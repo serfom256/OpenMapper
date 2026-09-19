@@ -5,19 +5,6 @@ import java.lang.reflect.Type;
 import io.github.serfom256.core.query.handlers.ResultSetHandler;
 import io.github.serfom256.model.operations.DmlOperation;
 
-/**
- * Everything about a DAO method that is fixed for its lifetime: its procedure
- * name, DML operation, result handler and parameter bindings.
- *
- * <p>Resolved once per {@link java.lang.reflect.Method} and reused, so invoking
- * a DAO method performs no annotation lookups and allocates no reflection
- * metadata. This mirrors what {@link io.github.serfom256.core.query.mapping.MappingPlan}
- * already does for entity types.
- *
- * <p>Instances come from {@link #builder()}; the fields are a mix of three
- * booleans and two reference types that positional arguments made easy to
- * transpose silently.
- */
 public final class DaoMethodPlan {
 
     private final String procedure;
@@ -74,7 +61,6 @@ public final class DaoMethodPlan {
         return returnGeneratedKeys;
     }
 
-    /** The exception to raise when nothing is found, or {@code null} to return null. */
     public Class<? extends Throwable> notFoundException() {
         return notFoundException;
     }
@@ -107,7 +93,6 @@ public final class DaoMethodPlan {
         return countProcedure;
     }
 
-    /** Index of the {@code @Sql} parameter carrying the statement, or -1 if absent. */
     public int sqlParameterIndex() {
         return sqlParameterIndex;
     }

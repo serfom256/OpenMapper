@@ -6,9 +6,6 @@ on:
   pull_request:
 
 jobs:
-  # Compiles and runs the full suite (unit + Testcontainers integration) against
-  # every supported Spring Boot line. ${spring.boot.version} swaps the imported
-  # Boot BOM, so this is the whole compatibility contract in one knob.
   build:
     name: Boot ${{ matrix.boot }} / Java ${{ matrix.java }}
     runs-on: ubuntu-latest
@@ -27,9 +24,6 @@ jobs:
       - name: Verify
         run: mvn -B verify -Dspring.boot.version=${{ matrix.boot }}
 
-  # Guards the thing unit tests cannot see: what a downstream application actually
-  # resolves. openMapper must contribute no Spring artifacts of its own, or a
-  # consumer can end up with two Spring versions on one classpath.
   consumer-resolution:
     name: Consumer resolution (Boot ${{ matrix.boot }})
     runs-on: ubuntu-latest

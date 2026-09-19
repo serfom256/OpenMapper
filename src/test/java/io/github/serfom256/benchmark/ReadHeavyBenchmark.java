@@ -32,16 +32,6 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-/**
- * Read-heavy throughput benchmark that reproduces the conditions of the user's
- * OpenMapperTest project:
- *   - OpenMapper with query cache ENABLED (openmapper.query.cache.enabled=true)
- *   - Spring Data JpaRepository (proxy + @Transactional interceptor per call)
- *   - Throughput mode (ops/ms) over repeated findById against a small ID set
- *
- * Also includes raw EntityManager and Jimmer for reference, so the spread
- * between "idiomatic Spring Data JPA" and "thin cached OpenMapper" is visible.
- */
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 3, time = 3)
@@ -78,7 +68,6 @@ public class ReadHeavyBenchmark {
 
         @TearDown(Level.Trial)
         public void tearDown() {
-            // Do not close — destroying the shared HikariCP DataSource breaks other states.
         }
     }
 
@@ -129,7 +118,6 @@ public class ReadHeavyBenchmark {
 
         @TearDown(Level.Trial)
         public void tearDown() {
-            // Do not close — shared DataSource.
         }
     }
 

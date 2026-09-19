@@ -463,7 +463,7 @@ One artifact runs on both Spring Boot 3 and 4. Every Spring artifact is `provide
 your application's version is always the one used and nothing is pinned for you - which
 matters in a build that enforces dependency convergence
 
-`spring-jdbc` has to be on your classpath: `spring-boot-starter-jdbc`, `-data-jpa` or
+openMapper brings no dependencies of its own. `spring-jdbc` has to be on your classpath: `spring-boot-starter-jdbc`, `-data-jpa` or
 `spring-orm` all bring it
 
 Spring Boot 2 is supported only by the 1.x line, which is no longer developed
@@ -487,13 +487,13 @@ has to be a `BeanDefinitionRegistryPostProcessor` too, ordered ahead of it
 <dependency>
     <groupId>io.github.serfom256</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>version</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 
 #### Usage with Gradle:
 ```groovy
-implementation 'io.github.serfom256:openmapper-spring-boot-starter:version'
+implementation 'io.github.serfom256:openmapper-spring-boot-starter:2.0.1'
 ```
 
 ---
@@ -966,8 +966,8 @@ try {
 | Parameter name                         | Parameter type | Default value                      | Description                                                    |
 | -------------------------------------- | -------------- | ---------------------------------- | -------------------------------------------------------------- |
 | openmapper.fsql.path                   | list<string>   | all subdirectories in project root | Package to scan for `.fsql` files                              |
-| openmapper.dao.packagesToScan          | string         | package of @SpringBootApplication  | Package to scan for classes, annotated with @DaoLayer          |
-| openmapper.model.packagesToScan        | string         | package of @SpringBootApplication  | Package to scan for classes, annotated with @Model             |
+| openmapper.dao.packagesToScan          | string         | package of @SpringBootApplication  | Packages to scan for @DaoLayer interfaces, comma-separated      |
+| openmapper.model.packagesToScan        | string         | package of @SpringBootApplication  | Packages to scan for @Model and @Dto classes, comma-separated   |
 | openmapper.sql.tracing.enabled         | boolean        | false                              | Tracing sql  queries                                           |
 | openmapper.sql.tracing.queries.enabled | boolean        | false                              | Tracing sql that will be executed (don't use it in production) |
 | openmapper.logging.enabled             | boolean        | false                              | Enable internal logging                                        |
@@ -981,6 +981,9 @@ Per-method settings live on `@DaoMethod`: `fetchSize`, `queryTimeoutSeconds`, `c
 
 ## How to install
 
-Until the first release lands on Maven Central, build it yourself
+Available on Maven Central as `io.github.serfom256:openmapper-spring-boot-starter`, see
+[Compatibility](#compatibility) for the dependency snippet
+
+To build from source
 
 - `git clone git@github.com:serfom256/OpenMapper.git && cd OpenMapper && mvn install`

@@ -98,7 +98,6 @@ class ResultSetObjectMapperTest {
 
     @Test
     void oneToMany_collapsesRepeatedParentRows() throws SQLException {
-        // a LEFT JOIN of one author with two books produces two rows
         ResultSet rs = rows(
                 new String[]{"id", "name", "book_id", "author_id", "title"},
                 new Object[][]{
@@ -118,7 +117,6 @@ class ResultSetObjectMapperTest {
 
     @Test
     void oneToMany_authorWithNoBooks_getsEmptyCollection() throws SQLException {
-        // LEFT JOIN with no matching child: book columns are SQL NULL
         ResultSet rs = rows(
                 new String[]{"id", "name", "book_id", "author_id", "title"},
                 new Object[][]{{1L, "Orphan", null, null, null}});
@@ -148,9 +146,6 @@ class ResultSetObjectMapperTest {
 
     @Test
     void joinKey_mismatchedRowsAreNotAttached() throws SQLException {
-        // A cross join emits every author paired with every book. Only the rows
-        // whose author_id matches the author's id are a real relationship; the
-        // @Joined(joinBy = "id", to = "authorId") key is what tells them apart.
         ResultSet rs = rows(
                 new String[]{"id", "name", "book_id", "author_id", "title"},
                 new Object[][]{
@@ -199,7 +194,6 @@ class ResultSetObjectMapperTest {
             });
         }
         when(rs.next()).thenAnswer(inv -> ++cursor[0] < data.length);
-        // wasNull() reflects the value of the column read by the most recent getXxx call
         when(rs.wasNull()).thenAnswer(inv ->
                 cursor[0] >= 0 && cursor[0] < data.length
                         && lastColumnIdx[0] >= 0

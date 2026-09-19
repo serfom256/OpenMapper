@@ -86,7 +86,6 @@ class ModelSpecificationReaderTest {
 
     @Test
     void readModelWithTwoOptimisticLockFields_throws() {
-        // Regression for BUG-4: the count guard must actually fire
         assertThrows(io.github.serfom256.exceptions.entity.ModelValidationException.class,
                 () -> reader.readModelMetadata(ModelWithTwoOptLocks.class));
     }

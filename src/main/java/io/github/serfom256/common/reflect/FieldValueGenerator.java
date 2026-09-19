@@ -15,12 +15,6 @@ public class FieldValueGenerator {
             Map.entry(long.class, v -> (long) ((long) v + 1)),
             Map.entry(Long.class, v -> v == null ? DEFAULT_VALUE : (long) ((long) v + 1)));
 
-    /**
-     * Whether a field of this type can carry an optimistic-lock version.
-     *
-     * <p>Checked when the model is validated at startup, because an unsupported
-     * type would otherwise fail on the first update that needs to increment it.
-     */
     public static boolean supportsOptimisticLockType(Class<?> type) {
         return supportedValueActions.containsKey(type);
     }

@@ -23,9 +23,6 @@ import io.github.serfom256.core.query.mapping.ResultSetGraphReader;
 import io.github.serfom256.kotlininterop.ProductBean;
 import io.github.serfom256.kotlininterop.ProductData;
 
-/**
- * Establishes which Kotlin class shapes the mapper can materialise today.
- */
 class KotlinInteropTest {
 
     private final ResultSetGraphReader reader = new ResultSetGraphReader(new MappingPlanRegistry(null));

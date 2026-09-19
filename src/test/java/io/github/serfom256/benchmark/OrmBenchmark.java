@@ -78,8 +78,6 @@ public class OrmBenchmark {
 
         @TearDown(Level.Trial)
         public void tearDown() {
-            // Don't close context — it destroys the shared HikariCP DataSource
-            // which other benchmark states also use. The JVM exit handles cleanup.
         }
     }
 
@@ -164,12 +162,6 @@ public class OrmBenchmark {
     }
 
 
-    // Deletes consume their rows, so the supply must be bounded by a fixed number
-    // of invocations rather than by elapsed time. The delete benchmarks below run
-    // in SingleShotTime with an explicit batchSize, and each iteration re-seeds
-    // exactly that many rows. Sizing by time instead (the default AverageTime
-    // mode) makes the row count depend on how fast the machine is, which is what
-    // previously exhausted the pool mid-iteration.
     static final int DELETE_SIMPLE_BATCH = 2_000;
     static final int DELETE_CASCADE_BATCH = 1_000;
     static final int BOOKS_PER_AUTHOR = 3;
@@ -255,9 +247,6 @@ public class OrmBenchmark {
 
     @Benchmark
     public Object selectOneToOne_Jimmer(JimmerState jimmer, ThreadState ts) {
-        // The fetcher is what makes this a one-to-one fetch. A bare
-        // findById(User.class, id) loads scalar columns only, so it would measure a
-        // single-row lookup while the other two implementations join.
         return jimmer.sqlClient.getEntities().findById(
                 UserFetcher.$.username().email()
                         .profile(UserProfileFetcher.$.bio().avatarUrl()),
@@ -287,8 +276,6 @@ public class OrmBenchmark {
 
     @Benchmark
     public Object selectOneToMany_Jimmer(JimmerState jimmer, ThreadState ts) {
-        // As above: without the books() fetcher this loads the author alone and the
-        // comparison against a LEFT JOIN is meaningless.
         return jimmer.sqlClient.getEntities().findById(
                 AuthorFetcher.$.name().country()
                         .books(BookFetcher.$.title().publishedYear().isbn()),
@@ -316,8 +303,6 @@ public class OrmBenchmark {
 
     @Benchmark
     public Object selectBatch_Jimmer(JimmerState jimmer) {
-        // Must mirror the other two: ORDER BY id LIMIT 100. This previously called
-        // findAll(), loading the whole table, which made the cell meaningless.
         ProductTable product = ProductTable.$;
         return jimmer.sqlClient.createQuery(product)
                 .orderBy(product.id())
@@ -472,10 +457,6 @@ public class OrmBenchmark {
                 ds.nextSimpleId()
         );
     }
-
-    // OpenMapper: single DELETE, DB ON DELETE CASCADE handles books
-    // JPA: loads entity graph, application-level cascade (N+1 DELETEs)
-    // Jimmer: single DELETE, DB ON DELETE CASCADE handles books
 
     @Benchmark
     @BenchmarkMode(Mode.SingleShotTime)

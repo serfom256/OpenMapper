@@ -15,19 +15,6 @@ import io.github.serfom256.core.query.model.BoundSql;
 import io.github.serfom256.parser.model.SQLRecord;
 import io.github.serfom256.parser.model.SQLToken;
 
-/**
- * Builds a parameterised statement from a parsed SQL record: every {@code [name]}
- * placeholder becomes a {@code ?} and its value is collected as a bind parameter,
- * in placeholder order. Values are never concatenated into the SQL text, so the
- * statement is immune to SQL injection and reusable by the database's plan cache.
- *
- * <p>A collection expands to one placeholder per element. Inside an {@code IN} an
- * empty collection becomes {@code 1 = 0} and inside a {@code NOT IN} it becomes
- * {@code 1 = 1}, because {@code x NOT IN (NULL)} is UNKNOWN for every row and would
- * silently drop the whole result set. Past
- * {@code openmapper.in.clause.chunk.size} elements the clause is split across
- * several {@code IN}s so a long list cannot hit the database's limit.
- */
 public class SQLBuilder {
 
     private final OpenMapperGlobalEnvironmentVariables variables;

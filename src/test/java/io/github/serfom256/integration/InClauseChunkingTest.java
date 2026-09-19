@@ -13,10 +13,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import io.github.serfom256.benchmark.model.om.ProductOM;
 
-/**
- * A chunk size this small is not realistic; it makes the generated SQL take the
- * chunked shape for a handful of rows so a real database has to parse and run it.
- */
 @TestPropertySource(properties = "openmapper.in.clause.chunk.size=2")
 class InClauseChunkingTest extends IntegrationTestBase {
 

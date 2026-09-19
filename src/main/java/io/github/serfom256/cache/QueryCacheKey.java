@@ -3,14 +3,6 @@ package io.github.serfom256.cache;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-/**
- * Identity of a cached query: the DAO method plus the argument values it was
- * called with.
- *
- * <p>Entries were previously keyed by {@code Arrays.hashCode(args) * 31 +
- * method.hashCode()}. A hash is not an identity -- two different calls that
- * happened to collide would read back each other's SQL.
- */
 public final class QueryCacheKey {
 
     private final Method method;

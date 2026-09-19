@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-/** Binds one {@code @Joined} association (to-one or to-many) of an entity. */
 final class AssociationBinding {
 
     private final MethodHandle getter;
@@ -47,7 +46,6 @@ final class AssociationBinding {
         ReflectiveAccessors.set(setter, owner, value);
     }
 
-    /** Returns the owner's collection, creating and assigning an empty one if absent. */
     @SuppressWarnings("unchecked")
     Collection<Object> collectionOf(Object owner) {
         Object existing = ReflectiveAccessors.get(getter, owner);

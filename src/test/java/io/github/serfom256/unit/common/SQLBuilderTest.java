@@ -71,7 +71,6 @@ class SQLBuilderTest {
         SQLRecord record = sourceMapper.map("SELECT * FROM users WHERE name = [name]");
         BoundSql result = sqlBuilder.buildSql(record, Map.of("name", "x' OR '1'='1"));
 
-        // the malicious value is a bind parameter, never part of the SQL text
         assertFalse(result.getSql().contains("OR"));
         assertFalse(result.getSql().contains("'"));
         assertEquals("x' OR '1'='1", result.getParameters().get(0));
@@ -138,7 +137,6 @@ class SQLBuilderTest {
     @Test
     @DisplayName("an empty NOT IN list excludes nothing rather than dropping every row")
     void emptyNotInListExcludesNothing() {
-        // "id NOT IN (NULL)" is UNKNOWN for every row, which silently returns no rows at all
         BoundSql result = build("SELECT * FROM t WHERE id NOT IN ([ids]) ORDER BY id", Map.of("ids", List.of()));
 
         assertEquals("SELECT * FROM t WHERE 1 = 1 ORDER BY id", result.getSql().replaceAll("\\s+", " ").trim());

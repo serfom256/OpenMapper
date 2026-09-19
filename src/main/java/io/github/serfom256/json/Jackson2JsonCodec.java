@@ -5,9 +5,6 @@ import io.github.serfom256.exceptions.common.SerializationException;
 
 import java.lang.reflect.Type;
 
-/**
- * {@link Serializer} backed by a default Jackson 2 {@link ObjectMapper}.
- */
 public class Jackson2JsonCodec implements Serializer {
 
     private final ObjectMapper mapper = new ObjectMapper();

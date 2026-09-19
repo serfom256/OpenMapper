@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-# Regression guard for the class of bug where a library's published pom pins Spring
-# versions from the Boot line it was built against, dragging a stale Spring onto a
-# consumer's classpath. Unit tests cannot see this; only dependency resolution can.
-#
-# Probe A: an application that depends on openMapper ALONE must resolve zero Spring
-#          artifacts, because openMapper declares Spring as 'provided'.
-# Probe B: a real Boot application must end up with every spring-boot artifact on
-#          the Boot line under test, with nothing pinned by openMapper.
 set -euo pipefail
 
 BOOT_VERSION="${1:?usage: consumer-probe.sh <spring-boot-version>}"
@@ -35,19 +27,16 @@ emit_pom() { # $1=dir  $2=parent-block  $3=extra-deps
 EOF
 }
 
-echo "== Probe A: openMapper ${OM_VERSION} alone must contribute no Spring artifact =="
-# Every Spring artifact must come from the consuming application. Contributing one
-# pins the host's Spring version and breaks any build that enforces dependency
-# convergence -- found against Broadleaf Commerce, which spring-jdbc at compile
-# scope stopped from even adding the dependency.
+echo "== Probe A: openMapper ${OM_VERSION} alone must contribute no dependency at all =="
 emit_pom "$PROBE/a" "" ""
-mvn -B -f "$PROBE/a/pom.xml" dependency:tree > "$PROBE/a/tree.txt"
-if grep -qE "org\.springframework(\.boot)?:" "$PROBE/a/tree.txt"; then
-  echo "FAIL: openMapper pulled in Spring artifacts on its own:"
-  grep -E "org\.springframework(\.boot)?:" "$PROBE/a/tree.txt"
+mvn -B -q -f "$PROBE/a/pom.xml" dependency:tree -DoutputFile="$PROBE/a/tree.txt"
+contributed="$(tail -n +2 "$PROBE/a/tree.txt" | grep -v "openmapper-spring-boot-starter" || true)"
+if [ -n "$contributed" ]; then
+  echo "FAIL: openMapper pulled in dependencies of its own:"
+  echo "$contributed"
   status=1
 else
-  echo "OK: no Spring artifacts contributed."
+  echo "OK: no dependencies contributed."
 fi
 
 echo
@@ -66,8 +55,6 @@ else
   echo "OK: every spring-boot artifact is on the ${BOOT_VERSION} line."
 fi
 
-# Spring Framework modules ship in lockstep, so more than one version among them
-# means something pinned its own -- the shape of the bug this probe exists for.
 framework_versions="$(grep -oE "org\.springframework:[A-Za-z0-9._-]+:jar:[^:]+" "$PROBE/b/tree.txt" \
                       | sed 's/.*:jar://' | sort -u)"
 if [ "$(echo "$framework_versions" | wc -l)" -gt 1 ]; then

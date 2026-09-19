@@ -9,13 +9,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import io.github.serfom256.config.OpenMapperConfig;
 
-/**
- * Having openMapper on the classpath must never stop an application context from
- * starting. A Boot slice test has no {@code @SpringBootApplication} bean to infer a
- * root package from, and may set no openMapper properties at all -- openMapper then
- * contributes nothing rather than failing the refresh, which is what broke every
- * Boot test in a Broadleaf Commerce module that merely depended on it.
- */
 class UnconfiguredContextTest {
 
     @Test

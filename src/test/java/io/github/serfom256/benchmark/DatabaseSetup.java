@@ -138,9 +138,6 @@ public final class DatabaseSetup {
         }
     }
 
-    /**
-     * Inserts a batch of products for deletion benchmarks, returns their IDs.
-     */
     public static long[] insertDeleteProducts(int count) {
         long[] ids = new long[count];
         try (Connection conn = dataSource.getConnection();
@@ -169,9 +166,6 @@ public final class DatabaseSetup {
         return ids;
     }
 
-    /**
-     * Inserts authors with books for cascade-delete benchmarks, returns author IDs.
-     */
     public static long[] insertDeleteAuthorsWithBooks(int authorCount, int booksPerAuthor) {
         long[] authorIds = new long[authorCount];
         try (Connection conn = dataSource.getConnection()) {

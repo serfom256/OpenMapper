@@ -21,12 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.*;
 
-/**
- * Base for OpenMapper integration tests. Bootstraps the starter through a real
- * Spring Boot context: settings come from {@code application.yaml} (the {@code it}
- * profile), and the Testcontainers DataSource is contributed by
- * {@link IntegrationDataSourceConfig}. No manual context wiring or property maps.
- */
 @SpringBootTest(classes = {OpenMapperApplication.class, IntegrationDataSourceConfig.class})
 @ActiveProfiles("it")
 public abstract class IntegrationTestBase {

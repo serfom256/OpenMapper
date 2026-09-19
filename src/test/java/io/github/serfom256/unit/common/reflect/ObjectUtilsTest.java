@@ -26,16 +26,12 @@ class ObjectUtilsTest {
 
     @Test
     void createNewInstance_validClass() {
-        // ObjectUtils.createNewInstance uses Class.forName(type.getCanonicalName())
-        // which fails for static inner classes (canonical name uses dots, forName needs $).
-        // This documents the library bug: inner classes can't be instantiated.
         assertThrows(ObjectCreationException.class,
                 () -> ObjectUtils.createNewInstance(SimpleBean.class));
     }
 
     @Test
     void createNewInstance_topLevelClass() {
-        // Top-level classes work fine since canonical name == binary name
         Object instance = ObjectUtils.createNewInstance(String.class);
         assertNotNull(instance);
     }
@@ -105,7 +101,6 @@ class ObjectUtilsTest {
 
     @Test
     void getInnerClassType_iterable_returnsGenericParam() throws Exception {
-        // Use reflection to get a parameterized type
         java.lang.reflect.Field field = TypeHolder.class.getDeclaredField("stringList");
         ParameterizedType type = (ParameterizedType) field.getGenericType();
         Class<?> result = ObjectUtils.getInnerClassType(List.class, type);

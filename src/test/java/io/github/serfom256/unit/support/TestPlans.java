@@ -13,11 +13,6 @@ import io.github.serfom256.core.query.method.DaoMethodPlanRegistry;
 import io.github.serfom256.mappers.ResultSetObjectMapper;
 import io.github.serfom256.mappers.ResultSetPrimitiveMapper;
 
-/**
- * Builds real {@link DaoMethodPlan}s for unit tests. The whole dependency chain
- * is constructible without a Spring context, so tests can exercise the same plan
- * resolution the runtime uses rather than a stand-in.
- */
 public final class TestPlans {
 
     private static final DaoMethodPlanRegistry REGISTRY = new DaoMethodPlanRegistry(handlerStrategy());

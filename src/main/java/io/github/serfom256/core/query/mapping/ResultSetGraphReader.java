@@ -21,18 +21,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Materialises an object graph from a result set in a single pass.
- *
- * <p>Each row already pairs a parent with one of its joined children (the SQL
- * join enforced the relationship), so relationships are wired directly from row
- * co-occurrence. An identity map deduplicates entities by primary key across the
- * repeated rows of a join, and a per-row "in progress" set guards against
- * infinite recursion on bidirectional or cyclic associations.
- *
- * <p>Complexity is O(rows x graph-depth); there is no O(parents x children)
- * matching and no reflection on the hot path.
- */
 public class ResultSetGraphReader {
 
     private final MappingPlanRegistry registry;
@@ -41,12 +29,6 @@ public class ResultSetGraphReader {
         this.registry = registry;
     }
 
-    /**
-     * @param rootType the entity type to return
-     * @param iterable whether the caller expects a collection or a single entity
-     * @return a {@code List} of root entities when {@code iterable}, otherwise the
-     *         first root entity or {@code null} when the result set is empty
-     */
     public Object map(Class<?> rootType, boolean iterable, ResultSet resultSet) throws SQLException {
         Set<String> columns = columnLabels(resultSet);
         MappingPlan rootPlan = registry.planFor(rootType);
@@ -260,11 +242,11 @@ public class ResultSetGraphReader {
 
         Object read(MappingPlan declared, ResultSet resultSet) throws SQLException {
             if (!columns.contains(declared.primaryKeyColumn())) {
-                return null; // this entity type is not part of the query
+                return null;
             }
             Object primaryKey = declared.readPrimaryKey(resultSet);
             if (primaryKey == null) {
-                return null; // outer join produced no row for this type
+                return null;
             }
 
             MappingPlan plan = resolve(declared, resultSet, columns);
@@ -279,7 +261,7 @@ public class ResultSetGraphReader {
             }
 
             if (!inProgress.add(instance)) {
-                return instance; // already being materialised up the call stack (cycle)
+                return instance;
             }
             try {
                 wireAssociations(plan, instance, resultSet);
@@ -293,7 +275,7 @@ public class ResultSetGraphReader {
             for (AssociationBinding association : plan.associations()) {
                 MappingPlan childPlan = registry.planFor(association.targetType());
                 if (!columns.contains(childPlan.primaryKeyColumn())) {
-                    continue; // association not selected by this query
+                    continue;
                 }
                 if (association.isCollection()) {
                     Collection<Object> collection = association.collectionOf(instance);

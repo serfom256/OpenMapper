@@ -10,12 +10,6 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
-/**
- * Immutable description of how to materialise one {@code @Model} type from a
- * result-set row. Built once per type by {@link MappingPlanBuilder}; all
- * reflective access is resolved into {@link java.lang.invoke.MethodHandle}s at
- * build time, so applying a plan to a row involves no reflection.
- */
 public final class MappingPlan {
 
     private final Class<?> type;
@@ -86,25 +80,11 @@ public final class MappingPlan {
         return associations;
     }
 
-    /**
-     * Reads the primary-key value for the current row, or {@code null} when the
-     * key column is SQL NULL (e.g. an outer join produced no row for this type).
-     */
     Object readPrimaryKey(ResultSet resultSet) throws SQLException {
         Object value = primaryKey.read(resultSet);
         return resultSet.wasNull() ? null : value;
     }
 
-    /**
-     * Creates a new instance populated from the current row.
-     *
-     * <p>Types with a no-argument constructor are built empty and filled through
-     * setters, skipping columns the query did not select. Immutable types -- a
-     * record, or a Kotlin {@code data class} -- are built by passing every value
-     * to the canonical constructor instead, since their fields are final. That
-     * path cannot skip anything: a component whose column is absent receives the
-     * type's default rather than being left untouched.
-     */
     Object instantiate(ResultSet resultSet, Set<String> columns) throws SQLException {
         if (constructsCanonically) {
             return constructCanonically(resultSet, columns);

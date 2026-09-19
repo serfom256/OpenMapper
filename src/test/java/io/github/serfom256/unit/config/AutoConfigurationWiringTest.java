@@ -17,18 +17,8 @@ import io.github.serfom256.core.environment.processors.ProcedureSourceEnvironmen
 import io.github.serfom256.core.query.facade.QueryFacade;
 import io.github.serfom256.mappers.ModelExtractor;
 
-/**
- * Guards the auto-configuration's wiring contract. openMapper registers its beans
- * explicitly rather than by component scanning, so the things scanning used to
- * provide implicitly -- that every bean resolves, that the environment processors
- * run in a fixed order, and that bean names stay stable -- are now this class's
- * responsibility to pin down.
- */
 class AutoConfigurationWiringTest {
 
-    // Packages are configured explicitly. Left unset, PackageScanner falls back to
-    // locating the @SpringBootApplication bean, which a bare context runner has no
-    // reason to contain.
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(OpenMapperConfig.class))
             .withPropertyValues(
@@ -62,8 +52,6 @@ class AutoConfigurationWiringTest {
     @Test
     @DisplayName("the bean name @UseRepository depends on is part of the public contract")
     void environmentProcessorBeanNameIsStable() {
-        // @UseRepository is meta-annotated @DependsOn("openMapperEnvironmentProcessor"),
-        // so renaming this bean silently breaks every consumer using that annotation.
         runner.run(context -> assertThat(context).hasBean("openMapperEnvironmentProcessor"));
     }
 

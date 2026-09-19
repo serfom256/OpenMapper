@@ -50,18 +50,12 @@ class SourceMapperTest {
 
     @Test
     void mapUnclosedVariable_parsesVariableButMissingClose_throws() {
-        // The regex split separates "[" as a token, which sets expectedVariable=true.
-        // "id" is consumed as the variable name. But no "]" follows, so
-        // expectedCloseIdentifier stays true. The next non-bracket token triggers
-        // the expect() check and throws.
         assertThrows(IllegalStateException.class,
                 () -> mapper.map("SELECT * FROM users WHERE id = [id extra"));
     }
 
     @Test
     void mapTrailingUnclosedVariable_parsedSilently() {
-        // When [var is at end of input, the loop ends with expectedCloseIdentifier=true
-        // but no expect() is called — so it silently produces a variable without error.
         SQLRecord record = mapper.map("SELECT * FROM users WHERE id = [id");
         assertNotNull(record);
         assertFalse(record.getVariables().isEmpty());

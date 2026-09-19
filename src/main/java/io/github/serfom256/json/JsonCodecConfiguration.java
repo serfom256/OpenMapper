@@ -6,11 +6,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Selects the {@link Serializer} implementation by classpath detection: Jackson 3
- * is preferred when present, otherwise Jackson 2. Both bean methods back off if
- * the application defines its own {@link Serializer} bean.
- */
 @Configuration(proxyBeanMethods = false)
 public class JsonCodecConfiguration {
 

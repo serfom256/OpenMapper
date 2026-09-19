@@ -20,16 +20,6 @@ import io.github.serfom256.core.environment.processors.ProcedureSourceEnvironmen
 import io.github.serfom256.parser.SourceMapper;
 import io.github.serfom256.parser.factory.DefaultParserFactory;
 
-/**
- * Startup-time machinery: the metadata contexts, the classpath scanner, and the
- * {@link io.github.serfom256.core.environment.EnvironmentProcessor}s that populate
- * those contexts before any DAO is invoked.
- *
- * <p>The {@code @Order} values on the processors are deliberate. They reproduce
- * the sequence component scanning used to produce implicitly, and pin it: the
- * processors share mutable context beans, so their relative order is behaviour,
- * not a detail.
- */
 @Configuration(proxyBeanMethods = false)
 public class OpenMapperEnvironmentConfiguration {
 

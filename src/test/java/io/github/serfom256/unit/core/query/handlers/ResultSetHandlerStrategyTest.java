@@ -19,11 +19,6 @@ import io.github.serfom256.core.query.handlers.IterableResultSetHandler;
 import io.github.serfom256.core.query.handlers.ResultSetHandlerStrategy;
 import io.github.serfom256.exceptions.common.UnsupportedTypeException;
 
-/**
- * The README lists the return types a DAO method may declare. Resolution is an exact
- * map lookup with no fallback, so a type missing from the strategy fails at startup --
- * which is how float came to be documented but unsupported.
- */
 class ResultSetHandlerStrategyTest {
 
     private final ResultSetHandlerStrategy strategy = new ResultSetHandlerStrategy(

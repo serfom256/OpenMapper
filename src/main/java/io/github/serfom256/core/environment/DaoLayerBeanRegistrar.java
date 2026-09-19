@@ -6,7 +6,6 @@ import io.github.serfom256.core.proxy.InvocationProxy;
 import io.github.serfom256.core.proxy.QueryMappingInvocationHandler;
 import io.github.serfom256.core.query.facade.QueryFacade;
 
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -29,16 +28,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-/**
- * Registers a bean definition for every {@code @DaoLayer} interface before any
- * application bean is instantiated.
- *
- * <p>Registration happens at bean-definition time rather than while the context
- * is already building beans, so a DAO can be injected into any bean regardless
- * of the order the container happens to create them in. The proxy itself is
- * built lazily by the definition's instance supplier, once
- * {@link QueryFacade} and the {@link DataSource} are available.
- */
 public class DaoLayerBeanRegistrar implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, Ordered {
 
     private static final String NO_ROOT_PACKAGE =
@@ -78,7 +67,8 @@ public class DaoLayerBeanRegistrar implements BeanDefinitionRegistryPostProcesso
             return;
         }
 
-        Set<Class<?>> daoInterfaces = new Reflections(packageToScan).getTypesAnnotatedWith(DaoLayer.class);
+        Set<Class<?>> daoInterfaces = new AnnotatedTypeScanner(environment, beanFactory.getBeanClassLoader())
+                .scan(packageToScan, DaoLayer.class);
         for (Class<?> daoInterface : daoInterfaces) {
             register(registry, beanFactory, daoInterface);
         }
