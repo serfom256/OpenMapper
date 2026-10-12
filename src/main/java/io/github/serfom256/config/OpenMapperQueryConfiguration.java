@@ -2,6 +2,9 @@ package io.github.serfom256.config;
 
 import java.util.List;
 
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,11 +24,15 @@ import io.github.serfom256.core.query.executors.operations.DmlSelectOperationExe
 import io.github.serfom256.core.query.executors.operations.DmlUpdateOperationExecutor;
 import io.github.serfom256.common.reflect.ModelFieldReader;
 import io.github.serfom256.core.context.ModelMetadataContext;
-import io.github.serfom256.core.lifecycle.EntityIdGenerators;
 import io.github.serfom256.core.lifecycle.EntityWriteListeners;
+import io.github.serfom256.core.lifecycle.EntityIdGenerators;
+import io.github.serfom256.mappers.ModelExtractor;
+import io.github.serfom256.procedures.ProceduresBuilder;
+import io.github.serfom256.procedures.ProceduresCustomizer;
+import io.github.serfom256.procedures.Procedures;
+import io.github.serfom256.parser.SourceMapper;
 import io.github.serfom256.core.query.facade.AssociationCascade;
 import io.github.serfom256.core.query.facade.OpenMapperCachingFacade;
-import io.github.serfom256.mappers.ModelExtractor;
 import io.github.serfom256.core.query.facade.QueryFacadeImpl;
 import io.github.serfom256.core.query.handlers.EmptyResultSetHandler;
 import io.github.serfom256.core.query.handlers.EntityResultSetHandler;
@@ -102,6 +109,20 @@ public class OpenMapperQueryConfiguration {
     public IterableResultSetHandler iterableResultSetHandler(ResultSetObjectMapper objectMapper,
             ResultSetPrimitiveMapper primitiveMapper) {
         return new IterableResultSetHandler(objectMapper, primitiveMapper);
+    }
+
+    @Bean
+    public Procedures procedures(SourceMapper sourceMapper,
+                                 InputMapper mapper,
+                                 QueryExecutor queryExecutor,
+                                 EntityResultSetHandler entityResultSetHandler,
+                                 IterableResultSetHandler iterableResultSetHandler,
+                                 ObjectProvider<DataSource> dataSource,
+                                 ObjectProvider<ProceduresCustomizer> customizers) {
+        ProceduresBuilder builder = new ProceduresBuilder(sourceMapper, mapper, queryExecutor,
+                entityResultSetHandler, iterableResultSetHandler, dataSource::getObject);
+        customizers.orderedStream().forEach(customizer -> customizer.customize(builder));
+        return builder.build();
     }
 
     @Bean

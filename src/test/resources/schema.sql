@@ -117,3 +117,16 @@ CREATE TABLE json_doc (
     spec TEXT,
     payload JSONB
 );
+
+CREATE TABLE nullable_box (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(64) NOT NULL,
+    int_v INT,
+    long_v BIGINT,
+    dbl_v DOUBLE PRECISION,
+    flt_v REAL,
+    shrt_v SMALLINT,
+    byte_v SMALLINT,
+    bool_v BOOLEAN,
+    str_v VARCHAR(32)
+);

@@ -20,6 +20,7 @@ public class QuerySpecifications {
     private int fetchSize;
     private int queryTimeoutSeconds;
     private boolean streaming;
+    private boolean largeUpdate;
     private Map<String, Object> params;
 
     public QuerySpecifications copy() {
@@ -75,6 +76,14 @@ public class QuerySpecifications {
 
     public boolean isStreaming() {
         return streaming;
+    }
+
+    public boolean isLargeUpdate() {
+        return largeUpdate;
+    }
+
+    public void setLargeUpdate(boolean largeUpdate) {
+        this.largeUpdate = largeUpdate;
     }
 
     public void setStreaming(boolean streaming) {

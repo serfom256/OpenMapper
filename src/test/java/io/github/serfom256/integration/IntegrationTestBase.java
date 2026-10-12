@@ -9,6 +9,7 @@ import io.github.serfom256.benchmark.dao.AuthorStatsDao;
 import io.github.serfom256.benchmark.dao.AuditedNoteDao;
 import io.github.serfom256.benchmark.dao.CatalogItemDao;
 import io.github.serfom256.benchmark.dao.JsonDocDao;
+import io.github.serfom256.benchmark.dao.NullableBoxDao;
 import io.github.serfom256.benchmark.dao.TicketDao;
 import io.github.serfom256.benchmark.dao.StudentDao;
 import io.github.serfom256.benchmark.dao.TaskDao;
@@ -60,6 +61,9 @@ public abstract class IntegrationTestBase {
 
     @Autowired
     protected JsonDocDao jsonDocDao;
+
+    @Autowired
+    protected NullableBoxDao nullableBoxDao;
 
     protected Connection getConnection() throws SQLException {
         return DatabaseSetup.getDataSource().getConnection();

@@ -182,3 +182,21 @@ insertJsonDoc = {
 findJsonDocByName = {
     SELECT id, name, attributes, tags, spec, payload FROM json_doc WHERE name = [name]
 }
+
+insertNullableBox = {
+    INSERT INTO nullable_box (name, int_v, long_v, dbl_v, flt_v, shrt_v, byte_v, bool_v, str_v)
+    VALUES ([name], [int_v], [long_v], [dbl_v], [flt_v], [shrt_v], [byte_v], [bool_v], [str_v])
+}
+
+findNullableBoxByName = {
+    SELECT id, name, int_v, long_v, dbl_v, flt_v, shrt_v, byte_v, bool_v, str_v
+    FROM nullable_box WHERE name = [name]
+}
+
+findPrimitiveBoxByName = {
+    SELECT id, name, int_v, long_v, dbl_v, bool_v FROM nullable_box WHERE name = [name]
+}
+
+findMaxIntValueByName = {
+    SELECT MAX(int_v) FROM nullable_box WHERE name = [name]
+}

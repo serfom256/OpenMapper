@@ -76,15 +76,33 @@ class ExecutorsTest {
         void executeUpdate_voidReturn_returnsVoidType() throws SQLException {
             when(ps.executeUpdate()).thenReturn(1);
 
-            Object result = actions.executeUpdate(handler, void.class, ps, false, false);
+            Object result = actions.executeUpdate(handler, void.class, ps, false, false, false);
             assertEquals(Void.TYPE, result);
+        }
+
+        @Test
+        void executeUpdate_largeUpdateUnsupported_fallsBackToTheIntCount() throws SQLException {
+            when(ps.executeLargeUpdate()).thenThrow(new java.sql.SQLFeatureNotSupportedException());
+            when(ps.executeUpdate()).thenReturn(7);
+
+            assertEquals(7L, actions.executeUpdate(handler, long.class, ps, false, false, true));
+        }
+
+        @Test
+        void executeUpdate_largeUpdate_readsTheLongCount() throws SQLException {
+            when(ps.executeLargeUpdate()).thenReturn(3_000_000_000L);
+
+            Object result = actions.executeUpdate(handler, long.class, ps, false, false, true);
+
+            assertEquals(3_000_000_000L, result);
+            verify(ps, never()).executeUpdate();
         }
 
         @Test
         void executeUpdate_noReturnKeys_returnsCount() throws SQLException {
             when(ps.executeUpdate()).thenReturn(3);
 
-            Object result = actions.executeUpdate(handler, int.class, ps, false, false);
+            Object result = actions.executeUpdate(handler, int.class, ps, false, false, false);
             assertEquals(3, result);
         }
 
@@ -95,7 +113,7 @@ class ExecutorsTest {
             when(resultSet.next()).thenReturn(true, false);
             when(resultSet.getObject(1)).thenReturn(42L);
 
-            Object result = actions.executeUpdate(handler, long.class, ps, true, false);
+            Object result = actions.executeUpdate(handler, long.class, ps, true, false, false);
 
             assertEquals(42L, result);
             verify(resultSet).close();
@@ -108,7 +126,7 @@ class ExecutorsTest {
             when(ps.getGeneratedKeys()).thenReturn(resultSet);
             when(handler.handle(resultSet, entityType)).thenReturn("mapped");
 
-            Object result = actions.executeUpdate(handler, entityType, ps, true, false);
+            Object result = actions.executeUpdate(handler, entityType, ps, true, false, false);
 
             assertEquals("mapped", result);
         }
@@ -118,14 +136,14 @@ class ExecutorsTest {
             when(ps.executeUpdate()).thenReturn(0);
 
             assertThrows(OptimisticLockException.class,
-                    () -> actions.executeUpdate(handler, int.class, ps, false, true));
+                    () -> actions.executeUpdate(handler, int.class, ps, false, true, false));
         }
 
         @Test
         void executeUpdate_optimisticLockSucceeded_returnsCount() throws SQLException {
             when(ps.executeUpdate()).thenReturn(1);
 
-            Object result = actions.executeUpdate(handler, int.class, ps, false, true);
+            Object result = actions.executeUpdate(handler, int.class, ps, false, true, false);
             assertEquals(1, result);
         }
     }

@@ -126,20 +126,27 @@ public class ColumnTypeRegistry {
         };
     }
 
+    private ColumnExtractor nullable(ColumnExtractor extractor) {
+        return (resultSet, column) -> {
+            Object value = extractor.extract(resultSet, column);
+            return resultSet.wasNull() ? null : value;
+        };
+    }
+
     private void registerBuiltIns() {
-        builtIn.put(Integer.class, ResultSet::getInt);
+        builtIn.put(Integer.class, nullable(ResultSet::getInt));
         builtIn.put(int.class, ResultSet::getInt);
-        builtIn.put(Long.class, ResultSet::getLong);
+        builtIn.put(Long.class, nullable(ResultSet::getLong));
         builtIn.put(long.class, ResultSet::getLong);
-        builtIn.put(Double.class, ResultSet::getDouble);
+        builtIn.put(Double.class, nullable(ResultSet::getDouble));
         builtIn.put(double.class, ResultSet::getDouble);
-        builtIn.put(Float.class, ResultSet::getFloat);
+        builtIn.put(Float.class, nullable(ResultSet::getFloat));
         builtIn.put(float.class, ResultSet::getFloat);
-        builtIn.put(Short.class, ResultSet::getShort);
+        builtIn.put(Short.class, nullable(ResultSet::getShort));
         builtIn.put(short.class, ResultSet::getShort);
-        builtIn.put(Byte.class, ResultSet::getByte);
+        builtIn.put(Byte.class, nullable(ResultSet::getByte));
         builtIn.put(byte.class, ResultSet::getByte);
-        builtIn.put(Boolean.class, ResultSet::getBoolean);
+        builtIn.put(Boolean.class, nullable(ResultSet::getBoolean));
         builtIn.put(boolean.class, ResultSet::getBoolean);
         builtIn.put(String.class, ResultSet::getString);
         builtIn.put(BigDecimal.class, ResultSet::getBigDecimal);

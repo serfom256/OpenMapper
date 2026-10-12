@@ -46,19 +46,19 @@ public class ResultSetUtils {
     private static final Map<Class<?>, ResultSetExtractorByPosition> RESULT_SET_TYPES_BY_POSITION = new HashMap<>(32);
 
     static {
-        RESULT_SET_TYPES_BY_NAME.put(Integer.class, ResultSet::getInt);
+        RESULT_SET_TYPES_BY_NAME.put(Integer.class, nullableByName(ResultSet::getInt));
         RESULT_SET_TYPES_BY_NAME.put(int.class, ResultSet::getInt);
-        RESULT_SET_TYPES_BY_NAME.put(Double.class, ResultSet::getDouble);
+        RESULT_SET_TYPES_BY_NAME.put(Double.class, nullableByName(ResultSet::getDouble));
         RESULT_SET_TYPES_BY_NAME.put(double.class, ResultSet::getDouble);
-        RESULT_SET_TYPES_BY_NAME.put(Long.class, ResultSet::getLong);
+        RESULT_SET_TYPES_BY_NAME.put(Long.class, nullableByName(ResultSet::getLong));
         RESULT_SET_TYPES_BY_NAME.put(long.class, ResultSet::getLong);
-        RESULT_SET_TYPES_BY_NAME.put(Float.class, ResultSet::getFloat);
+        RESULT_SET_TYPES_BY_NAME.put(Float.class, nullableByName(ResultSet::getFloat));
         RESULT_SET_TYPES_BY_NAME.put(float.class, ResultSet::getFloat);
-        RESULT_SET_TYPES_BY_NAME.put(Short.class, ResultSet::getShort);
+        RESULT_SET_TYPES_BY_NAME.put(Short.class, nullableByName(ResultSet::getShort));
         RESULT_SET_TYPES_BY_NAME.put(short.class, ResultSet::getShort);
-        RESULT_SET_TYPES_BY_NAME.put(Byte.class, ResultSet::getByte);
+        RESULT_SET_TYPES_BY_NAME.put(Byte.class, nullableByName(ResultSet::getByte));
         RESULT_SET_TYPES_BY_NAME.put(byte.class, ResultSet::getByte);
-        RESULT_SET_TYPES_BY_NAME.put(Boolean.class, ResultSet::getBoolean);
+        RESULT_SET_TYPES_BY_NAME.put(Boolean.class, nullableByName(ResultSet::getBoolean));
         RESULT_SET_TYPES_BY_NAME.put(boolean.class, ResultSet::getBoolean);
 
         RESULT_SET_TYPES_BY_NAME.put(String.class, ResultSet::getString);
@@ -73,19 +73,19 @@ public class ResultSetUtils {
     }
 
     static {
-        RESULT_SET_TYPES_BY_POSITION.put(Integer.class, ResultSet::getInt);
+        RESULT_SET_TYPES_BY_POSITION.put(Integer.class, nullableByPosition(ResultSet::getInt));
         RESULT_SET_TYPES_BY_POSITION.put(int.class, ResultSet::getInt);
-        RESULT_SET_TYPES_BY_POSITION.put(Double.class, ResultSet::getDouble);
+        RESULT_SET_TYPES_BY_POSITION.put(Double.class, nullableByPosition(ResultSet::getDouble));
         RESULT_SET_TYPES_BY_POSITION.put(double.class, ResultSet::getDouble);
-        RESULT_SET_TYPES_BY_POSITION.put(Long.class, ResultSet::getLong);
+        RESULT_SET_TYPES_BY_POSITION.put(Long.class, nullableByPosition(ResultSet::getLong));
         RESULT_SET_TYPES_BY_POSITION.put(long.class, ResultSet::getLong);
-        RESULT_SET_TYPES_BY_POSITION.put(Float.class, ResultSet::getFloat);
+        RESULT_SET_TYPES_BY_POSITION.put(Float.class, nullableByPosition(ResultSet::getFloat));
         RESULT_SET_TYPES_BY_POSITION.put(float.class, ResultSet::getFloat);
-        RESULT_SET_TYPES_BY_POSITION.put(Short.class, ResultSet::getShort);
+        RESULT_SET_TYPES_BY_POSITION.put(Short.class, nullableByPosition(ResultSet::getShort));
         RESULT_SET_TYPES_BY_POSITION.put(short.class, ResultSet::getShort);
-        RESULT_SET_TYPES_BY_POSITION.put(Byte.class, ResultSet::getByte);
+        RESULT_SET_TYPES_BY_POSITION.put(Byte.class, nullableByPosition(ResultSet::getByte));
         RESULT_SET_TYPES_BY_POSITION.put(byte.class, ResultSet::getByte);
-        RESULT_SET_TYPES_BY_POSITION.put(Boolean.class, ResultSet::getBoolean);
+        RESULT_SET_TYPES_BY_POSITION.put(Boolean.class, nullableByPosition(ResultSet::getBoolean));
         RESULT_SET_TYPES_BY_POSITION.put(boolean.class, ResultSet::getBoolean);
 
         RESULT_SET_TYPES_BY_POSITION.put(String.class, ResultSet::getString);
@@ -105,6 +105,20 @@ public class ResultSetUtils {
         } catch (SQLException e) {
             throw new ResultSetExtractionException(e);
         }
+    }
+
+    private static ResultSetExtractorByColumn nullableByName(ResultSetExtractorByColumn extractor) {
+        return (resultSet, column) -> {
+            Object value = extractor.extract(resultSet, column);
+            return resultSet.wasNull() ? null : value;
+        };
+    }
+
+    private static ResultSetExtractorByPosition nullableByPosition(ResultSetExtractorByPosition extractor) {
+        return (resultSet, position) -> {
+            Object value = extractor.extract(resultSet, position);
+            return resultSet.wasNull() ? null : value;
+        };
     }
 
     public static Object getFirst(Class<?> returnType, ResultSet resultSet) {

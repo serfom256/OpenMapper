@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 
 import io.github.serfom256.core.query.handlers.ResultSetHandler;
 import io.github.serfom256.exceptions.internal.OptimisticLockException;
@@ -72,9 +73,10 @@ public class PreparedStatementActions {
             Type returnType,
             PreparedStatement ps,
             boolean returnPrimaryKeys,
-            boolean hasOptimisticLock) throws SQLException {
+            boolean hasOptimisticLock,
+            boolean largeUpdate) throws SQLException {
 
-        int updatedCount = ps.executeUpdate();
+        long updatedCount = update(ps, largeUpdate);
 
         if (hasOptimisticLock && updatedCount == 0) {
             throw new OptimisticLockException();
@@ -85,11 +87,25 @@ public class PreparedStatementActions {
         }
 
         if (!returnPrimaryKeys) {
-            return updatedCount;
+            if (largeUpdate) {
+                return updatedCount;
+            }
+            return (int) updatedCount;
         }
 
         try (ResultSet rs = ps.getGeneratedKeys()) {
             return readGeneratedKeys(handler, returnType, rs);
+        }
+    }
+
+    private long update(PreparedStatement ps, boolean largeUpdate) throws SQLException {
+        if (!largeUpdate) {
+            return ps.executeUpdate();
+        }
+        try {
+            return ps.executeLargeUpdate();
+        } catch (UnsupportedOperationException | SQLFeatureNotSupportedException e) {
+            return ps.executeUpdate();
         }
     }
 

@@ -1,6 +1,57 @@
-# OpenMapper
+<p align="center">
+  <img src="icons/openmapper-card.png" alt="OpenMapper — Lightning-fast ORM for Java and Kotlin" width="760">
+</p>
 
-OpenMapper is a lightweight ORM library based on JDBC that provides fast object mapping operations
+<p align="center">
+  <a href="https://central.sonatype.com/artifact/io.github.serfom256/openmapper-spring-boot-starter"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.serfom256/openmapper-spring-boot-starter?style=flat-square&label=Maven%20Central&color=58BF9C"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-58BF9C?style=flat-square"></a>
+  <img alt="Java 17+" src="https://img.shields.io/badge/Java-17%2B-58BF9C?style=flat-square">
+  <img alt="Spring Boot 3.x and 4.x" src="https://img.shields.io/badge/Spring%20Boot-3.x%20%7C%204.x-58BF9C?style=flat-square">
+</p>
+
+**OpenMapper** is an ORM for JDBC with no persistence context. Statements are declared
+in `.fsql` files, entities are mapped by annotation, and repositories are plain interfaces
+bound at startup - no query DSL, no generated SQL
+
+Result sets are materialised into object graphs, joined associations included, with no
+transitive dependencies
+
+## Contents
+
+- [Sql procedures declaration](#sql-procedures-declaration)
+- [Code declaration](#code-declaration)
+- [Object mapping example](#object-mapping-example)
+- [Object relating mapping](#object-relating-mapping)
+  - [Many To Many](#many-to-many)
+  - [Many To One](#many-to-one)
+  - [One To One](#one-to-one)
+  - [Optimistic lock support](#optimistic-lock-support)
+  - [Retrieving generated keys after insert](#retrieving-generated-keys-after-insert)
+  - [Using @Dto annotation](#using-dto-annotation)
+  - [Using @Sql annotation](#using-sql-annotation)
+  - [Supported types](#supported-types)
+- [Compatibility](#compatibility)
+- [Supported annotations](#supported-annotations)
+- [Column types](#column-types)
+- [JSON columns](#json-columns)
+- [Read-only fields](#read-only-fields)
+- [Enums](#enums)
+- [Inheritance](#inheritance)
+- [Generated keys](#generated-keys)
+- [Write hooks](#write-hooks)
+- [Batch writes](#batch-writes)
+- [IN clauses](#in-clauses)
+- [Inline statements](#inline-statements)
+- [Streaming](#streaming)
+- [Pagination](#pagination)
+- [Cascade writes](#cascade-writes)
+- [Many to many](#many-to-many-1)
+- [Upserts](#upserts)
+- [Transactions](#transactions)
+- [Kotlin](#kotlin)
+- [Errors](#errors)
+- [OpenMapper configuration](#openmapper-configuration)
+- [How to install](#how-to-install)
 
 ---
 
@@ -514,6 +565,7 @@ implementation 'io.github.serfom256:openmapper-spring-boot-starter:2.0.1'
 | @DaoMethod            | Method level             | Used for method that executes the query and returns mapped result                                      |
 | @Param                | Argument parameter level | Used for specifying name of the argument that will be substituted in the sql query                     |
 | @UseRepository        | Class level              | Used for service layer classes that will be interacting with DAO layer                                 |
+| Procedures            | Bean                     | Runs a statement written in place, no .fsql file or interface needed                                   |
 | @Cached               | Method level             | Used for query cache for this method, ignores configuration `openmapper.query.cache.enabled`           |
 | IdGenerator           | Bean                     | Supplies a primary key the database does not generate, assigned just before insert                     |
 | EntityWriteListener   | Bean                     | Called with an entity just before it is written                                                        |
@@ -761,6 +813,58 @@ limit) the clause is split, so a long list does not hit the database's cap
 WHERE t.id IN (?, ?, ...) OR t.id IN (?, ?, ...)
 ```
 `NOT IN` splits with `AND` instead. Set the property to `0` to switch it off
+
+---
+
+## Inline statements:
+
+When a statement does not deserve a file and an interface, inject `Procedures`
+
+```java
+
+@Service
+public class ReportService {
+
+    private final Procedures procedures;
+
+    public List<Product> expensive(BigDecimal from) {
+        return procedures.select(
+                "SELECT id, name, price FROM product WHERE price > [from] ORDER BY id",
+                Product.class, Map.of("from", from));
+    }
+}
+```
+Same placeholders, same binding, same mapping - a `@Model` comes back as a full graph with
+its `@Joined` associations, anything else as a scalar
+
+```java
+Optional<Product> one = procedures.selectOne("SELECT ... WHERE id = [id]", Product.class, Map.of("id", 1L));
+long rows = procedures.execute("UPDATE product SET quantity = [quantity] WHERE id = [id]",
+        DmlOperation.UPDATE, Map.of("quantity", 5, "id", 1L));
+Optional<Long> id = procedures.executeReturningKey("INSERT INTO product ...", DmlOperation.INSERT,
+        Long.class, Map.of("name", "widget"));
+```
+`execute` counts rows with `executeLargeUpdate` where the driver supports it, so a count
+past `Integer.MAX_VALUE` survives
+
+Statements join the caller's transaction like any DAO method. Defaults come from a
+`ProceduresCustomizer` bean
+
+```java
+
+@Component
+public class ReportProceduresCustomizer implements ProceduresCustomizer {
+
+    public void customize(ProceduresBuilder builder) {
+        builder
+            .fetchSize(500)
+            .queryTimeoutSeconds(30)
+            .statementCacheSize(256);
+    }
+}
+```
+What you give up is startup validation and keeping the SQL in one file, so prefer a
+`@DaoLayer` method for anything routine
 
 ---
 

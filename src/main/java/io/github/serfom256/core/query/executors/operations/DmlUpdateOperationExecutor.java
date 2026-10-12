@@ -33,7 +33,8 @@ public class DmlUpdateOperationExecutor implements DatabaseOperation {
                 returnType,
                 preparedStatement,
                 shouldReturnGeneratedKeys,
-                hasPreviousOptimisticLockValue);
+                hasPreviousOptimisticLockValue,
+                methodSpecifications.isLargeUpdate());
     }
 
     @Override
