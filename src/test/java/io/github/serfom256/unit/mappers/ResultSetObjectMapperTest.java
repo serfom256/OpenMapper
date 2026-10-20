@@ -192,6 +192,19 @@ class ResultSetObjectMapperTest {
                 lastColumnIdx[0] = idx;
                 return data[cursor[0]][idx];
             });
+            when(rs.getLong(i + 1)).thenAnswer(inv -> {
+                lastColumnIdx[0] = idx;
+                Object v = data[cursor[0]][idx];
+                return v == null ? 0L : ((Number) v).longValue();
+            });
+            when(rs.getString(i + 1)).thenAnswer(inv -> {
+                lastColumnIdx[0] = idx;
+                return (String) data[cursor[0]][idx];
+            });
+            when(rs.getObject(i + 1)).thenAnswer(inv -> {
+                lastColumnIdx[0] = idx;
+                return data[cursor[0]][idx];
+            });
         }
         when(rs.next()).thenAnswer(inv -> ++cursor[0] < data.length);
         when(rs.wasNull()).thenAnswer(inv ->

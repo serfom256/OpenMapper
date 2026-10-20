@@ -12,14 +12,18 @@ final class ScalarBinding {
     private final String column;
     private final MethodHandle setter;
     private final ResultSetUtils.ColumnExtractor extractor;
+    private final ResultSetUtils.PositionalExtractor positional;
     private final Class<?> fieldType;
 
     ScalarBinding(String fieldName, String column, MethodHandle setter,
-                  ResultSetUtils.ColumnExtractor extractor, Class<?> fieldType) {
+                  ResultSetUtils.ColumnExtractor extractor,
+                  ResultSetUtils.PositionalExtractor positional,
+                  Class<?> fieldType) {
         this.fieldName = fieldName;
         this.column = column;
         this.setter = setter;
         this.extractor = extractor;
+        this.positional = positional;
         this.fieldType = fieldType;
     }
 
@@ -67,7 +71,22 @@ final class ScalarBinding {
         return extractor.extract(resultSet, column);
     }
 
+    Object read(ResultSet resultSet, int index) throws SQLException {
+        if (positional != null && index != RowLayout.ABSENT) {
+            return positional.extract(resultSet, index);
+        }
+        return extractor.extract(resultSet, column);
+    }
+
     void apply(Object instance, ResultSet resultSet) throws SQLException {
         ReflectiveAccessors.set(setter, instance, extractor.extract(resultSet, column));
+    }
+
+    void apply(Object instance, ResultSet resultSet, int index) throws SQLException {
+        ReflectiveAccessors.set(setter, instance, read(resultSet, index));
+    }
+
+    void applyValue(Object instance, Object value) {
+        ReflectiveAccessors.set(setter, instance, value);
     }
 }

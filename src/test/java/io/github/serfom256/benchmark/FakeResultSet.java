@@ -52,9 +52,14 @@ public final class FakeResultSet {
         }
 
         private Object value(Method method, Object[] args) {
-            Object raw = args != null && args.length == 1 && args[0] instanceof String
-                    ? row.get(args[0])
-                    : null;
+            Object raw = null;
+            if (args != null && args.length >= 1) {
+                if (args[0] instanceof String label) {
+                    raw = row.get(label);
+                } else if (args[0] instanceof Integer index && index >= 1 && index <= columns.length) {
+                    raw = row.get(columns[index - 1]);
+                }
+            }
             return raw != null ? raw : defaultFor(method.getReturnType());
         }
 

@@ -4,7 +4,6 @@ import java.lang.invoke.MethodHandle;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 
 final class NestedBinding {
 
@@ -18,13 +17,13 @@ final class NestedBinding {
         this.scalars = scalars;
     }
 
-    void apply(Object owner, ResultSet resultSet, Set<String> columns) throws SQLException {
+    RowWriter writerFor(RowLayout layout) {
+        return layout.writerFor(scalars);
+    }
+
+    void apply(Object owner, ResultSet resultSet, RowWriter writer) throws SQLException {
         Object nested = ReflectiveAccessors.construct(constructor);
-        for (ScalarBinding scalar : scalars) {
-            if (columns.contains(scalar.column())) {
-                scalar.apply(nested, resultSet);
-            }
-        }
+        writer.write(nested, resultSet, null, null);
         ReflectiveAccessors.set(setter, owner, nested);
     }
 }

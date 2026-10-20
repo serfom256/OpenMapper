@@ -20,12 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.github.serfom256.annotations.entity.EnumType;
 import io.github.serfom256.exceptions.common.UnsupportedTypeException;
 import io.github.serfom256.mappers.ResultSetUtils.ColumnExtractor;
+import io.github.serfom256.mappers.ResultSetUtils.PositionalExtractor;
 
 public class ColumnTypeRegistry {
 
     private final Map<Class<?>, ColumnTypeConverter<?>> converters = new HashMap<>();
     private final Map<Class<?>, ColumnExtractor> resolved = new ConcurrentHashMap<>();
     private final Map<Class<?>, ColumnExtractor> builtIn = new HashMap<>(48);
+    private final Map<Class<?>, PositionalExtractor> builtInByIndex = new HashMap<>(48);
 
     public ColumnTypeRegistry() {
         this(List.of());
@@ -53,12 +55,26 @@ public class ColumnTypeRegistry {
         return extractorFor(type);
     }
 
+    public PositionalExtractor positionalExtractorFor(Class<?> type, EnumType enumType) {
+        if (converters.containsKey(type)) {
+            return null;
+        }
+        if (type.isEnum()) {
+            return enumType == EnumType.ORDINAL ? ordinalEnumByIndex(type) : enumByIndex(type);
+        }
+        return builtInByIndex.get(type);
+    }
+
     public Object toParameter(Object value, EnumType enumType) {
         if (enumType == EnumType.ORDINAL && value instanceof Enum<?> constant
                 && !converters.containsKey(value.getClass())) {
             return constant.ordinal();
         }
         return toParameter(value);
+    }
+
+    public boolean hasConverter(Class<?> type) {
+        return converters.containsKey(type);
     }
 
     public boolean supports(Class<?> type) {
@@ -126,6 +142,43 @@ public class ColumnTypeRegistry {
         };
     }
 
+    private PositionalExtractor ordinalEnumByIndex(Class<?> type) {
+        Object[] constants = type.getEnumConstants();
+        return (resultSet, index) -> {
+            int ordinal = resultSet.getInt(index);
+            if (resultSet.wasNull()) {
+                return null;
+            }
+            if (ordinal < 0 || ordinal >= constants.length) {
+                throw new SQLException(
+                        "column %d holds ordinal %d, but %s has %d constants"
+                                .formatted(index, ordinal, type.getSimpleName(), constants.length));
+            }
+            return constants[ordinal];
+        };
+    }
+
+    private PositionalExtractor enumByIndex(Class<?> type) {
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Class<? extends Enum> enumType = (Class<? extends Enum>) type;
+        return (resultSet, index) -> {
+            String name = resultSet.getString(index);
+            if (name == null) {
+                return null;
+            }
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            Object constant = Enum.valueOf(enumType, name.trim());
+            return constant;
+        };
+    }
+
+    private PositionalExtractor nullableByIndex(PositionalExtractor extractor) {
+        return (resultSet, index) -> {
+            Object value = extractor.extract(resultSet, index);
+            return resultSet.wasNull() ? null : value;
+        };
+    }
+
     private ColumnExtractor nullable(ColumnExtractor extractor) {
         return (resultSet, column) -> {
             Object value = extractor.extract(resultSet, column);
@@ -170,10 +223,55 @@ public class ColumnTypeRegistry {
             BigDecimal value = resultSet.getBigDecimal(column);
             return value == null ? null : value.toBigInteger();
         });
+
+        registerBuiltInsByIndex();
+    }
+
+    private void registerBuiltInsByIndex() {
+        builtInByIndex.put(Integer.class, nullableByIndex(ResultSet::getInt));
+        builtInByIndex.put(int.class, ResultSet::getInt);
+        builtInByIndex.put(Long.class, nullableByIndex(ResultSet::getLong));
+        builtInByIndex.put(long.class, ResultSet::getLong);
+        builtInByIndex.put(Double.class, nullableByIndex(ResultSet::getDouble));
+        builtInByIndex.put(double.class, ResultSet::getDouble);
+        builtInByIndex.put(Float.class, nullableByIndex(ResultSet::getFloat));
+        builtInByIndex.put(float.class, ResultSet::getFloat);
+        builtInByIndex.put(Short.class, nullableByIndex(ResultSet::getShort));
+        builtInByIndex.put(short.class, ResultSet::getShort);
+        builtInByIndex.put(Byte.class, nullableByIndex(ResultSet::getByte));
+        builtInByIndex.put(byte.class, ResultSet::getByte);
+        builtInByIndex.put(Boolean.class, nullableByIndex(ResultSet::getBoolean));
+        builtInByIndex.put(boolean.class, ResultSet::getBoolean);
+        builtInByIndex.put(String.class, ResultSet::getString);
+        builtInByIndex.put(BigDecimal.class, ResultSet::getBigDecimal);
+        builtInByIndex.put(byte[].class, ResultSet::getBytes);
+        builtInByIndex.put(Object.class, ResultSet::getObject);
+
+        builtInByIndex.put(java.sql.Date.class, ResultSet::getDate);
+        builtInByIndex.put(java.sql.Time.class, ResultSet::getTime);
+        builtInByIndex.put(java.sql.Timestamp.class, ResultSet::getTimestamp);
+        builtInByIndex.put(java.sql.Blob.class, ResultSet::getBlob);
+
+        objectTypeByIndex(LocalDate.class);
+        objectTypeByIndex(LocalDateTime.class);
+        objectTypeByIndex(LocalTime.class);
+        objectTypeByIndex(OffsetDateTime.class);
+        objectTypeByIndex(OffsetTime.class);
+        objectTypeByIndex(Instant.class);
+        objectTypeByIndex(UUID.class);
+
+        builtInByIndex.put(BigInteger.class, (resultSet, index) -> {
+            BigDecimal value = resultSet.getBigDecimal(index);
+            return value == null ? null : value.toBigInteger();
+        });
     }
 
     private void objectType(Class<?> type) {
         builtIn.put(type, (resultSet, column) -> resultSet.getObject(column, type));
+    }
+
+    private void objectTypeByIndex(Class<?> type) {
+        builtInByIndex.put(type, (resultSet, index) -> resultSet.getObject(index, type));
     }
 
     private static final ColumnExtractor NONE = (resultSet, column) -> null;

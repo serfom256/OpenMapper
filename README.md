@@ -18,6 +18,7 @@ transitive dependencies
 
 ## Contents
 
+- [Performance](#performance)
 - [Sql procedures declaration](#sql-procedures-declaration)
 - [Code declaration](#code-declaration)
 - [Object mapping example](#object-mapping-example)
@@ -54,6 +55,42 @@ transitive dependencies
 - [How to install](#how-to-install)
 
 ---
+
+## Performance
+
+Measured with JMH against PostgreSQL 15 (Testcontainers, HikariCP, single thread), comparing
+openMapper with Jimmer and JPA/Hibernate on joined reads and writes.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/benchmark-relational-dark.svg">
+    <img alt="Relational reads and writes against PostgreSQL: openMapper against Jimmer and JPA/Hibernate" src="docs/benchmark-relational-light.svg" width="880">
+  </picture>
+</p>
+
+openMapper is approximately twice as fast as Jimmer on associated reads and on writes: one-to-one
+1.97x, one-to-many 1.77x, `UPDATE` 2.0x. Against JPA it is approximately twice as fast on `INSERT`
+and `UPDATE`. Round trips dominate this workload, and openMapper resolves an association in a
+single join. The remaining operations fall within the error bars and are reported as ties
+
+<details>
+<summary>Full results, microseconds per operation, lower is better</summary>
+
+| Operation | openMapper | Jimmer | JPA / Hibernate |
+|---|---|---|---|
+| SELECT simple (by id) | 83.37 ± 7.38 | 91.23 ± 27.23 | 88.51 ± 13.94 |
+| SELECT one-to-one | **91.53 ± 7.03** | 180.36 ± 17.29 | 92.90 ± 1.46 |
+| SELECT one-to-many | **105.05 ± 5.24** | 185.95 ± 6.50 | 110.81 ± 0.98 |
+| SELECT batch (100 rows) | 150.37 ± 7.07 | 151.44 ± 7.41 | 197.30 ± 42.76 |
+| INSERT simple | 79.97 ± 1.45 | 94.28 ± 21.71 | 186.69 ± 5.67 |
+| UPDATE simple | **95.61 ± 18.66** | 191.13 ± 25.68 | 191.42 ± 27.62 |
+| UPDATE parent | **88.99 ± 12.59** | 181.58 ± 41.73 | 183.70 ± 20.23 |
+| DELETE simple† | 83.40 ± 16.12 | 85.60 ± 4.15 | 270.05 ± 9.05 |
+| DELETE cascade† | 675.02 ± 149.49 | 1056.28 ± 267.27 | 1089.84 ± 527.18 |
+
+Bold marks results whose error bars do not overlap. † single-shot mode
+
+</details>
 
 ## Sql procedures declaration:
 

@@ -41,6 +41,10 @@ class KotlinInteropTest {
         Mockito.when(rs.getString("name")).thenReturn("widget");
         Mockito.when(rs.getDouble("price")).thenReturn(1.5);
         Mockito.when(rs.getObject("id")).thenReturn(7L);
+        Mockito.when(rs.getLong(1)).thenReturn(7L);
+        Mockito.when(rs.getString(2)).thenReturn("widget");
+        Mockito.when(rs.getDouble(3)).thenReturn(1.5);
+        Mockito.when(rs.getObject(1)).thenReturn(7L);
         return rs;
     }
 

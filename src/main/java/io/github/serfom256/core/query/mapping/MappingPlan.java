@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -17,6 +16,7 @@ public final class MappingPlan {
     private final boolean constructsCanonically;
     private final ScalarBinding primaryKey;
     private final List<ScalarBinding> scalars;
+    private final ScalarBinding[] scalarArray;
     private final List<NestedBinding> nested;
     private final List<AssociationBinding> associations;
     private final Map<String, String> columnByField;
@@ -39,6 +39,7 @@ public final class MappingPlan {
         this.constructsCanonically = constructsCanonically;
         this.primaryKey = primaryKey;
         this.scalars = scalars;
+        this.scalarArray = scalars.toArray(new ScalarBinding[0]);
         this.nested = nested;
         this.associations = associations;
         Map<String, String> byField = new HashMap<>();
@@ -80,31 +81,53 @@ public final class MappingPlan {
         return associations;
     }
 
-    Object readPrimaryKey(ResultSet resultSet) throws SQLException {
-        Object value = primaryKey.read(resultSet);
+    boolean hasNumericPrimaryKey() {
+        Class<?> type = primaryKey.fieldType();
+        return type == long.class || type == int.class || type == short.class || type == byte.class
+                || type == Long.class || type == Integer.class || type == Short.class || type == Byte.class;
+    }
+
+    RowWriter writerFor(RowLayout layout) {
+        return layout.writerFor(scalars);
+    }
+
+    int[] indicesFor(RowLayout layout) {
+        return layout.indicesOf(scalars);
+    }
+
+    long readPrimaryKeyLong(ResultSet resultSet, int index) throws SQLException {
+        return index == RowLayout.ABSENT
+                ? resultSet.getLong(primaryKey.column())
+                : resultSet.getLong(index);
+    }
+
+    Object readPrimaryKey(ResultSet resultSet, int index) throws SQLException {
+        Object value = primaryKey.read(resultSet, index);
         return resultSet.wasNull() ? null : value;
     }
 
-    Object instantiate(ResultSet resultSet, Set<String> columns) throws SQLException {
+    Object instantiate(ResultSet resultSet, RowWriter writer, int[] indices, Object knownPrimaryKey)
+            throws SQLException {
         if (constructsCanonically) {
-            return constructCanonically(resultSet, columns);
+            return constructCanonically(resultSet, indices, knownPrimaryKey);
         }
         Object instance = ReflectiveAccessors.construct(constructor);
-        for (ScalarBinding scalar : scalars) {
-            if (columns.contains(scalar.column())) {
-                scalar.apply(instance, resultSet);
-            }
-        }
+        writer.write(instance, resultSet, knownPrimaryKey, primaryKey);
         return instance;
     }
 
-    private Object constructCanonically(ResultSet resultSet, Set<String> columns) throws SQLException {
-        Object[] arguments = new Object[scalars.size()];
+    private Object constructCanonically(ResultSet resultSet, int[] indices, Object knownPrimaryKey)
+            throws SQLException {
+        Object[] arguments = new Object[scalarArray.length];
         for (int i = 0; i < arguments.length; i++) {
-            ScalarBinding scalar = scalars.get(i);
-            arguments[i] = columns.contains(scalar.column())
-                    ? scalar.read(resultSet)
-                    : scalar.defaultValue();
+            ScalarBinding scalar = scalarArray[i];
+            if (indices[i] == RowLayout.ABSENT) {
+                arguments[i] = scalar.defaultValue();
+            } else if (knownPrimaryKey != null && scalar == primaryKey) {
+                arguments[i] = knownPrimaryKey;
+            } else {
+                arguments[i] = scalar.read(resultSet, indices[i]);
+            }
         }
         return ReflectiveAccessors.construct(constructor, arguments);
     }

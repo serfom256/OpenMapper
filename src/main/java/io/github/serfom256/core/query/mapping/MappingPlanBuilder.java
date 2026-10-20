@@ -52,12 +52,16 @@ final class MappingPlanBuilder {
             if (scalarAnnotation != null || lockAnnotation != null) {
                 String column = columnName(field,
                         scalarAnnotation != null ? scalarAnnotation.name() : lockAnnotation.name());
-                ResultSetUtils.ColumnExtractor extractor = field.isAnnotationPresent(Json.class)
+                boolean json = field.isAnnotationPresent(Json.class);
+                ResultSetUtils.ColumnExtractor extractor = json
                         ? jsonExtractor(field)
                         : columnTypes.extractorFor(field.getType(), enumTypeOf(scalarAnnotation));
+                ResultSetUtils.PositionalExtractor positional = json
+                        ? null
+                        : columnTypes.positionalExtractorFor(field.getType(), enumTypeOf(scalarAnnotation));
                 ScalarBinding binding = new ScalarBinding(field.getName(), column,
                         canonical ? null : ReflectiveAccessors.setter(field), extractor,
-                        field.getType());
+                        positional, field.getType());
                 scalars.add(binding);
                 if (field.getName().equals(primaryKeyField)) {
                     primaryKey = binding;
@@ -159,6 +163,7 @@ final class MappingPlanBuilder {
                         columnName(nestedField, annotation.name()),
                         ReflectiveAccessors.setter(nestedField),
                         columnTypes.extractorFor(nestedField.getType(), enumTypeOf(annotation)),
+                        columnTypes.positionalExtractorFor(nestedField.getType(), enumTypeOf(annotation)),
                         nestedField.getType()));
             }
         }

@@ -1,11 +1,11 @@
 package io.github.serfom256.core.query.mapping;
 
 import io.github.serfom256.core.query.representation.EntityGraph;
+import io.github.serfom256.core.query.representation.InstanceIndex;
 import io.github.serfom256.exceptions.entity.ModelValidationException;
 import io.github.serfom256.exceptions.internal.ResultSetExtractionException;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 public class ResultSetGraphReader {
@@ -30,29 +30,64 @@ public class ResultSetGraphReader {
     }
 
     public Object map(Class<?> rootType, boolean iterable, ResultSet resultSet) throws SQLException {
-        Set<String> columns = columnLabels(resultSet);
+        RowLayout layout = RowLayout.of(resultSet);
         MappingPlan rootPlan = registry.planFor(rootType);
-        EntityGraph graph = new EntityGraph();
-        RowReader rowReader = new RowReader(graph, columns);
+        PreparedPlans plans = new PreparedPlans(layout);
 
-        while (resultSet.next()) {
-            rowReader.read(rootPlan, resultSet);
+        if (!wiresAssociations(rootPlan)) {
+            return mapFlat(plans.of(rootPlan), iterable, resultSet, plans);
         }
 
-        Collection<Object> roots = graph.forType(rootType).values();
+        EntityGraph graph = new EntityGraph();
+        RowReader rowReader = new RowReader(graph, plans);
+
+        while (resultSet.next()) {
+            rowReader.read(plans.of(rootPlan), resultSet);
+        }
+
+        Collection<Object> roots = graph.forType(rootType, rootPlan.hasNumericPrimaryKey()).values();
         if (iterable) {
             return new ArrayList<>(roots);
         }
         return roots.isEmpty() ? null : roots.iterator().next();
     }
 
+    private Object mapFlat(Prepared prepared, boolean iterable, ResultSet resultSet, PreparedPlans plans)
+            throws SQLException {
+        List<Object> rows = iterable ? new ArrayList<>() : null;
+        while (resultSet.next()) {
+            if (skipsRow(prepared, resultSet)) {
+                continue;
+            }
+            Prepared rowPlan = resolve(prepared, resultSet, plans);
+            Object instance = rowPlan.plan.instantiate(resultSet, rowPlan.writer, rowPlan.indices, null);
+            applyNested(rowPlan, instance, resultSet);
+            if (!iterable) {
+                return instance;
+            }
+            rows.add(instance);
+        }
+        return iterable ? rows : null;
+    }
+
+    private boolean skipsRow(Prepared prepared, ResultSet resultSet) throws SQLException {
+        if (!prepared.keyPresent) {
+            return false;
+        }
+        if (prepared.numericKey) {
+            prepared.plan.readPrimaryKeyLong(resultSet, prepared.keyIndex);
+            return resultSet.wasNull();
+        }
+        return prepared.plan.readPrimaryKey(resultSet, prepared.keyIndex) == null;
+    }
+
     public Stream<Object> stream(Class<?> rootType, ResultSet resultSet) throws SQLException {
         MappingPlan rootPlan = registry.planFor(rootType);
-        Set<String> columns = columnLabels(resultSet);
+        PreparedPlans plans = new PreparedPlans(RowLayout.of(resultSet));
 
         Iterator<Object> rows = wiresAssociations(rootPlan)
-                ? new WindowedGraphIterator(rootPlan, resultSet, columns)
-                : new FlatRowIterator(rootPlan, resultSet, columns);
+                ? new WindowedGraphIterator(rootPlan, resultSet, plans)
+                : new FlatRowIterator(rootPlan, resultSet, plans);
 
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED | Spliterator.NONNULL),
@@ -71,34 +106,126 @@ public class ResultSetGraphReader {
         return false;
     }
 
-    private MappingPlan resolve(MappingPlan declared, ResultSet resultSet, Set<String> columns) throws SQLException {
-        String column = declared.discriminatorColumn();
-        if (column == null || !columns.contains(column)) {
-            return declared;
+    private Prepared resolve(Prepared prepared, ResultSet resultSet, PreparedPlans plans) throws SQLException {
+        if (prepared.discriminatorIndex == RowLayout.ABSENT) {
+            return prepared;
         }
-        String value = resultSet.getString(column);
+        String value = resultSet.getString(prepared.discriminatorIndex);
         if (value == null) {
-            return declared;
+            return prepared;
         }
-        Class<?> subtype = declared.subtypeFor(value);
+        Class<?> subtype = prepared.plan.subtypeFor(value);
         if (subtype == null) {
-            throw new ModelValidationException(declared.type(),
-                    "no @Subtype declares discriminator %s = '%s'".formatted(column, value));
+            throw new ModelValidationException(prepared.plan.type(),
+                    "no @Subtype declares discriminator %s = '%s'"
+                            .formatted(prepared.plan.discriminatorColumn(), value));
         }
-        return registry.planFor(subtype);
+        return plans.of(registry.planFor(subtype));
+    }
+
+    private void applyNested(Prepared prepared, Object instance, ResultSet resultSet) throws SQLException {
+        for (int i = 0; i < prepared.nested.length; i++) {
+            prepared.nested[i].apply(instance, resultSet, prepared.nestedWriters[i]);
+        }
+    }
+
+    private final class PreparedPlans {
+
+        private final RowLayout layout;
+        private final IdentityHashMap<MappingPlan, Prepared> cache = new IdentityHashMap<>();
+        private MappingPlan cachedPlan;
+        private Prepared cachedPrepared;
+
+        PreparedPlans(RowLayout layout) {
+            this.layout = layout;
+        }
+
+        Prepared of(MappingPlan plan) {
+            if (cachedPlan == plan) {
+                return cachedPrepared;
+            }
+            Prepared prepared = cache.get(plan);
+            if (prepared == null) {
+                prepared = new Prepared(plan, layout, registry);
+                cache.put(plan, prepared);
+            }
+            cachedPlan = plan;
+            cachedPrepared = prepared;
+            return prepared;
+        }
+    }
+
+    private static final class Prepared {
+
+        private final MappingPlan plan;
+        private final boolean keyPresent;
+        private final int keyIndex;
+        private final boolean numericKey;
+        private final RowWriter writer;
+        private final int[] indices;
+        private final int discriminatorIndex;
+        private final NestedBinding[] nested;
+        private final RowWriter[] nestedWriters;
+        private final PreparedAssociation[] associations;
+
+        Prepared(MappingPlan plan, RowLayout layout, MappingPlanRegistry registry) {
+            this.plan = plan;
+            this.keyPresent = layout.has(plan.primaryKeyColumn());
+            this.keyIndex = layout.indexOf(plan.primaryKeyColumn());
+            this.numericKey = plan.hasNumericPrimaryKey();
+            this.writer = plan.writerFor(layout);
+            this.indices = plan.indicesFor(layout);
+            this.discriminatorIndex = layout.indexOf(plan.discriminatorColumn());
+
+            List<NestedBinding> nestedBindings = plan.nested();
+            this.nested = nestedBindings.toArray(new NestedBinding[0]);
+            this.nestedWriters = new RowWriter[nested.length];
+            for (int i = 0; i < nested.length; i++) {
+                nestedWriters[i] = nested[i].writerFor(layout);
+            }
+
+            List<AssociationBinding> bindings = plan.associations();
+            this.associations = new PreparedAssociation[bindings.size()];
+            for (int i = 0; i < associations.length; i++) {
+                AssociationBinding association = bindings.get(i);
+                MappingPlan targetPlan = registry.planFor(association.targetType());
+                associations[i] = new PreparedAssociation(association, targetPlan,
+                        layout.has(targetPlan.primaryKeyColumn()),
+                        layout.indexOf(plan.columnForField(association.joinByField())),
+                        layout.indexOf(targetPlan.columnForField(association.toField())));
+            }
+        }
+    }
+
+    private static final class PreparedAssociation {
+
+        private final AssociationBinding association;
+        private final MappingPlan targetPlan;
+        private final boolean targetKeyPresent;
+        private final int ownerJoinIndex;
+        private final int targetJoinIndex;
+
+        PreparedAssociation(AssociationBinding association, MappingPlan targetPlan, boolean targetKeyPresent,
+                            int ownerJoinIndex, int targetJoinIndex) {
+            this.association = association;
+            this.targetPlan = targetPlan;
+            this.targetKeyPresent = targetKeyPresent;
+            this.ownerJoinIndex = ownerJoinIndex;
+            this.targetJoinIndex = targetJoinIndex;
+        }
     }
 
     private final class FlatRowIterator implements Iterator<Object> {
 
-        private final MappingPlan plan;
+        private final Prepared prepared;
         private final ResultSet resultSet;
-        private final Set<String> columns;
+        private final PreparedPlans plans;
         private Boolean hasNext;
 
-        FlatRowIterator(MappingPlan plan, ResultSet resultSet, Set<String> columns) {
-            this.plan = plan;
+        FlatRowIterator(MappingPlan plan, ResultSet resultSet, PreparedPlans plans) {
+            this.prepared = plans.of(plan);
             this.resultSet = resultSet;
-            this.columns = columns;
+            this.plans = plans;
         }
 
         @Override
@@ -116,11 +243,9 @@ public class ResultSetGraphReader {
             }
             hasNext = null;
             try {
-                MappingPlan rowPlan = resolve(plan, resultSet, columns);
-                Object instance = rowPlan.instantiate(resultSet, columns);
-                for (NestedBinding nested : rowPlan.nested()) {
-                    nested.apply(instance, resultSet, columns);
-                }
+                Prepared rowPlan = resolve(prepared, resultSet, plans);
+                Object instance = rowPlan.plan.instantiate(resultSet, rowPlan.writer, rowPlan.indices, null);
+                applyNested(rowPlan, instance, resultSet);
                 return instance;
             } catch (SQLException e) {
                 throw new ResultSetExtractionException(e);
@@ -138,9 +263,9 @@ public class ResultSetGraphReader {
 
     private final class WindowedGraphIterator implements Iterator<Object> {
 
-        private final MappingPlan plan;
+        private final Prepared prepared;
         private final ResultSet resultSet;
-        private final Set<String> columns;
+        private final PreparedPlans plans;
         private final Set<Object> emittedKeys = new HashSet<>();
 
         private RowReader windowReader;
@@ -150,10 +275,10 @@ public class ResultSetGraphReader {
         private boolean exhausted;
         private Object next;
 
-        WindowedGraphIterator(MappingPlan plan, ResultSet resultSet, Set<String> columns) {
-            this.plan = plan;
+        WindowedGraphIterator(MappingPlan plan, ResultSet resultSet, PreparedPlans plans) {
+            this.prepared = plans.of(plan);
             this.resultSet = resultSet;
-            this.columns = columns;
+            this.plans = plans;
         }
 
         @Override
@@ -178,7 +303,7 @@ public class ResultSetGraphReader {
             try {
                 while (rowHeld || resultSet.next()) {
                     rowHeld = false;
-                    Object key = plan.readPrimaryKey(resultSet);
+                    Object key = prepared.plan.readPrimaryKey(resultSet, prepared.keyIndex);
                     if (key == null) {
                         continue;
                     }
@@ -189,7 +314,7 @@ public class ResultSetGraphReader {
                     if (pending == null) {
                         openWindow(key);
                     }
-                    pending = windowReader.read(plan, resultSet);
+                    pending = windowReader.read(prepared, resultSet);
                 }
                 exhausted = true;
                 return pending != null ? emit() : null;
@@ -204,10 +329,10 @@ public class ResultSetGraphReader {
                         ("rows for %s id %s are not contiguous: streaming an entity with a @Joined "
                                 + "association requires the query to order by the root id, so each "
                                 + "entity is complete before the next begins")
-                                .formatted(plan.type().getSimpleName(), key)));
+                                .formatted(prepared.plan.type().getSimpleName(), key)));
             }
             pendingKey = key;
-            windowReader = new RowReader(new EntityGraph(), columns);
+            windowReader = new RowReader(new EntityGraph(), plans);
         }
 
         private Object emit() {
@@ -218,79 +343,103 @@ public class ResultSetGraphReader {
         }
     }
 
-    private static Set<String> columnLabels(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData meta = resultSet.getMetaData();
-        int count = meta.getColumnCount();
-        Set<String> labels = new HashSet<>(Math.max(16, count * 2));
-        for (int i = 1; i <= count; i++) {
-            labels.add(meta.getColumnLabel(i));
-        }
-        return labels;
-    }
-
     private final class RowReader {
 
         private final EntityGraph graph;
-        private final Set<String> columns;
-        private final Set<Object> inProgress = Collections.newSetFromMap(new IdentityHashMap<>());
-        private final IdentityHashMap<Object, Set<Object>> collectionMembers = new IdentityHashMap<>();
+        private final PreparedPlans plans;
+        private Class<?> cachedType;
+        private InstanceIndex cachedIndex;
+        private Set<Object> inProgress;
+        private IdentityHashMap<Object, Set<Object>> collectionMembers;
 
-        RowReader(EntityGraph graph, Set<String> columns) {
+        RowReader(EntityGraph graph, PreparedPlans plans) {
             this.graph = graph;
-            this.columns = columns;
+            this.plans = plans;
         }
 
-        Object read(MappingPlan declared, ResultSet resultSet) throws SQLException {
-            if (!columns.contains(declared.primaryKeyColumn())) {
-                return null;
+        private InstanceIndex indexFor(Prepared prepared) {
+            if (cachedType != prepared.plan.type()) {
+                cachedType = prepared.plan.type();
+                cachedIndex = graph.forType(cachedType, prepared.numericKey);
             }
-            Object primaryKey = declared.readPrimaryKey(resultSet);
-            if (primaryKey == null) {
+            return cachedIndex;
+        }
+
+        Object read(Prepared prepared, ResultSet resultSet) throws SQLException {
+            if (!prepared.keyPresent) {
                 return null;
             }
 
-            MappingPlan plan = resolve(declared, resultSet, columns);
-            Map<Object, Object> instances = graph.forType(declared.type());
-            Object instance = instances.get(primaryKey);
-            if (instance == null) {
-                instance = plan.instantiate(resultSet, columns);
-                instances.put(primaryKey, instance);
-                for (NestedBinding nested : plan.nested()) {
-                    nested.apply(instance, resultSet, columns);
+            InstanceIndex instances = indexFor(prepared);
+            long longKey = 0;
+            Object primaryKey = null;
+            Object instance;
+            if (prepared.numericKey) {
+                longKey = prepared.plan.readPrimaryKeyLong(resultSet, prepared.keyIndex);
+                if (resultSet.wasNull()) {
+                    return null;
                 }
+                instance = instances.get(longKey);
+            } else {
+                primaryKey = prepared.plan.readPrimaryKey(resultSet, prepared.keyIndex);
+                if (primaryKey == null) {
+                    return null;
+                }
+                instance = instances.get(primaryKey);
             }
 
-            if (!inProgress.add(instance)) {
+            Prepared rowPlan = resolve(prepared, resultSet, plans);
+            if (instance == null) {
+                instance = rowPlan.plan.instantiate(resultSet, rowPlan.writer, rowPlan.indices, primaryKey);
+                if (prepared.numericKey) {
+                    instances.put(longKey, instance);
+                } else {
+                    instances.put(primaryKey, instance);
+                }
+                applyNested(rowPlan, instance, resultSet);
+            }
+
+            if (rowPlan.associations.length == 0) {
+                return instance;
+            }
+            if (!inProgress().add(instance)) {
                 return instance;
             }
             try {
-                wireAssociations(plan, instance, resultSet);
+                wireAssociations(rowPlan, instance, resultSet);
             } finally {
                 inProgress.remove(instance);
             }
             return instance;
         }
 
-        private void wireAssociations(MappingPlan plan, Object instance, ResultSet resultSet) throws SQLException {
-            for (AssociationBinding association : plan.associations()) {
-                MappingPlan childPlan = registry.planFor(association.targetType());
-                if (!columns.contains(childPlan.primaryKeyColumn())) {
+        private Set<Object> inProgress() {
+            if (inProgress == null) {
+                inProgress = Collections.newSetFromMap(new IdentityHashMap<>());
+            }
+            return inProgress;
+        }
+
+        private void wireAssociations(Prepared prepared, Object instance, ResultSet resultSet) throws SQLException {
+            for (PreparedAssociation prepAssociation : prepared.associations) {
+                if (!prepAssociation.targetKeyPresent) {
                     continue;
                 }
+                AssociationBinding association = prepAssociation.association;
                 if (association.isCollection()) {
                     Collection<Object> collection = association.collectionOf(instance);
-                    if (!joinKeysMatch(plan, childPlan, association, resultSet)) {
+                    if (!joinKeysMatch(prepAssociation, resultSet)) {
                         continue;
                     }
-                    Object child = read(childPlan, resultSet);
+                    Object child = read(plans.of(prepAssociation.targetPlan), resultSet);
                     if (child != null) {
                         addUnique(collection, child);
                     }
                 } else {
-                    if (!joinKeysMatch(plan, childPlan, association, resultSet)) {
+                    if (!joinKeysMatch(prepAssociation, resultSet)) {
                         continue;
                     }
-                    Object child = read(childPlan, resultSet);
+                    Object child = read(plans.of(prepAssociation.targetPlan), resultSet);
                     if (child != null) {
                         association.setSingle(instance, child);
                     }
@@ -298,17 +447,13 @@ public class ResultSetGraphReader {
             }
         }
 
-        private boolean joinKeysMatch(MappingPlan ownerPlan,
-                                      MappingPlan targetPlan,
-                                      AssociationBinding association,
-                                      ResultSet resultSet) throws SQLException {
-            String ownerColumn = ownerPlan.columnForField(association.joinByField());
-            String targetColumn = targetPlan.columnForField(association.toField());
-            if (ownerColumn == null || targetColumn == null
-                    || !columns.contains(ownerColumn) || !columns.contains(targetColumn)) {
+        private boolean joinKeysMatch(PreparedAssociation association, ResultSet resultSet) throws SQLException {
+            if (association.ownerJoinIndex == RowLayout.ABSENT
+                    || association.targetJoinIndex == RowLayout.ABSENT) {
                 return true;
             }
-            return sameKey(resultSet.getObject(ownerColumn), resultSet.getObject(targetColumn));
+            return sameKey(resultSet.getObject(association.ownerJoinIndex),
+                    resultSet.getObject(association.targetJoinIndex));
         }
 
         private boolean sameKey(Object owner, Object target) {
@@ -325,6 +470,9 @@ public class ResultSetGraphReader {
         }
 
         private void addUnique(Collection<Object> collection, Object child) {
+            if (collectionMembers == null) {
+                collectionMembers = new IdentityHashMap<>();
+            }
             Set<Object> members = collectionMembers.computeIfAbsent(
                     collection, c -> Collections.newSetFromMap(new IdentityHashMap<>()));
             if (members.add(child)) {

@@ -29,6 +29,11 @@ public class ResultSetUtils {
         Object extract(ResultSet resultSet, String column) throws SQLException;
     }
 
+    @FunctionalInterface
+    public interface PositionalExtractor {
+        Object extract(ResultSet resultSet, int index) throws SQLException;
+    }
+
     public static ColumnExtractor extractorForColumn(Class<?> type) {
         ResultSetExtractorByColumn extractor = RESULT_SET_TYPES_BY_NAME.get(type);
         if (extractor == null) {
