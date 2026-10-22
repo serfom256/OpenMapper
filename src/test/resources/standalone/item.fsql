@@ -1,0 +1,11 @@
+findAllItems = {
+    SELECT id, name, qty FROM standalone_item ORDER BY id
+}
+
+findItemById = {
+    SELECT id, name, qty FROM standalone_item WHERE id = [id]
+}
+
+insertItem = {
+    INSERT INTO standalone_item (id, name, qty) VALUES ([id], [name], [qty])
+}

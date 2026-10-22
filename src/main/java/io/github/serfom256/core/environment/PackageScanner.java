@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 
 import org.jspecify.annotations.Nullable;
 
@@ -21,13 +22,32 @@ public class PackageScanner {
 
     private final OpenMapperGlobalEnvironmentVariables variables;
 
-    private final ApplicationContext context;
+    private final @Nullable ApplicationContext context;
+
+    private final Environment environment;
+
+    private final ClassLoader classLoader;
 
     private static final Logger logger = LoggerFactory.getLogger(PackageScanner.class);
 
     public PackageScanner(OpenMapperGlobalEnvironmentVariables variables, ApplicationContext context) {
+        this(variables, context, context.getEnvironment(), context.getClassLoader());
+    }
+
+    public PackageScanner(OpenMapperGlobalEnvironmentVariables variables,
+                          Environment environment,
+                          ClassLoader classLoader) {
+        this(variables, null, environment, classLoader);
+    }
+
+    private PackageScanner(OpenMapperGlobalEnvironmentVariables variables,
+                           @Nullable ApplicationContext context,
+                           Environment environment,
+                           ClassLoader classLoader) {
         this.variables = variables;
         this.context = context;
+        this.environment = environment;
+        this.classLoader = classLoader;
     }
 
     public Set<Class<?>> scanPackagesFor(String packageToScan, Class<? extends Annotation> annotation) {
@@ -41,11 +61,13 @@ public class PackageScanner {
         if (variables.isLoggingEnabled()) {
             logger.info("Scanning packages for @{} annotation: {}", annotation.getName(), packageToScan);
         }
-        return new AnnotatedTypeScanner(context.getEnvironment(), context.getClassLoader())
-                .scan(packageToScan, annotation);
+        return new AnnotatedTypeScanner(environment, classLoader).scan(packageToScan, annotation);
     }
 
     private @Nullable String getRootPackage() {
+        if (context == null) {
+            return null;
+        }
         Map<String, Object> annotatedBeans = context.getBeansWithAnnotation(SpringBootApplication.class);
         if (annotatedBeans.isEmpty()) {
             return null;

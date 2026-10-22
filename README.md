@@ -49,6 +49,7 @@ transitive dependencies
 - [Many to many](#many-to-many-1)
 - [Upserts](#upserts)
 - [Transactions](#transactions)
+- [Running without Spring](#running-without-spring)
 - [Kotlin](#kotlin)
 - [Errors](#errors)
 - [OpenMapper configuration](#openmapper-configuration)
@@ -575,13 +576,13 @@ has to be a `BeanDefinitionRegistryPostProcessor` too, ordered ahead of it
 <dependency>
     <groupId>io.github.serfom256</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>2.0.1</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
 #### Usage with Gradle:
 ```groovy
-implementation 'io.github.serfom256:openmapper-spring-boot-starter:2.0.1'
+implementation 'io.github.serfom256:openmapper-spring-boot-starter:2.2.0'
 ```
 
 ---
@@ -1039,6 +1040,55 @@ Outside a transaction each call takes a connection from the pool. No configurati
 
 Note: a DAO bound to another datasource with `@DaoLayer(dataSource = "...")` joins only
 transactions of that datasource
+
+---
+
+## Running without Spring:
+
+OpenMapper runs in a plain Java application. Build one instance at startup and keep it - it is
+thread safe and caches the DAO proxies it hands out
+
+```java
+OpenMapper openMapper = OpenMapper.builder()
+        .dataSource(dataSource)
+        .scanPackages("com.testapp")
+        .build();
+
+ItemDao items = openMapper.dao(ItemDao.class);
+```
+
+`scanPackages` finds `@DaoLayer` interfaces and `@Model` classes. `.fsql` files are read from the
+classpath unless `sqlLocations` narrows it
+
+| Builder method | Default |
+|---|---|
+| `dataSource` | required |
+| `scanPackages`, or `daoPackages` and `modelPackages` | required |
+| `sqlLocations` | every `.fsql` on the classpath |
+| `jsonSerializer` | none; `@Json` columns need one |
+| `columnTypeConverters`, `idGenerators`, `writeListeners` | none |
+| `queryCacheEnabled`, `loggingEnabled`, `sqlTracingEnabled` | `false` |
+| `inClauseChunkSize` | 1000 |
+| `property(name, value)` | sets any `openmapper.*` setting directly |
+
+Transactions work the same way. Create a transaction manager once and the DAOs join it, with no
+application context
+
+```java
+TransactionTemplate transactions =
+        new TransactionTemplate(new DataSourceTransactionManager(dataSource));
+
+transactions.execute(status -> {
+    items.insertItem(item);
+    stock.decrement(item);
+    return null;
+});
+```
+
+Without a transaction manager each call takes its own connection and commits on its own
+
+There is no application context, no component scan and no autoconfiguration here, but the Spring
+jars are still on the classpath as ordinary libraries
 
 ---
 

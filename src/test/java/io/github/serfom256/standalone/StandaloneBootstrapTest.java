@@ -2,66 +2,27 @@ package io.github.serfom256.standalone;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.serfom256.OpenMapper;
 import io.github.serfom256.annotations.DaoLayer;
 import io.github.serfom256.annotations.DaoMethod;
 import io.github.serfom256.annotations.Param;
 import io.github.serfom256.annotations.entity.Field;
 import io.github.serfom256.annotations.entity.Model;
-import io.github.serfom256.annotations.entity.Sql;
-import io.github.serfom256.cache.QueryCacheImpl;
-import io.github.serfom256.common.SQLBuilder;
-import io.github.serfom256.common.reflect.ModelFieldReader;
-import io.github.serfom256.common.reflect.ModelPropertyExtractor;
-import io.github.serfom256.config.OpenMapperGlobalEnvironmentVariables;
-import io.github.serfom256.core.context.DaoMethodContext;
-import io.github.serfom256.core.context.ModelMetadataContext;
-import io.github.serfom256.core.context.OpenMapperSQLContext;
-import io.github.serfom256.core.lifecycle.EntityIdGenerators;
-import io.github.serfom256.core.lifecycle.EntityWriteListeners;
-import io.github.serfom256.core.proxy.InvocationProxy;
-import io.github.serfom256.core.query.common.NotFoundTranslator;
-import io.github.serfom256.core.query.common.PreparedStatementActions;
-import io.github.serfom256.core.query.executors.JdbcQueryExecutor;
-import io.github.serfom256.core.query.executors.QueryExecutionStrategy;
-import io.github.serfom256.core.query.executors.operations.DatabaseOperation;
-import io.github.serfom256.core.query.executors.operations.DmlSelectOperationExecutor;
-import io.github.serfom256.core.query.executors.operations.DmlUpdateOperationExecutor;
-import io.github.serfom256.core.query.facade.AssociationCascade;
-import io.github.serfom256.core.query.facade.OpenMapperCachingFacade;
-import io.github.serfom256.core.query.facade.QueryFacadeImpl;
-import io.github.serfom256.core.query.handlers.EmptyResultSetHandler;
-import io.github.serfom256.core.query.handlers.EntityResultSetHandler;
-import io.github.serfom256.core.query.handlers.IterableResultSetHandler;
-import io.github.serfom256.core.query.handlers.ResultSetHandlerStrategy;
-import io.github.serfom256.core.query.mapping.MappingPlanRegistry;
-import io.github.serfom256.core.query.mapping.ResultSetGraphReader;
-import io.github.serfom256.core.query.method.DaoMethodPlanRegistry;
-import io.github.serfom256.core.proxy.QueryMappingInvocationHandler;
-import io.github.serfom256.core.query.source.mapping.impl.InputMapperImpl;
-import io.github.serfom256.mappers.ColumnTypeRegistry;
-import io.github.serfom256.mappers.ModelExtractor;
-import io.github.serfom256.mappers.ResultSetObjectMapper;
-import io.github.serfom256.mappers.ResultSetPrimitiveMapper;
-import io.github.serfom256.common.reflect.FieldValueGenerator;
-import io.github.serfom256.parser.SourceMapper;
-import io.github.serfom256.core.common.ModelSpecificationReader;
-import io.github.serfom256.core.common.DaoMethodFacade;
 import io.github.serfom256.model.operations.DmlOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.StandardEnvironment;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StandaloneBootstrapTest {
 
@@ -85,78 +46,82 @@ class StandaloneBootstrapTest {
         }
     }
 
+    private OpenMapper openMapper() {
+        return OpenMapper.builder()
+                .dataSource(dataSource)
+                .scanPackages("io.github.serfom256.standalone")
+                .sqlLocations("classpath*:standalone/*.fsql")
+                .build();
+    }
+
     @Test
-    @DisplayName("openMapper runs with no ApplicationContext, wired by hand")
-    void worksWithoutSpringContainer() throws Exception {
-        ItemDao dao = bootstrap();
+    @DisplayName("reads through a DAO with no ApplicationContext")
+    void readsWithoutSpringContainer() {
+        ItemDao items = openMapper().dao(ItemDao.class);
 
-        List<Item> all = dao.findAll();
-        Item one = dao.findById(2L);
+        List<Item> all = items.findAllItems();
+        Item one = items.findItemById(2L);
 
-        assertThat(all).hasSize(2);
-        assertThat(all).extracting(Item::getName).containsExactlyInAnyOrder("first", "second");
+        assertThat(all).extracting(Item::getName).contains("first", "second");
         assertThat(one.getName()).isEqualTo("second");
         assertThat(one.getQty()).isEqualTo(20);
     }
 
-    private ItemDao bootstrap() throws Exception {
-        StandardEnvironment environment = new StandardEnvironment();
-        environment.getPropertySources().addFirst(new MapPropertySource("openmapper",
-                Map.of("openmapper.logging.enabled", "false")));
-        OpenMapperGlobalEnvironmentVariables variables = new OpenMapperGlobalEnvironmentVariables(environment);
+    @Test
+    @DisplayName("writes through a DAO with no ApplicationContext")
+    void writesWithoutSpringContainer() {
+        ItemDao items = openMapper().dao(ItemDao.class);
 
-        ColumnTypeRegistry columnTypes = new ColumnTypeRegistry();
-        MappingPlanRegistry mappingPlans = new MappingPlanRegistry(null, columnTypes);
-        ResultSetGraphReader graphReader = new ResultSetGraphReader(mappingPlans);
-        ResultSetObjectMapper objectMapper = new ResultSetObjectMapper(graphReader);
-        ResultSetPrimitiveMapper primitiveMapper = new ResultSetPrimitiveMapper();
+        Item item = new Item();
+        item.id = 99;
+        item.name = "written";
+        item.qty = 7;
+        items.insertItem(item);
 
-        EntityResultSetHandler entityHandler = new EntityResultSetHandler(objectMapper, primitiveMapper);
-        IterableResultSetHandler iterableHandler = new IterableResultSetHandler(objectMapper, primitiveMapper);
-        ResultSetHandlerStrategy handlers =
-                new ResultSetHandlerStrategy(entityHandler, new EmptyResultSetHandler(), iterableHandler);
+        assertThat(items.findItemById(99L).getName()).isEqualTo("written");
+    }
 
-        PreparedStatementActions actions = new PreparedStatementActions();
-        QueryExecutionStrategy strategy = new QueryExecutionStrategy(List.<DatabaseOperation>of(
-                new DmlSelectOperationExecutor(actions), new DmlUpdateOperationExecutor(actions)));
-        JdbcQueryExecutor executor = new JdbcQueryExecutor(strategy, graphReader);
+    @Test
+    @DisplayName("a rollback undoes a write with no ApplicationContext")
+    void rollbackWithoutSpringContainer() {
+        ItemDao items = openMapper().dao(ItemDao.class);
+        TransactionTemplate transactions =
+                new TransactionTemplate(new DataSourceTransactionManager(dataSource));
 
-        SQLBuilder sqlBuilder = new SQLBuilder(variables);
-        InputMapperImpl inputMapper = new InputMapperImpl(sqlBuilder, variables);
-        SourceMapper sourceMapper = new SourceMapper();
+        assertThatThrownBy(() -> transactions.execute(status -> {
+            Item item = new Item();
+            item.id = 123;
+            item.name = "rolled-back";
+            item.qty = 1;
+            items.insertItem(item);
+            throw new IllegalStateException("forced rollback");
+        })).isInstanceOf(IllegalStateException.class);
 
-        DaoMethodContext daoMethods = new DaoMethodContext();
-        OpenMapperSQLContext sqlContext = new OpenMapperSQLContext(
-                new DaoMethodFacade(daoMethods, sourceMapper));
+        assertThat(items.findItemById(123L)).isNull();
+    }
 
-        ModelMetadataContext models = new ModelMetadataContext();
-        models.registerModel(Item.class, new ModelSpecificationReader().readModelMetadata(Item.class));
-        mappingPlans.planFor(Item.class);
+    @Test
+    @DisplayName("the same DAO instance is reused")
+    void cachesDaoProxies() {
+        OpenMapper openMapper = openMapper();
 
-        ModelFieldReader fieldReader = new ModelFieldReader();
-        ModelExtractor modelExtractor =
-                new ModelExtractor(new FieldValueGenerator(), models, null, fieldReader, columnTypes);
-        ModelPropertyExtractor propertyExtractor = new ModelPropertyExtractor(modelExtractor,
-                new EntityWriteListeners(List.of()), new EntityIdGenerators(List.of(), fieldReader));
+        assertThat(openMapper.dao(ItemDao.class)).isSameAs(openMapper.dao(ItemDao.class));
+    }
 
-        for (Method method : ItemDao.class.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(Sql.class)) {
-                daoMethods.registerMethod(method);
-            }
-        }
-        sqlContext.updateContext("findAll", sourceMapper.map("select * from standalone_item"));
-        sqlContext.updateContext("findById", sourceMapper.map("select * from standalone_item where id = [id]"));
+    @Test
+    @DisplayName("a missing data source is reported before anything is scanned")
+    void requiresDataSource() {
+        assertThatThrownBy(() -> OpenMapper.builder().scanPackages("io.github.serfom256.standalone").build())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("data source");
+    }
 
-        AssociationCascade cascade = new AssociationCascade(models, sqlContext, modelExtractor, fieldReader,
-                inputMapper, executor, new EntityWriteListeners(List.of()),
-                new EntityIdGenerators(List.of(), fieldReader));
-
-        QueryFacadeImpl facade = new QueryFacadeImpl(sqlContext, inputMapper, executor, propertyExtractor, variables,
-                new OpenMapperCachingFacade(propertyExtractor, variables, inputMapper, new QueryCacheImpl()),
-                new NotFoundTranslator(), new DaoMethodPlanRegistry(handlers), handlers, cascade, fieldReader, models);
-
-        return (ItemDao) new InvocationProxy()
-                .makeProxyFor(new QueryMappingInvocationHandler(facade, dataSource), ItemDao.class.getName());
+    @Test
+    @DisplayName("a missing package to scan is reported")
+    void requiresPackagesToScan() {
+        assertThatThrownBy(() -> OpenMapper.builder().dataSource(dataSource).build())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("package to scan");
     }
 
     @Model(primaryKey = "id")
@@ -185,9 +150,12 @@ class StandaloneBootstrapTest {
     public interface ItemDao {
 
         @DaoMethod(operation = DmlOperation.SELECT)
-        List<Item> findAll();
+        List<Item> findAllItems();
 
         @DaoMethod(operation = DmlOperation.SELECT)
-        Item findById(@Param(name = "id") Long id);
+        Item findItemById(@Param(name = "id") Long id);
+
+        @DaoMethod(operation = DmlOperation.INSERT)
+        void insertItem(Item item);
     }
 }
