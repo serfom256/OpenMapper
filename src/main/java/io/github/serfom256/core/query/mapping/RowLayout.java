@@ -3,10 +3,10 @@ package io.github.serfom256.core.query.mapping;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 final class RowLayout {
 
@@ -23,7 +23,7 @@ final class RowLayout {
     static RowLayout of(ResultSet resultSet) throws SQLException {
         ResultSetMetaData meta = resultSet.getMetaData();
         int count = meta.getColumnCount();
-        Map<String, Integer> byLabel = new HashMap<>(Math.max(16, count * 2));
+        Map<String, Integer> byLabel = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         for (int i = 1; i <= count; i++) {
             byLabel.putIfAbsent(meta.getColumnLabel(i), i);
         }

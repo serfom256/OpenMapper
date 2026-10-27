@@ -45,6 +45,7 @@ public class ModelPropertyExtractor {
         querySpecifications.setOperation(plan.operation());
         querySpecifications.setReturnType(plan.genericReturnType());
         querySpecifications.setShouldReturnGeneratedKeys(plan.returnGeneratedKeys());
+        querySpecifications.setGeneratedKeyColumns(plan.generatedKeyColumns());
         querySpecifications.setFetchSize(plan.fetchSize());
         querySpecifications.setQueryTimeoutSeconds(plan.queryTimeoutSeconds());
         querySpecifications.setStreaming(plan.returnsStream());

@@ -49,6 +49,8 @@ import io.github.serfom256.mappers.ResultSetObjectMapper;
 import io.github.serfom256.mappers.ResultSetPrimitiveMapper;
 import io.github.serfom256.parser.SourceMapper;
 import io.github.serfom256.parser.factory.DefaultParserFactory;
+import io.github.serfom256.procedures.Procedures;
+import io.github.serfom256.procedures.ProceduresBuilder;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.env.MapPropertySource;
@@ -85,12 +87,14 @@ public final class OpenMapper {
 
     private final QueryFacadeImpl queryFacade;
     private final DataSource dataSource;
+    private final Procedures procedures;
     private final InvocationProxy invocationProxy = new InvocationProxy();
     private final Map<Class<?>, Object> daos = new ConcurrentHashMap<>();
 
-    private OpenMapper(QueryFacadeImpl queryFacade, DataSource dataSource) {
+    private OpenMapper(QueryFacadeImpl queryFacade, DataSource dataSource, Procedures procedures) {
         this.queryFacade = queryFacade;
         this.dataSource = dataSource;
+        this.procedures = procedures;
     }
 
     /** Starts configuring an instance. A data source and at least one package to scan are required. */
@@ -112,6 +116,14 @@ public final class OpenMapper {
         }
         return (T) daos.computeIfAbsent(daoInterface, type -> invocationProxy.makeProxyFor(
                 new QueryMappingInvocationHandler(queryFacade, dataSource), type.getName()));
+    }
+
+    /**
+     * Runs statements written at the call site, without a {@code .fsql} file or a
+     * {@code @DaoLayer} interface.
+     */
+    public Procedures procedures() {
+        return procedures;
     }
 
     /** Collects the configuration for an {@link OpenMapper} instance. */
@@ -254,10 +266,11 @@ public final class OpenMapper {
             ResultSetObjectMapper objectMapper = new ResultSetObjectMapper(graphReader);
             ResultSetPrimitiveMapper primitiveMapper = new ResultSetPrimitiveMapper();
 
+            EntityResultSetHandler entityHandler = new EntityResultSetHandler(objectMapper, primitiveMapper);
+            IterableResultSetHandler iterableHandler =
+                    new IterableResultSetHandler(objectMapper, primitiveMapper);
             ResultSetHandlerStrategy handlers = new ResultSetHandlerStrategy(
-                    new EntityResultSetHandler(objectMapper, primitiveMapper),
-                    new EmptyResultSetHandler(),
-                    new IterableResultSetHandler(objectMapper, primitiveMapper));
+                    entityHandler, new EmptyResultSetHandler(), iterableHandler);
 
             PreparedStatementActions actions = new PreparedStatementActions();
             JdbcQueryExecutor executor = new JdbcQueryExecutor(
@@ -300,7 +313,11 @@ public final class OpenMapper {
                     new NotFoundTranslator(), new DaoMethodPlanRegistry(handlers), handlers, cascade, fieldReader,
                     models);
 
-            return new OpenMapper(facade, dataSource);
+            DataSource configured = dataSource;
+            Procedures procedures = new ProceduresBuilder(sourceMapper, inputMapper, executor,
+                    entityHandler, iterableHandler, () -> configured).build();
+
+            return new OpenMapper(facade, dataSource, procedures);
         }
     }
 }

@@ -78,4 +78,17 @@ public interface Procedures {
      */
     <K> Optional<K> executeReturningKey(String sql, DmlOperation operation, Class<K> keyType,
                                         Map<String, Object> parameters);
+
+    /**
+     * Reads the generated key from a named column.
+     *
+     * <p>Oracle reports a {@code ROWID} rather than the generated value unless the column is
+     * named, so a statement that has to run on Oracle should name it here. A DAO method takes
+     * the column from its {@code @Model} and needs no equivalent.
+     *
+     * @param keyColumn column the database generates, as spelled in the table
+     * @return the generated key, empty when the statement produced none
+     */
+    <K> Optional<K> executeReturningKey(String sql, DmlOperation operation, Class<K> keyType,
+                                        Map<String, Object> parameters, String keyColumn);
 }

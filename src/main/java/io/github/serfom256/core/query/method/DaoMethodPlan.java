@@ -10,6 +10,7 @@ public final class DaoMethodPlan {
     private final String procedure;
     private final DmlOperation operation;
     private final boolean returnGeneratedKeys;
+    private final String[] generatedKeyColumns;
     private final Class<? extends Throwable> notFoundException;
     private final boolean cached;
     private final ResultSetHandler<?> handler;
@@ -29,6 +30,7 @@ public final class DaoMethodPlan {
         this.procedure = builder.procedure;
         this.operation = builder.operation;
         this.returnGeneratedKeys = builder.returnGeneratedKeys;
+        this.generatedKeyColumns = builder.generatedKeyColumns;
         this.notFoundException = builder.notFoundException;
         this.cached = builder.cached;
         this.handler = builder.handler;
@@ -55,6 +57,10 @@ public final class DaoMethodPlan {
 
     public DmlOperation operation() {
         return operation;
+    }
+
+    public String[] generatedKeyColumns() {
+        return generatedKeyColumns;
     }
 
     public boolean returnGeneratedKeys() {
@@ -130,6 +136,7 @@ public final class DaoMethodPlan {
         private String procedure;
         private DmlOperation operation;
         private boolean returnGeneratedKeys;
+        private String[] generatedKeyColumns;
         private Class<? extends Throwable> notFoundException;
         private boolean cached;
         private ResultSetHandler<?> handler;
@@ -155,6 +162,11 @@ public final class DaoMethodPlan {
 
         Builder operation(DmlOperation operation) {
             this.operation = operation;
+            return this;
+        }
+
+        Builder generatedKeyColumns(String[] generatedKeyColumns) {
+            this.generatedKeyColumns = generatedKeyColumns;
             return this;
         }
 

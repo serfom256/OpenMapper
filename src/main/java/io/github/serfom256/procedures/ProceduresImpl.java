@@ -93,13 +93,22 @@ class ProceduresImpl implements Procedures {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <K> Optional<K> executeReturningKey(String sql, DmlOperation operation, Class<K> keyType,
                                                Map<String, Object> parameters) {
+        return executeReturningKey(sql, operation, keyType, parameters, null);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <K> Optional<K> executeReturningKey(String sql, DmlOperation operation, Class<K> keyType,
+                                               Map<String, Object> parameters, String keyColumn) {
         QuerySpecifications specifications = specifications(operation, parameters);
         specifications.setHandler(entityHandler);
         specifications.setReturnType(keyType);
         specifications.setShouldReturnGeneratedKeys(true);
+        if (keyColumn != null && !keyColumn.isBlank()) {
+            specifications.setGeneratedKeyColumns(new String[]{keyColumn});
+        }
         return Optional.ofNullable((K) queryExecutor.execute(bind(sql, parameters), specifications));
     }
 

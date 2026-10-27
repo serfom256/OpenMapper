@@ -137,6 +137,23 @@ class ProceduresTest extends IntegrationTestBase {
     }
 
     @Test
+    @DisplayName("an insert can return the generated key read from a named column")
+    void insertReturnsGeneratedKeyFromNamedColumn() {
+        String name = uniqueName();
+
+        Long id = procedures.<Long>executeReturningKey(
+                "INSERT INTO product (name, price, quantity, description) "
+                        + "VALUES ([name], [price], [quantity], [description])",
+                DmlOperation.INSERT, Long.class,
+                Map.of("name", name, "price", 1.0, "quantity", 1, "description", "inline"),
+                "id").orElseThrow();
+
+        assertNotNull(id);
+        assertEquals(Optional.of(name), procedures.selectOne("SELECT name FROM product WHERE id = [id]",
+                String.class, Map.of("id", id)));
+    }
+
+    @Test
     @DisplayName("values are bound, never concatenated into the statement")
     void parametersAreBound() {
         String name = uniqueName();

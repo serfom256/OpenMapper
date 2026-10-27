@@ -1,0 +1,19 @@
+findAllCompat = {
+    SELECT id, name, qty FROM compat_item ORDER BY id
+}
+
+findCompatById = {
+    SELECT id, name, qty FROM compat_item WHERE id = [id]
+}
+
+insertCompat = {
+    INSERT INTO compat_item (id, name, qty) VALUES ([id], [name], [qty])
+}
+
+insertKeyed = {
+    INSERT INTO compat_keyed (name) VALUES ([name])
+}
+
+findKeyedById = {
+    SELECT id, name FROM compat_keyed WHERE id = [id]
+}

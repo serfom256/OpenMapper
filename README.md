@@ -60,7 +60,7 @@ transitive dependencies
 ## Performance
 
 Measured with JMH against PostgreSQL 15 (Testcontainers, HikariCP, single thread), comparing
-openMapper with Jimmer and JPA/Hibernate on joined reads and writes.
+OpenMapper with Jimmer and JPA/Hibernate on joined reads and writes.
 
 <p align="center">
   <picture>
@@ -69,15 +69,15 @@ openMapper with Jimmer and JPA/Hibernate on joined reads and writes.
   </picture>
 </p>
 
-openMapper is approximately twice as fast as Jimmer on associated reads and on writes: one-to-one
+OpenMapper is approximately twice as fast as Jimmer on associated reads and on writes: one-to-one
 1.97x, one-to-many 1.77x, `UPDATE` 2.0x. Against JPA it is approximately twice as fast on `INSERT`
-and `UPDATE`. Round trips dominate this workload, and openMapper resolves an association in a
+and `UPDATE`. Round trips dominate this workload, and OpenMapper resolves an association in a
 single join. The remaining operations fall within the error bars and are reported as ties
 
 <details>
 <summary>Full results, microseconds per operation, lower is better</summary>
 
-| Operation | openMapper | Jimmer | JPA / Hibernate |
+| Operation | OpenMapper | Jimmer | JPA / Hibernate |
 |---|---|---|---|
 | SELECT simple (by id) | 83.37 ± 7.38 | 91.23 ± 27.23 | 88.51 ± 13.94 |
 | SELECT one-to-one | **91.53 ± 7.03** | 180.36 ± 17.29 | 92.90 ± 1.46 |
@@ -543,32 +543,28 @@ A return type outside this list fails at startup with `UnsupportedTypeException`
 
 ## Compatibility
 
-| openMapper | Spring Boot | Java |
-| ---------- | ----------- | ---- |
-| 2.x        | 3.x, 4.x    | 17+  |
-| 1.x        | 2.x         | 17+  |
+**OpenMapper 2.x** supports both Spring Boot 3 and 4. Spring dependencies are declared
+`provided`, so the application's own versions are used and no version is pinned on its behalf
 
-One artifact runs on both Spring Boot 3 and 4. Every Spring artifact is `provided`, so
-your application's version is always the one used and nothing is pinned for you - which
-matters in a build that enforces dependency convergence
+OpenMapper declares no transitive dependencies. `spring-jdbc` must be present on the classpath;
+`spring-boot-starter-jdbc`, `spring-boot-starter-data-jpa` and `spring-orm` each provide it
 
-openMapper brings no dependencies of its own. `spring-jdbc` has to be on your classpath: `spring-boot-starter-jdbc`, `-data-jpa` or
-`spring-orm` all bring it
+#### Databases:
 
-Spring Boot 2 is supported only by the 1.x line, which is no longer developed
+| Database   | Tested against |
+| ---------- | -------------- |
+| PostgreSQL | 15             |
+| Oracle     | 21 XE          |
+| MySQL      | 8.4            |
+| MariaDB    | 11.4           |
 
-#### Outside Spring Boot:
+The integration suite runs against each of these databases on every release
 
-Auto-configuration only fires in a Boot application. In a plain Spring context, import
-the configuration yourself
+Statements are declared in `.fsql` files and are never generated, so no dialect is configured
+and vendor-specific syntax is written directly. Column labels are resolved case-insensitively
+in line with JDBC semantics, and generated keys are retrieved by primary-key column name
 
-```xml
-
-<bean class="io.github.serfom256.config.OpenMapperConfig"/>
-```
-Settings are read from the `Environment`, and DAO beans are registered by a
-`BeanDefinitionRegistryPostProcessor`, so anything that puts those properties in place
-has to be a `BeanDefinitionRegistryPostProcessor` too, ordered ahead of it
+Other JDBC databases are expected to work, but are not covered by the test suite
 
 #### Usage with Maven:
 ```xml
@@ -576,13 +572,13 @@ has to be a `BeanDefinitionRegistryPostProcessor` too, ordered ahead of it
 <dependency>
     <groupId>io.github.serfom256</groupId>
     <artifactId>openmapper-spring-boot-starter</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
 </dependency>
 ```
 
 #### Usage with Gradle:
 ```groovy
-implementation 'io.github.serfom256:openmapper-spring-boot-starter:2.2.0'
+implementation 'io.github.serfom256:openmapper-spring-boot-starter:2.2.1'
 ```
 
 ---
@@ -1045,8 +1041,8 @@ transactions of that datasource
 
 ## Running without Spring:
 
-OpenMapper runs in a plain Java application. Build one instance at startup and keep it - it is
-thread safe and caches the DAO proxies it hands out
+OpenMapper runs in a plain Java application. A single instance is built at startup and reused;
+it is thread safe and caches the DAO proxies it returns
 
 ```java
 OpenMapper openMapper = OpenMapper.builder()
@@ -1057,8 +1053,8 @@ OpenMapper openMapper = OpenMapper.builder()
 ItemDao items = openMapper.dao(ItemDao.class);
 ```
 
-`scanPackages` finds `@DaoLayer` interfaces and `@Model` classes. `.fsql` files are read from the
-classpath unless `sqlLocations` narrows it
+`scanPackages` locates `@DaoLayer` interfaces and `@Model` classes. `.fsql` files are read from
+the classpath unless `sqlLocations` restricts the search
 
 | Builder method | Default |
 |---|---|
@@ -1071,8 +1067,17 @@ classpath unless `sqlLocations` narrows it
 | `inClauseChunkSize` | 1000 |
 | `property(name, value)` | sets any `openmapper.*` setting directly |
 
-Transactions work the same way. Create a transaction manager once and the DAOs join it, with no
-application context
+`procedures()` returns the same `Procedures` instance a Spring application receives, for statements
+written at the call site
+
+```java
+Optional<Long> id = openMapper.procedures().executeReturningKey(
+        "INSERT INTO item (name) VALUES ([name])",
+        DmlOperation.INSERT, Long.class, Map.of("name", "widget"), "id");
+```
+
+Transactions are supported without an application context. A transaction manager is created once
+and DAO calls join it
 
 ```java
 TransactionTemplate transactions =
@@ -1085,10 +1090,10 @@ transactions.execute(status -> {
 });
 ```
 
-Without a transaction manager each call takes its own connection and commits on its own
+Without a transaction manager each call acquires its own connection and commits independently
 
-There is no application context, no component scan and no autoconfiguration here, but the Spring
-jars are still on the classpath as ordinary libraries
+No application context, component scan or auto-configuration is involved. The Spring artifacts
+remain on the classpath as ordinary libraries
 
 ---
 

@@ -44,6 +44,7 @@ final class DaoMethodPlanCompiler {
                 .procedure(procedureName(method, daoMethod))
                 .operation(daoMethod != null ? daoMethod.operation() : DmlOperation.SELECT)
                 .returnGeneratedKeys(daoMethod != null && daoMethod.returnKeys())
+                .generatedKeyColumns(generatedKeyColumns(method, daoMethod))
                 .notFoundException(notFoundException(daoMethod, method))
                 .cached(method.getAnnotation(Cached.class) != null)
                 .handler(handlerStrategy.getHandlerByMethodReturnType(
@@ -60,6 +61,53 @@ final class DaoMethodPlanCompiler {
                 .fetchSize(daoMethod != null ? daoMethod.fetchSize() : 0)
                 .queryTimeoutSeconds(daoMethod != null ? daoMethod.queryTimeoutSeconds() : 0)
                 .build();
+    }
+
+    private String[] generatedKeyColumns(Method method, DaoMethod daoMethod) {
+        if (daoMethod == null || !daoMethod.returnKeys()) {
+            return null;
+        }
+        for (Parameter parameter : method.getParameters()) {
+            Class<?> modelType = modelTypeOf(parameter);
+            if (modelType == null) {
+                continue;
+            }
+            String column = primaryKeyColumn(modelType, modelType.getAnnotation(Model.class).primaryKey());
+            if (column != null) {
+                return new String[]{column};
+            }
+        }
+        return null;
+    }
+
+    private Class<?> modelTypeOf(Parameter parameter) {
+        if (parameter.getType().isAnnotationPresent(Model.class)) {
+            return parameter.getType();
+        }
+        if (!Collection.class.isAssignableFrom(parameter.getType())
+                || !(parameter.getParameterizedType() instanceof ParameterizedType parameterized)) {
+            return null;
+        }
+        Type[] arguments = parameterized.getActualTypeArguments();
+        if (arguments.length != 1 || !(arguments[0] instanceof Class<?> element)) {
+            return null;
+        }
+        return element.isAnnotationPresent(Model.class) ? element : null;
+    }
+
+    private String primaryKeyColumn(Class<?> modelType, String fieldName) {
+        for (Class<?> current = modelType; current != null && current != Object.class;
+                current = current.getSuperclass()) {
+            for (java.lang.reflect.Field field : current.getDeclaredFields()) {
+                if (!field.getName().equals(fieldName)) {
+                    continue;
+                }
+                io.github.serfom256.annotations.entity.Field annotation =
+                        field.getAnnotation(io.github.serfom256.annotations.entity.Field.class);
+                return annotation == null || annotation.name().isEmpty() ? field.getName() : annotation.name();
+            }
+        }
+        return null;
     }
 
     private String procedureName(Method method, DaoMethod daoMethod) {

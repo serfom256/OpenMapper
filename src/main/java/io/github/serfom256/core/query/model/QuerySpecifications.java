@@ -16,6 +16,7 @@ public class QuerySpecifications {
     private Type returnType;
     private DmlOperation operation;
     private boolean shouldReturnGeneratedKeys;
+    private String[] generatedKeyColumns;
     private boolean hasOptimisticLock;
     private int fetchSize;
     private int queryTimeoutSeconds;
@@ -30,6 +31,7 @@ public class QuerySpecifications {
         copy.returnType = returnType;
         copy.operation = operation;
         copy.shouldReturnGeneratedKeys = shouldReturnGeneratedKeys;
+        copy.generatedKeyColumns = generatedKeyColumns;
         copy.hasOptimisticLock = hasOptimisticLock;
         copy.fetchSize = fetchSize;
         copy.queryTimeoutSeconds = queryTimeoutSeconds;
@@ -112,6 +114,14 @@ public class QuerySpecifications {
 
     public void setShouldReturnGeneratedKeys(boolean shouldReturnGeneratedKeys) {
         this.shouldReturnGeneratedKeys = shouldReturnGeneratedKeys;
+    }
+
+    public String[] getGeneratedKeyColumns() {
+        return generatedKeyColumns;
+    }
+
+    public void setGeneratedKeyColumns(String[] generatedKeyColumns) {
+        this.generatedKeyColumns = generatedKeyColumns;
     }
 
     public void setHasOptimisticLock(boolean hasOptimisticLock) {

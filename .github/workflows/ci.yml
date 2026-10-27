@@ -4,6 +4,9 @@ on:
   push:
     branches: [master]
   pull_request:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,6 +26,24 @@ jobs:
           cache: maven
       - name: Verify
         run: mvn -B verify -Dspring.boot.version=${{ matrix.boot }}
+
+  database-compatibility:
+    name: Database compatibility
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' && github.event_name != 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Free disk space for the Oracle image
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h /
+      - name: Oracle, MySQL and MariaDB
+        run: mvn -B test -Pcompat -Djacoco.skip=true
 
   consumer-resolution:
     name: Consumer resolution (Boot ${{ matrix.boot }})

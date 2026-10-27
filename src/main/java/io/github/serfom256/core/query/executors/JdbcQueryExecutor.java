@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -83,7 +84,10 @@ public class JdbcQueryExecutor implements QueryExecutor {
     private PreparedStatement prepare(Connection connection, String sql, QuerySpecifications querySpecifications)
             throws SQLException {
         if (querySpecifications.shouldReturnGeneratedKeys()) {
-            return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            String[] keyColumns = querySpecifications.getGeneratedKeyColumns();
+            return keyColumns == null || keyColumns.length == 0
+                    ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+                    : connection.prepareStatement(sql, keyColumns);
         }
         return connection.prepareStatement(sql);
     }
@@ -150,7 +154,12 @@ public class JdbcQueryExecutor implements QueryExecutor {
 
     private void bindParameters(PreparedStatement preparedStatement, List<Object> parameters) throws SQLException {
         for (int i = 0; i < parameters.size(); i++) {
-            preparedStatement.setObject(i + 1, parameters.get(i));
+            Object parameter = parameters.get(i);
+            if (parameter == null) {
+                preparedStatement.setNull(i + 1, Types.NULL);
+            } else {
+                preparedStatement.setObject(i + 1, parameter);
+            }
         }
     }
 }

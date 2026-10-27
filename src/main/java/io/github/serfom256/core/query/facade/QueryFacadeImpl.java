@@ -227,6 +227,7 @@ public class QueryFacadeImpl implements QueryFacade {
         specifications.setOperation(plan.operation());
         specifications.setReturnType(plan.genericReturnType());
         specifications.setShouldReturnGeneratedKeys(plan.returnGeneratedKeys());
+        specifications.setGeneratedKeyColumns(plan.generatedKeyColumns());
         specifications.setFetchSize(plan.fetchSize());
         specifications.setQueryTimeoutSeconds(plan.queryTimeoutSeconds());
         specifications.setHasOptimisticLock(hasOptimisticLock);
