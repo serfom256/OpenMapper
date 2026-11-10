@@ -1,0 +1,29 @@
+# every construct the grammar handles, for eyeballing highlighting
+
+sampleFindProduct = {
+    SELECT id, name, price, quantity FROM product WHERE id = [id]
+}
+
+# placeholders may repeat, and sit anywhere in the statement
+sampleUpsertInventory = {
+    INSERT INTO inventory (sku, quantity, version)
+    VALUES ([sku], [quantity], [version])
+    ON CONFLICT (sku) DO UPDATE
+        SET quantity = [quantity], version = [version]
+    WHERE inventory.version = [old_version]
+}
+
+sampleFindAuthorWithBooks = {
+    -- a line comment inside a body
+    SELECT a.id, a.name, b.id AS book_id, b.title
+    FROM author a
+        LEFT JOIN book b ON a.id = b.author_id
+    WHERE a.id = [id]
+    ORDER BY a.id
+}
+
+sampleCountByName = {
+    /* a block comment
+       spanning lines */
+    SELECT count(*) FROM product WHERE name = [name] AND label = 'keeps    spacing'
+}

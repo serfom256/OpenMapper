@@ -1,0 +1,51 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "fsql",
+  "scopeName": "source.fsql",
+  "patterns": [
+    { "include": "#line-comment" },
+    { "include": "#procedure" }
+  ],
+  "repository": {
+    "line-comment": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.fsql"
+    },
+    "sql-line-comment": {
+      "match": "(--|#).*$",
+      "name": "comment.line.fsql"
+    },
+    "block-comment": {
+      "begin": "/\\*",
+      "end": "\\*/",
+      "name": "comment.block.fsql"
+    },
+    "placeholder": {
+      "match": "(\\[)(\\w+)(\\])",
+      "captures": {
+        "1": { "name": "punctuation.definition.variable.begin.fsql" },
+        "2": { "name": "variable.parameter.fsql" },
+        "3": { "name": "punctuation.definition.variable.end.fsql" }
+      }
+    },
+    "procedure": {
+      "begin": "([A-Za-z0-9_.\\-]+)\\s*(=)\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "entity.name.function.fsql" },
+        "2": { "name": "keyword.operator.assignment.fsql" },
+        "3": { "name": "punctuation.section.braces.begin.fsql" }
+      },
+      "end": "(\\})",
+      "endCaptures": {
+        "1": { "name": "punctuation.section.braces.end.fsql" }
+      },
+      "contentName": "meta.embedded.block.sql",
+      "patterns": [
+        { "include": "#block-comment" },
+        { "include": "#sql-line-comment" },
+        { "include": "#placeholder" },
+        { "include": "source.sql" }
+      ]
+    }
+  }
+}

@@ -1,13 +1,13 @@
 package io.github.serfom256.compat;
 
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.OracleContainer;
+import org.testcontainers.oracle.OracleContainer;
 
 class OracleCompatibilityTest extends AbstractDialectCompatibilityTest {
 
     @Override
     protected JdbcDatabaseContainer<?> container() {
-        return new OracleContainer("gvenzl/oracle-xe:21.3.0-slim-faststart");
+        return new OracleContainer("gvenzl/oracle-free:23.26.3-slim-faststart");
     }
 
     @Override

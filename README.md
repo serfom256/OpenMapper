@@ -114,7 +114,6 @@ Where:
 Repository declaration:
 
 ```java
-
 @DaoLayer
 public interface MyRepo {
 
@@ -128,7 +127,6 @@ public interface MyRepo {
 Model declaration:
 
 ```java
-
 @Model(primaryKey = "id")
 public class User {
 
@@ -140,8 +138,6 @@ public class User {
 
     @Joined(joinBy = "id", to = "userId")
     private List<Course> courses;
-
-    // Getters and setters
 }
 
 @Model(primaryKey = "id")
@@ -154,9 +150,7 @@ public class Course {
     private int userId;
 
     @Field(name = "data")
-    private String data;
-
-    // Getters and setters
+    private String data; 
 }
 ```
 
@@ -173,7 +167,6 @@ select.all.users={
 #### Repository:
 
 ```java
-
 @DaoLayer
 public interface MyRepo {
 
@@ -184,34 +177,15 @@ public interface MyRepo {
 
 Custom objects that used in sql query must be annotated with `@Model` annotation
 
-#### @Model annotation:
-
-primaryKey: primary key of the table
-
-#### @Field annotation:
-
-name: name in sql procedure declared in: `.fsql` file
-
-#### @Param annotation:
-
-name: name in sql procedure that will be replaced with
-
 ---
 
 ## Object relating mapping:
 
 OpenMapper supports different types of entity objects relationship:
 
-- [x] Many-To-Many
-- [x] Many-To-One
-- [x] One-To-One
-
-Modeling object relations in code:
-
 ### Many To Many:
 
 ```java
-
 @Model(primaryKey = "id")
 class User {
 
@@ -225,9 +199,7 @@ class User {
     private String data;
 
     @Joined(joinBy = "id", to = "userId")
-    List<Course> courses;
-
-    // Getters and setters
+    List<Course> courses; 
 }
 
 @Model(primaryKey = "id")
@@ -244,15 +216,12 @@ class Course {
 
     @Joined(joinBy = "userId", to = "id")
     List<User> users;
-
-    // Getters and setters
 }
 ```
 
 ### Many To One:
 
 ```java
-
 @Model(primaryKey = "id")
 class User {
 
@@ -264,8 +233,6 @@ class User {
 
     @Joined(joinBy = "id", to = "userId")
     private List<Course> courses;
-
-    // Getters and setters
 }
 
 @Model(primaryKey = "id")
@@ -279,16 +246,12 @@ class Course {
 
     @Field
     private String data;
-
-    // Getters and setters
 }
-
 ```
 
 ### One To One:
 
 ```java
-
 @Model(primaryKey = "id")
 class User {
 
@@ -299,9 +262,7 @@ class User {
     private String name;
 
     @Joined(joinBy = "id", to = "userId")
-    private Course courses;
-
-    // Getters and setters
+    private Course courses; 
 }
 
 @Model(primaryKey = "id")
@@ -315,8 +276,6 @@ class Course {
 
     @Field
     private String data;
-
-    // Getters and setters
 }
 ```
 ---
@@ -337,8 +296,6 @@ public class User {
 
     @OptimisticLockField(oldVersion = "oldVersion") // oldVersion - link to previous version to update
     private long version;
-
-    // Getters and setters
 }
 ```
 
@@ -379,7 +336,7 @@ repository.createUser(user); // creating new user with id, name, and default ver
 
 repository.updateUser(new User(1, "new_name", user.getVersion())); // updating name and version (user version that equals 1 will be updated to 2)
 
-System.out.println(repository.findUserById(1)); // will return User(id=1, name=new_name, version=2)
+log.info(repository.findUserById(1)); // will return User(id=1, name=new_name, version=2)
 ```
 
 ### If the row was changed by someone else, the update matches no row and `OptimisticLockException` is thrown
@@ -414,7 +371,7 @@ public class User {
     @Field
     private String name;
 
-    // Getters and setters
+    
 }
 ```
 
@@ -438,7 +395,7 @@ public interface Repository {
 ```java
 User user = new User("name", 1);
 int userId = repository.createUser(user);
-System.out.println(userId); // will print 1
+log.info(userId); // will print 1
 ```
 
 ---
@@ -454,8 +411,6 @@ public class DtoUser {
 
     @Field
     private String name;
-    
-    // Getters and setters
 }
 ```
 
@@ -617,7 +572,6 @@ Supported out of the box: all primitives and their wrappers, `String`, `BigDecim
 For anything else declare a converter as a bean
 
 ```java
-
 @Component
 public class MoneyConverter implements ColumnTypeConverter<Money> {
 
@@ -644,7 +598,6 @@ Converters win over the built-in types, so you can also override one
 A field marked `@Json` is written as JSON text and read back into its own type
 
 ```java
-
 @Field(name = "attributes")
 @Json
 private Map<String, String> attributes;
@@ -666,7 +619,6 @@ Values the database produces - a computed column, a `DEFAULT`, a trigger - are m
 read and left out of writes
 
 ```java
-
 @Field(name = "book_count", readOnly = true)
 private int bookCount;
 ```
@@ -679,7 +631,6 @@ The same model can be inserted without the insert referring to a column it canno
 Stored by name by default, by position when the column is numeric
 
 ```java
-
 @Field(name = "status")
 private Status status;
 
@@ -696,7 +647,6 @@ rewrites what existing rows mean
 A subclass inherits its parent's `@Field`s, so only its own columns need declaring
 
 ```java
-
 public abstract class Auditable {
 
     @Field(name = "id")
@@ -717,7 +667,6 @@ public class Note extends Auditable {
 To pick the concrete type per row, name a discriminator column and list the subtypes
 
 ```java
-
 @Model(primaryKey = "id")
 @Inheritance(discriminator = "item_type")
 @Subtype(value = "BUNDLE", type = BundleItem.class)
@@ -752,7 +701,6 @@ column and the value. Writes are not polymorphic - the procedure decides where a
 When the database makes the key, read it back
 
 ```java
-
 @DaoMethod(operation = DmlOperation.INSERT, returnKeys = true)
 long insertProduct(Product product);
 ```
@@ -761,7 +709,6 @@ When the application makes it - a sequence table, a UUID, an allocator shared wi
 existing system - declare a generator as a bean
 
 ```java
-
 @Component
 public class OrderIdGenerator implements IdGenerator<Order> {
 
@@ -787,7 +734,6 @@ specific generator wins
 A bean called with the entity just before it is written
 
 ```java
-
 @Component
 public class AuditListener implements EntityWriteListener<Auditable> {
 
@@ -813,7 +759,6 @@ every element of a batch and cascaded children. Reads never fire it
 A write method taking a collection of models runs as one batch
 
 ```java
-
 @DaoMethod(procedure = "insertProduct", operation = DmlOperation.INSERT)
 int insertProducts(List<Product> products);
 ```
@@ -832,7 +777,6 @@ findByIds = {
 }
 ```
 ```java
-
 @DaoMethod(operation = DmlOperation.SELECT)
 List<Product> findByIds(@Param(name = "ids") List<Long> ids);
 ```
@@ -855,7 +799,6 @@ WHERE t.id IN (?, ?, ...) OR t.id IN (?, ?, ...)
 When a statement does not deserve a file and an interface, inject `Procedures`
 
 ```java
-
 @Service
 public class ReportService {
 
@@ -885,7 +828,6 @@ Statements join the caller's transaction like any DAO method. Defaults come from
 `ProceduresCustomizer` bean
 
 ```java
-
 @Component
 public class ReportProceduresCustomizer implements ProceduresCustomizer {
 
@@ -907,7 +849,6 @@ What you give up is startup validation and keeping the SQL in one file, so prefe
 Return `Stream<E>` to map rows one at a time instead of building a list
 
 ```java
-
 @DaoMethod(procedure = "findByName", operation = DmlOperation.SELECT, fetchSize = 500)
 Stream<Product> streamByName(@Param(name = "name") String name);
 ```
@@ -936,7 +877,6 @@ countByName = {
 }
 ```
 ```java
-
 @DaoMethod(procedure = "findPaged", countProcedure = "countByName")
 Page<Product> findPaged(@Param(name = "name") String name, PageRequest pageRequest);
 ```
@@ -956,7 +896,6 @@ the same parameters
 Give `@Joined` a `saveProcedure` and its elements are written after the parent
 
 ```java
-
 @Joined(joinBy = "id", to = "authorId", saveProcedure = "insertBookForAuthor")
 private List<Book> books;
 ```
@@ -978,7 +917,6 @@ are missing from the collection are left alone - delete them yourself
 Join through the link table in your query and point `to` at the link column
 
 ```java
-
 @Joined(joinBy = "id", to = "student_id", saveProcedure = "linkStudentCourse")
 private List<Course> courses;
 ```
@@ -1005,7 +943,6 @@ upsertInventory = {
 }
 ```
 ```java
-
 @DaoMethod(operation = DmlOperation.MERGE)
 void upsertInventory(Inventory inventory);
 ```
@@ -1020,7 +957,6 @@ OpenMapper joins Spring transactions. Inside `@Transactional` DAO calls use the 
 connection, so they commit and roll back with the rest of the method
 
 ```java
-
 @UseRepository
 public class OrderService {
 
@@ -1102,7 +1038,6 @@ remain on the classpath as ordinary libraries
 Models work with `var` properties and a no-arg constructor
 
 ```kotlin
-
 @Model(primaryKey = "id")
 class Product {
     @field:Field(name = "id")    var id: Long = 0
@@ -1114,7 +1049,6 @@ Note `@field:` — without it the annotation lands on the constructor parameter,
 Repositories are plain interfaces
 
 ```kotlin
-
 @DaoLayer
 interface ProductDao {
 
@@ -1126,7 +1060,6 @@ interface ProductDao {
 `data class` works too, built through its primary constructor
 
 ```kotlin
-
 @Model(primaryKey = "id")
 data class Product(
     @field:Field(name = "id")   val id: Long,
@@ -1147,14 +1080,6 @@ mutable type
 Database failures are thrown as Spring `DataAccessException`, the same types JPA and
 `JdbcTemplate` throw
 
-```java
-try {
-    productDao.insert(product);
-} catch (DuplicateKeyException e) {
-    // ...
-}
-```
-
 ---
 
 ## OpenMapper configuration
@@ -1169,17 +1094,3 @@ try {
 | openmapper.logging.enabled             | boolean        | false                              | Enable internal logging                                        |
 | openmapper.query.cache.enabled         | boolean        | false                              | Enable global query cache                                      |
 | openmapper.in.clause.chunk.size        | int            | 1000                               | Split a longer IN list into several clauses, `0` disables it   |
-
-Per-method settings live on `@DaoMethod`: `fetchSize`, `queryTimeoutSeconds`, `countProcedure`,
-`returnKeys`, `translateNotFoundExceptionTo`
-
----
-
-## How to install
-
-Available on Maven Central as `io.github.serfom256:openmapper-spring-boot-starter`, see
-[Compatibility](#compatibility) for the dependency snippet
-
-To build from source
-
-- `git clone git@github.com:serfom256/OpenMapper.git && cd OpenMapper && mvn install`

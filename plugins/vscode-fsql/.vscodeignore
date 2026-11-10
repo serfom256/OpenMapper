@@ -1,0 +1,8 @@
+.vscode/**
+node_modules/**
+src/**
+samples/**
+tsconfig.json
+install-local.sh
+package-lock.json
+**/*.map

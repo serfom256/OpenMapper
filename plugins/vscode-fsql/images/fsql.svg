@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+<linearGradient id="fL" gradientUnits="userSpaceOnUse" x1="356" y1="367" x2="607" y2="657">
+  <stop offset="0" stop-color="#EDF1EF"/><stop offset="1" stop-color="#D4DCD8"/></linearGradient>
+<linearGradient id="fR" gradientUnits="userSpaceOnUse" x1="858" y1="367" x2="607" y2="657">
+  <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFF3F1"/></linearGradient>
+<linearGradient id="fB" gradientUnits="userSpaceOnUse" x1="607" y1="512" x2="607" y2="802">
+  <stop offset="0" stop-color="#DDE5E1"/><stop offset="1" stop-color="#BEC9C4"/></linearGradient>
+<linearGradient id="mt" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0.6" y2="1"
+  gradientTransform="scale(1024)">
+  <stop offset="0" stop-color="#95E8CB"/><stop offset="1" stop-color="#58BF9C"/></linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="#18171E"/>
+<polygon points="607,222 607,512 356,657 356,367" fill="url(#fL)"/>
+<polygon points="607,222 858,367 858,657 607,512" fill="url(#fR)"/>
+<polygon points="607,512 858,657 607,802 356,657" fill="url(#fB)"/>
+<g stroke="url(#mt)" stroke-width="26" stroke-linecap="round" fill="none">
+  <path d="M607,222 L607,512"/><path d="M858,657 L607,512"/><path d="M356,657 L607,512"/>
+</g>
+<g fill="url(#mt)">
+  <circle cx="607" cy="222" r="32"/><circle cx="858" cy="657" r="32"/>
+  <circle cx="356" cy="657" r="32"/><circle cx="607" cy="512" r="32"/>
+  <polygon points="172,266 246,309 246,395 172,438 98,395 98,309"/>
+  <polygon points="107,503 162,535 162,599 107,631 52,599 52,535"/>
+  <polygon points="212,699 254,723 254,771 212,795 170,771 170,723"/>
+</g>
+</svg>

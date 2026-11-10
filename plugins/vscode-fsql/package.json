@@ -1,0 +1,74 @@
+{
+  "name": "openmapper-fsql",
+  "displayName": "openMapper fsql",
+  "description": "Syntax highlighting, embedded SQL and formatting for openMapper .fsql files",
+  "version": "0.1.0",
+  "publisher": "serfom256",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/serfom256/OpenMapper",
+    "directory": "plugins/vscode-fsql"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters"
+  ],
+  "activationEvents": [
+    "onLanguage:fsql"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "fsql",
+        "aliases": [
+          "fsql",
+          "FSQL"
+        ],
+        "extensions": [
+          ".fsql"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./images/fsql.svg",
+          "dark": "./images/fsql.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fsql",
+        "scopeName": "source.fsql",
+        "path": "./syntaxes/fsql.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.sql": "sql"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "openMapper fsql",
+      "properties": {
+        "openmapperFsql.exclude": {
+          "type": "string",
+          "default": "**/{node_modules,target,target-release,build,out,dist,bin,.git}/**",
+          "markdownDescription": "Glob for `.fsql` files to ignore when looking for duplicate procedure names. Build directories must be excluded, because Maven and Gradle copy `.fsql` resources into them and every copy would look like a duplicate."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "test": "node --experimental-strip-types --test src/test/*.test.ts",
+    "install-local": "./install-local.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.6.0"
+  },
+  "icon": "images/icon.png"
+}
